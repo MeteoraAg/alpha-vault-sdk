@@ -8,8 +8,11 @@ export interface GetOrCreateATAResponse {
 }
 
 export interface DepositInfo {
+  // Total deposit amount
   totalDeposit: BN;
+  // Total consumed deposit amount for bought token
   totalFilled: BN;
+  // Total remaining deposit amount to be returned
   totalReturned: BN;
 }
 
