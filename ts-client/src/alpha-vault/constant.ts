@@ -8,6 +8,7 @@ export const PROGRAM_ID = Object.freeze({
 export const SEED = Object.freeze({
   escrow: "escrow",
   vault: "vault",
+  merkleRoot: "merkle_root",
 });
 
 export const ALPHA_VAULT_TREASURY_ID = new PublicKey(

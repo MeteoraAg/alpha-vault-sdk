@@ -32,3 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added examples on how to use Alpha Vault SDK. Check `ts-client/src/examples`
 - Add `fillVault` method to crank the vault to purchase tokens from the pool.
 - Add `closeEscrow` method to close the escrow account.
+
+### Changed
+
+- `deposit` require to pass `DepositWithProofParams` if the vault is permissioned.

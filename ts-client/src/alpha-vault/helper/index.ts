@@ -29,7 +29,22 @@ import {
 import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
 import { Transaction } from "@solana/web3.js";
 import DLMM from "@meteora-ag/dlmm";
-import { BN } from "bn.js";
+import BN from "bn.js";
+
+export function deriveMerkleRootConfig(
+  alphaVault: PublicKey,
+  version: BN,
+  programId: PublicKey
+) {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from(SEED.merkleRoot),
+      alphaVault.toBuffer(),
+      new Uint8Array(version.toArrayLike(Buffer, "le", 8)),
+    ],
+    programId
+  );
+}
 
 export function deriveEscrow(
   alphaVault: PublicKey,

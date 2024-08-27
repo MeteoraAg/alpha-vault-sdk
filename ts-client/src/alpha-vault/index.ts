@@ -21,10 +21,12 @@ import {
   VaultMode,
   VaultParam,
   PoolType,
+  DepositWithProofParams,
 } from "./type";
 import {
   deriveAlphaVault,
   deriveEscrow,
+  deriveMerkleRootConfig,
   fillDlmmTransaction,
   fillDynamicAmmTransaction,
   getOrCreateATAInstruction,
@@ -87,14 +89,7 @@ export class AlphaVault {
    */
   public static async createPermissionlessVault(
     connection: Connection,
-    {
-      quoteMint,
-      baseMint,
-      poolType,
-      vaultMode,
-      poolAddress,
-      config,
-    }: VaultParam,
+    vaultParam: VaultParam,
     owner: PublicKey,
     opt?: Opt
   ): Promise<Transaction> {
@@ -109,41 +104,27 @@ export class AlphaVault {
       provider
     );
 
-    const [alphaVault] = deriveAlphaVault(
-      config,
-      poolAddress,
-      program.programId
+    return AlphaVault.createVault(program, vaultParam, owner, false);
+  }
+
+  public static async createPermissionedVault(
+    connection: Connection,
+    vaultParam: VaultParam,
+    owner: PublicKey,
+    opt?: Opt
+  ): Promise<Transaction> {
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+    const program = new Program(
+      IDL,
+      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
+      provider
     );
 
-    const method =
-      vaultMode === VaultMode.PRORATA
-        ? program.methods.initializeVaultWithProrataConfig
-        : program.methods.initializeVaultWithFcfsConfig;
-
-    const createTx = await method({
-      poolType,
-      baseMint,
-      quoteMint,
-      permissioned: false,
-    })
-      .accounts({
-        vault: alphaVault,
-        pool: poolAddress,
-        funder: owner,
-        config,
-        quoteMint,
-        program: program.programId,
-        systemProgram: SystemProgram.programId,
-      })
-      .transaction();
-
-    const { blockhash, lastValidBlockHeight } =
-      await program.provider.connection.getLatestBlockhash("confirmed");
-    return new Transaction({
-      blockhash,
-      lastValidBlockHeight,
-      feePayer: owner,
-    }).add(createTx);
+    return AlphaVault.createVault(program, vaultParam, owner, true);
   }
 
   /**
@@ -207,9 +188,8 @@ export class AlphaVault {
    */
   public async getEscrow(owner: PublicKey): Promise<Escrow | null> {
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
-    const escrowAccount = await this.program.account.escrow.fetchNullable(
-      escrow
-    );
+    const escrowAccount =
+      await this.program.account.escrow.fetchNullable(escrow);
 
     return escrowAccount;
   }
@@ -219,35 +199,27 @@ export class AlphaVault {
    *
    * @param {BN} maxAmount - The maximum amount of tokens to deposit.
    * @param {PublicKey} owner - The public key of the owner's wallet.
-   * @param {Opt} [opt] - Optional parameters for the transaction.
+   * @param {DepositWithProofParams} [depositProof] - The deposit proof parameters. Required for permisisoned vault.
    * @return {Promise<Transaction>} A promise that resolves to the deposit transaction.
    */
   public async deposit(
     maxAmount: BN,
     owner: PublicKey,
-    opt?: Opt
+    depositProof?: DepositWithProofParams
   ): Promise<Transaction> {
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
-    const escrowAccount = await this.program.account.escrow.fetchNullable(
-      escrow
-    );
+    const escrowAccount =
+      await this.program.account.escrow.fetchNullable(escrow);
 
     const preInstructions: TransactionInstruction[] = [];
     if (!escrowAccount) {
       if (this.vault.permissioned === 1) {
-        const merkleProofApi = MERKLE_PROOF_API[opt?.cluster || "mainnet-beta"];
-        const merkleData = await fetch(
-          `${merkleProofApi}/${this.pubkey.toBase58()}/${owner.toBase58()}`
-        ).then((res) => res.json());
-        const { merkle_root_config, max_cap, proof } = merkleData as {
-          merkle_root_config: string;
-          max_cap: number;
-          proof: number[][];
-        };
+        const { merkleRootConfig, maxCap, proof } = depositProof;
+
         const createEscrowTx = await this.program.methods
-          .createPermissionedEscrow(new BN(max_cap), proof)
+          .createPermissionedEscrow(maxCap, proof)
           .accounts({
-            merkleRootConfig: merkle_root_config,
+            merkleRootConfig,
             vault: this.pubkey,
             pool: this.vault.pool,
             escrow,
@@ -480,6 +452,38 @@ export class AlphaVault {
   }
 
   /**
+   * Creates a Merkle root configuration for the vault.
+   *
+   * @param {Buffer} root - The Merkle root to be configured.
+   * @param {BN} version - The version of the Merkle root configuration.
+   * @return {Transaction} A transaction to create the Merkle root configuration.
+   */
+  public async createMerkleRootConfig(
+    root: Buffer,
+    version: BN,
+    vaultCreator: PublicKey
+  ) {
+    const [merkleRootConfig] = deriveMerkleRootConfig(
+      this.pubkey,
+      version,
+      this.program.programId
+    );
+
+    return this.program.methods
+      .createMerkleRootConfig({
+        root: Array.from(new Uint8Array(root)),
+        version,
+      })
+      .accounts({
+        merkleRootConfig,
+        vault: this.pubkey,
+        admin: vaultCreator,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+  }
+
+  /**
    * Close the escrow account.
    *
    * @param {PublicKey} owner - The public key of the owner's wallet.
@@ -540,5 +544,55 @@ export class AlphaVault {
       totalFilled,
       totalReturned,
     };
+  }
+
+  private static async createVault(
+    program: AlphaVaultProgram,
+    {
+      quoteMint,
+      baseMint,
+      poolType,
+      vaultMode,
+      poolAddress,
+      config,
+    }: VaultParam,
+    owner: PublicKey,
+    permissioned: boolean
+  ) {
+    const [alphaVault] = deriveAlphaVault(
+      config,
+      poolAddress,
+      program.programId
+    );
+
+    const method =
+      vaultMode === VaultMode.PRORATA
+        ? program.methods.initializeVaultWithProrataConfig
+        : program.methods.initializeVaultWithFcfsConfig;
+
+    const createTx = await method({
+      poolType,
+      baseMint,
+      quoteMint,
+      permissioned,
+    })
+      .accounts({
+        vault: alphaVault,
+        pool: poolAddress,
+        funder: owner,
+        config,
+        quoteMint,
+        program: program.programId,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+
+    const { blockhash, lastValidBlockHeight } =
+      await program.provider.connection.getLatestBlockhash("confirmed");
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: owner,
+    }).add(createTx);
   }
 }
