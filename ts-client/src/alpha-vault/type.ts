@@ -7,9 +7,18 @@ export interface GetOrCreateATAResponse {
   ix?: TransactionInstruction;
 }
 
+export interface DepositWithProofParams {
+  merkleRootConfig: PublicKey;
+  maxCap: BN;
+  proof: number[][];
+}
+
 export interface DepositInfo {
+  // Total deposit amount
   totalDeposit: BN;
+  // Total consumed deposit amount for bought token
   totalFilled: BN;
+  // Total remaining deposit amount to be returned
   totalReturned: BN;
 }
 
