@@ -10,14 +10,6 @@ import * as Token from "@solana/spl-token";
 import { struct, u64, i64 } from "@coral-xyz/borsh";
 import BN from "bn.js";
 
-export const DYNAMIC_AMM_PROGRAM_ID = new PublicKey(
-  "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB"
-);
-
-export const ALPHA_VAULT_PROGRAM_ID = new PublicKey(
-  "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2"
-);
-
 export interface Clock {
   slot: BN;
   epochStartTimestamp: BN;

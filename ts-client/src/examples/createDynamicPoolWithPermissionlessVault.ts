@@ -6,14 +6,13 @@ import {
   sendAndConfirmTransaction,
   SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
-import AlphaVault, { PoolType, VaultMode } from "..";
+import AlphaVault, { DYNAMIC_AMM_PROGRAM_ID, PoolType, VaultMode } from "..";
 import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
 import {
   ActivationType,
   Clock,
   ClockLayout,
   createTokenAndMint,
-  DYNAMIC_AMM_PROGRAM_ID,
   loadKeypairFromFile,
 } from "./utils";
 import dotenv from "dotenv";

@@ -1,6 +1,6 @@
 {
   "name": "@meteora-ag/alpha-vault",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -35,7 +35,7 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
     "@mercurial-finance/dynamic-amm-sdk": "1.1.0",
-    "@meteora-ag/dlmm": "1.0.56-rc.0",
+    "@meteora-ag/dlmm": "1.1.2",
     "@solana/buffer-layout": "^4.0.1",
     "@solana/spl-token": "^0.4.6",
     "@solana/web3.js": "^1.91.6",

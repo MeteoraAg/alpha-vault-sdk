@@ -5,13 +5,14 @@ import {
   PublicKey,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { ALPHA_VAULT_PROGRAM_ID, loadKeypairFromFile } from "../utils";
+import { loadKeypairFromFile } from "../utils";
 import { AlphaVault } from "../../alpha-vault";
 import BN from "bn.js";
 import dotenv from "dotenv";
 import Decimal from "decimal.js";
 import { deriveMerkleRootConfig } from "../../alpha-vault/helper";
 import { createMerkleTree, loadWhitelistWalletCsv } from "./utils";
+import { PROGRAM_ID } from "../../alpha-vault/constant";
 
 dotenv.config();
 
@@ -54,7 +55,7 @@ async function depositToPermissionedAlphaVault(
   const [merkleRootConfig] = deriveMerkleRootConfig(
     alphaVault.pubkey,
     new BN(0),
-    ALPHA_VAULT_PROGRAM_ID
+    new PublicKey(PROGRAM_ID["mainnet-beta"])
   );
 
   // 4. Deposit
