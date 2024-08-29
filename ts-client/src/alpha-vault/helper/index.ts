@@ -1,4 +1,5 @@
 import {
+  ComputeBudgetProgram,
   Connection,
   PublicKey,
   SystemProgram,
@@ -9,6 +10,7 @@ import {
   DLMM_PROGRAM_ID,
   DYNAMIC_AMM_PROGRAM_ID,
   SEED,
+  VAULT_PROGRAM_ID,
 } from "../constant";
 import {
   AlphaVaultProgram,
@@ -28,7 +30,7 @@ import {
 } from "@solana/spl-token";
 import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
 import { Transaction } from "@solana/web3.js";
-import DLMM from "@meteora-ag/dlmm";
+import DLMM, { DlmmSdkError, SwapQuote } from "@meteora-ag/dlmm";
 import BN from "bn.js";
 
 export function deriveMerkleRootConfig(
@@ -157,11 +159,16 @@ export const fillDlmmTransaction = async (
   const connection = program.provider.connection;
   const pair = await DLMM.create(connection, vault.pool);
 
-  const preInstructions: TransactionInstruction[] = [];
+  // TODO: Estimate CU
+  const preInstructions: TransactionInstruction[] = [
+    ComputeBudgetProgram.setComputeUnitLimit({
+      units: 1_400_000,
+    }),
+  ];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
     await getOrCreateATAInstruction(
       connection,
-      vault.quoteMint,
+      vault.baseMint,
       vaultKey,
       payer
     );
@@ -171,21 +178,36 @@ export const fillDlmmTransaction = async (
     vault.vaultMode == VaultMode.FCFS
       ? vault.totalDeposit
       : vault.totalDeposit.lt(vault.maxBuyingCap)
-      ? vault.totalDeposit
-      : vault.maxBuyingCap;
+        ? vault.totalDeposit
+        : vault.maxBuyingCap;
 
   const remainingInAmount = inAmountCap.sub(vault.swappedAmount);
 
   const swapForY = pair.lbPair.tokenXMint.equals(vault.quoteMint);
-  const binArrays = await pair.getBinArrayForSwap(swapForY);
 
-  const { consumedInAmount, binArraysPubkey } = pair.swapQuote(
-    remainingInAmount,
-    swapForY,
-    new BN(0),
-    binArrays,
-    true
-  );
+  const binArrays = await pair.getBinArrayForSwap(swapForY, 3);
+
+  let quoteResult: SwapQuote;
+  try {
+    quoteResult = pair.swapQuote(
+      remainingInAmount,
+      swapForY,
+      new BN(0),
+      binArrays,
+      true
+    );
+  } catch (error) {
+    if (error instanceof DlmmSdkError) {
+      if (error.name == "SWAP_QUOTE_INSUFFICIENT_LIQUIDITY") {
+        // With isPartialFill, insufficient liquidity happen only when there is not enough liquidity in the pool
+        // Vault bought up full distribution curve
+        return null;
+      }
+    }
+    throw error;
+  }
+
+  const { consumedInAmount, binArraysPubkey } = quoteResult;
 
   const [dlmmEventAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("__event_authority")],
@@ -202,7 +224,7 @@ export const fillDlmmTransaction = async (
       pool: vault.pool,
       binArrayBitmapExtension: pair.binArrayBitmapExtension
         ? pair.binArrayBitmapExtension.publicKey
-        : null,
+        : pair.program.programId,
       reserveX: pair.lbPair.reserveX,
       reserveY: pair.lbPair.reserveY,
       tokenXMint: pair.lbPair.tokenXMint,
@@ -254,7 +276,7 @@ export const fillDynamicAmmTransaction = async (
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
     await getOrCreateATAInstruction(
       connection,
-      vault.quoteMint,
+      vault.baseMint,
       vaultKey,
       payer
     );
@@ -281,7 +303,7 @@ export const fillDynamicAmmTransaction = async (
       aVaultLpMint: pool.vaultA.tokenLpMint.address,
       bVaultLpMint: pool.vaultB.tokenLpMint.address,
       adminTokenFee,
-      vaultProgram: ALPHA_VAULT_TREASURY_ID,
+      vaultProgram: VAULT_PROGRAM_ID,
       tokenProgram: TOKEN_PROGRAM_ID,
     })
     .preInstructions(preInstructions)

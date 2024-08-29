@@ -19,13 +19,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-# alpha-vault [0.1.0] - PR [#1](https://github.com/MeteoraAg/alpha-vault-sdk/pull/1/files)
+## alpha-vault-sdk [0.1.2] - PR [#2](https://github.com/MeteoraAg/alpha-vault-sdk/pull/2)
+
+### Fixed
+
+- Fix bug in `fillVault` method
+
+## alpha-vault [0.1.0] - PR [#1](https://github.com/MeteoraAg/alpha-vault-sdk/pull/1)
 
 ### Added
 
 - Program interface
 
-# @meteora-ag/alpha-vault
+## @meteora-ag/alpha-vault [1.1.1] - PR [#1](https://github.com/MeteoraAg/alpha-vault-sdk/pull/1)
 
 ### Added
 

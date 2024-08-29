@@ -15,6 +15,10 @@ export const ALPHA_VAULT_TREASURY_ID = new PublicKey(
   "BJQbRiRWhJCyTYZcAuAL3ngDCx3AyFQGKDq8zhiZAKUw"
 );
 
+export const VAULT_PROGRAM_ID = new PublicKey(
+  "24Uqj9JCLxUeoC3hGfh5W3s9FM9uCHDS2SG3LYwBpyTi"
+);
+
 export const DYNAMIC_AMM_PROGRAM_ID = new PublicKey(
   "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB"
 );

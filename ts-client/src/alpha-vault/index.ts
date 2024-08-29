@@ -435,8 +435,10 @@ export class AlphaVault {
    * Crank the vault to buy tokens from the pool.
    *
    * @param {PublicKey} payer - The public key of the payer's wallet.
+   *
+   * @returns {Promise<Transaction | null>} A promise that resolves to the fill vault transaction or null if it's DLMM pool and out of liquidity.
    */
-  public async fillVault(payer: PublicKey) {
+  public async fillVault(payer: PublicKey): Promise<Transaction | null> {
     const poolType = this.vault.poolType;
 
     if (poolType === PoolType.DYNAMIC) {
