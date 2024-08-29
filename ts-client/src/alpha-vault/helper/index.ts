@@ -157,9 +157,7 @@ export const fillDlmmTransaction = async (
   payer: PublicKey
 ) => {
   const connection = program.provider.connection;
-  const pair = await DLMM.create(connection, vault.pool, {
-    programId: DLMM_PROGRAM_ID,
-  });
+  const pair = await DLMM.create(connection, vault.pool);
 
   // TODO: Estimate CU
   const preInstructions: TransactionInstruction[] = [
