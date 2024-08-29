@@ -28,6 +28,11 @@ async function fillVaultWithDlmm(vault: PublicKey, payer: Keypair) {
       payer.publicKey
     );
 
+    if (!fillVaultWithDLMMTransaction) {
+      // Vault bought out the whole pool and still have remaining
+      break;
+    }
+
     console.log("Fill vault with DLMM");
     const txHash = await sendAndConfirmTransaction(
       connection,
@@ -41,8 +46,8 @@ async function fillVaultWithDlmm(vault: PublicKey, payer: Keypair) {
       alphaVault.vault.vaultMode == VaultMode.FCFS
         ? alphaVault.vault.totalDeposit
         : alphaVault.vault.totalDeposit.lt(alphaVault.vault.maxBuyingCap)
-        ? alphaVault.vault.totalDeposit
-        : alphaVault.vault.maxBuyingCap;
+          ? alphaVault.vault.totalDeposit
+          : alphaVault.vault.maxBuyingCap;
 
     if (inAmountCap.eq(alphaVault.vault.swappedAmount)) {
       break;

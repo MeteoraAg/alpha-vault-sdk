@@ -30,7 +30,7 @@ import {
 } from "@solana/spl-token";
 import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
 import { Transaction } from "@solana/web3.js";
-import DLMM from "@meteora-ag/dlmm";
+import DLMM, { DlmmSdkError, SwapQuote } from "@meteora-ag/dlmm";
 import BN from "bn.js";
 
 export function deriveMerkleRootConfig(
@@ -189,18 +189,27 @@ export const fillDlmmTransaction = async (
 
   const binArrays = await pair.getBinArrayForSwap(swapForY, 3);
 
-  const { consumedInAmount, binArraysPubkey } = pair.swapQuote(
-    remainingInAmount,
-    swapForY,
-    new BN(0),
-    binArrays,
-    true
-  );
-
-  // Vault bought up full distribution curve
-  if (consumedInAmount.isZero()) {
-    return null;
+  let quoteResult: SwapQuote;
+  try {
+    quoteResult = pair.swapQuote(
+      remainingInAmount,
+      swapForY,
+      new BN(0),
+      binArrays,
+      true
+    );
+  } catch (error) {
+    if (error instanceof DlmmSdkError) {
+      if (error.name == "SWAP_QUOTE_INSUFFICIENT_LIQUIDITY") {
+        // With isPartialFill, insufficient liquidity happen only when there is not enough liquidity in the pool
+        // Vault bought up full distribution curve
+        return null;
+      }
+    }
+    throw error;
   }
+
+  const { consumedInAmount, binArraysPubkey } = quoteResult;
 
   const [dlmmEventAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("__event_authority")],
