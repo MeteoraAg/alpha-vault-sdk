@@ -47,3 +47,8 @@ export enum PoolType {
   DLMM,
   DYNAMIC,
 }
+
+export enum ActivationType {
+  SLOT,
+  TIMESTAMP,
+}

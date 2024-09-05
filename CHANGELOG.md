@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## @meteora-ag/alpha-vault [1.1.3] [PR #3](https://github.com/MeteoraAg/alpha-vault-sdk/pull/3)
+
+### Changed
+
+- Export type `ActivationType`
+
 ## alpha-vault-sdk [0.1.2] - PR [#2](https://github.com/MeteoraAg/alpha-vault-sdk/pull/2)
 
 ### Fixed
