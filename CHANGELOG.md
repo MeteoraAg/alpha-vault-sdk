@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## @meteora-ag/alpha-vault [1.1.4] [PR #4](https://github.com/MeteoraAg/alpha-vault-sdk/pull/4)
+
+### Changed
+
+- Export `merkle_tree`, `helper` & `constants`
+
 ## @meteora-ag/alpha-vault [1.1.3] [PR #3](https://github.com/MeteoraAg/alpha-vault-sdk/pull/3)
 
 ### Changed
