@@ -35,6 +35,11 @@ import {
 } from "./helper";
 import { NATIVE_MINT, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
+export * from "./merkle_tree/";
+export * from "./helper";
+export * from "./type";
+export * from "./constant";
+
 type Opt = {
   cluster: Cluster;
 };
