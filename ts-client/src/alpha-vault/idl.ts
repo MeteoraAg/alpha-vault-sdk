@@ -1,7 +1,28 @@
 export type AlphaVault = {
-  "version": "0.3.0",
+  "version": "0.3.2",
   "name": "alpha_vault",
   "instructions": [
+    {
+      "name": "transferVaultAuthority",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAuthority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newAuthority",
+          "type": "publicKey"
+        }
+      ]
+    },
     {
       "name": "initializeProrataVault",
       "accounts": [
@@ -546,6 +567,57 @@ export type AlphaVault = {
               ]
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "createPermissionedEscrowWithAuthority",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pool",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "maxCap",
+          "type": "u64"
         }
       ]
     },
@@ -1412,9 +1484,9 @@ export type AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "permissioned",
+            "name": "whitelistMode",
             "docs": [
-              "permissioned flag"
+              "deposit whitelist mode"
             ],
             "type": "u8"
           },
@@ -1438,11 +1510,18 @@ export type AlphaVault = {
             }
           },
           {
+            "name": "vaultAuthority",
+            "docs": [
+              "vault authority normally is vault creator, will be able to create merkle root config"
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "padding",
             "type": {
               "array": [
                 "u128",
-                7
+                5
               ]
             }
           }
@@ -1560,8 +1639,8 @@ export type AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "permissioned",
-            "type": "bool"
+            "name": "whitelistMode",
+            "type": "u8"
           }
         ]
       }
@@ -1664,8 +1743,8 @@ export type AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "permissioned",
-            "type": "bool"
+            "name": "whitelistMode",
+            "type": "u8"
           }
         ]
       }
@@ -1688,11 +1767,8 @@ export type AlphaVault = {
             "type": "publicKey"
           },
           {
-            "name": "permissioned",
-            "docs": [
-              "Permissioned vault support whitelist wallet deposit cap feature"
-            ],
-            "type": "bool"
+            "name": "whitelistMode",
+            "type": "u8"
           }
         ]
       }
@@ -1764,6 +1840,23 @@ export type AlphaVault = {
           },
           {
             "name": "Fcfs"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistMode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Permissionless"
+          },
+          {
+            "name": "PermissionWithMerkleProof"
+          },
+          {
+            "name": "PermissionWithAuthority"
           }
         ]
       }
@@ -2326,14 +2419,75 @@ export type AlphaVault = {
       "code": 6028,
       "name": "ActivationTypeIsMismatched",
       "msg": "Activation type is mismatched"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidPool",
+      "msg": "Pool is not connected to the alpha vault"
+    },
+    {
+      "code": 6030,
+      "name": "InvalidCreator",
+      "msg": "Invalid creator"
+    },
+    {
+      "code": 6031,
+      "name": "PermissionedVaultCannotChargeEscrowFee",
+      "msg": "Permissioned vault cannot charge escrow fee"
+    },
+    {
+      "code": 6032,
+      "name": "EscrowFeeTooHigh",
+      "msg": "Escrow fee too high"
+    },
+    {
+      "code": 6033,
+      "name": "LockDurationInvalid",
+      "msg": "Lock duration is invalid"
+    },
+    {
+      "code": 6034,
+      "name": "MaxBuyingCapIsTooSmall",
+      "msg": "Max buying cap is too small"
+    },
+    {
+      "code": 6035,
+      "name": "MaxDepositingCapIsTooSmall",
+      "msg": "Max depositing cap is too small"
+    },
+    {
+      "code": 6036,
+      "name": "InvalidWhitelistWalletMode",
+      "msg": "Invalid whitelist wallet mode"
     }
   ]
 };
 
 export const IDL: AlphaVault = {
-  "version": "0.3.0",
+  "version": "0.3.2",
   "name": "alpha_vault",
   "instructions": [
+    {
+      "name": "transferVaultAuthority",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAuthority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newAuthority",
+          "type": "publicKey"
+        }
+      ]
+    },
     {
       "name": "initializeProrataVault",
       "accounts": [
@@ -2878,6 +3032,57 @@ export const IDL: AlphaVault = {
               ]
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "createPermissionedEscrowWithAuthority",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pool",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "maxCap",
+          "type": "u64"
         }
       ]
     },
@@ -3744,9 +3949,9 @@ export const IDL: AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "permissioned",
+            "name": "whitelistMode",
             "docs": [
-              "permissioned flag"
+              "deposit whitelist mode"
             ],
             "type": "u8"
           },
@@ -3770,11 +3975,18 @@ export const IDL: AlphaVault = {
             }
           },
           {
+            "name": "vaultAuthority",
+            "docs": [
+              "vault authority normally is vault creator, will be able to create merkle root config"
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "padding",
             "type": {
               "array": [
                 "u128",
-                7
+                5
               ]
             }
           }
@@ -3892,8 +4104,8 @@ export const IDL: AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "permissioned",
-            "type": "bool"
+            "name": "whitelistMode",
+            "type": "u8"
           }
         ]
       }
@@ -3996,8 +4208,8 @@ export const IDL: AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "permissioned",
-            "type": "bool"
+            "name": "whitelistMode",
+            "type": "u8"
           }
         ]
       }
@@ -4020,11 +4232,8 @@ export const IDL: AlphaVault = {
             "type": "publicKey"
           },
           {
-            "name": "permissioned",
-            "docs": [
-              "Permissioned vault support whitelist wallet deposit cap feature"
-            ],
-            "type": "bool"
+            "name": "whitelistMode",
+            "type": "u8"
           }
         ]
       }
@@ -4096,6 +4305,23 @@ export const IDL: AlphaVault = {
           },
           {
             "name": "Fcfs"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistMode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Permissionless"
+          },
+          {
+            "name": "PermissionWithMerkleProof"
+          },
+          {
+            "name": "PermissionWithAuthority"
           }
         ]
       }
@@ -4658,6 +4884,46 @@ export const IDL: AlphaVault = {
       "code": 6028,
       "name": "ActivationTypeIsMismatched",
       "msg": "Activation type is mismatched"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidPool",
+      "msg": "Pool is not connected to the alpha vault"
+    },
+    {
+      "code": 6030,
+      "name": "InvalidCreator",
+      "msg": "Invalid creator"
+    },
+    {
+      "code": 6031,
+      "name": "PermissionedVaultCannotChargeEscrowFee",
+      "msg": "Permissioned vault cannot charge escrow fee"
+    },
+    {
+      "code": 6032,
+      "name": "EscrowFeeTooHigh",
+      "msg": "Escrow fee too high"
+    },
+    {
+      "code": 6033,
+      "name": "LockDurationInvalid",
+      "msg": "Lock duration is invalid"
+    },
+    {
+      "code": 6034,
+      "name": "MaxBuyingCapIsTooSmall",
+      "msg": "Max buying cap is too small"
+    },
+    {
+      "code": 6035,
+      "name": "MaxDepositingCapIsTooSmall",
+      "msg": "Max depositing cap is too small"
+    },
+    {
+      "code": 6036,
+      "name": "InvalidWhitelistWalletMode",
+      "msg": "Invalid whitelist wallet mode"
     }
   ]
 };

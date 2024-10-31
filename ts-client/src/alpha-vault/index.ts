@@ -1,4 +1,5 @@
 import { AnchorProvider, BN, Program } from "@coral-xyz/anchor";
+import { NATIVE_MINT, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import {
   Cluster,
   Connection,
@@ -7,22 +8,14 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { IDL } from "./idl";
 import {
   ALPHA_VAULT_TREASURY_ID,
-  MERKLE_PROOF_API,
+  Permissionless,
+  PermissionWithAuthority,
+  PermissionWithMerkleProof,
   PROGRAM_ID,
+  WhitelistMode,
 } from "./constant";
-import {
-  DepositInfo,
-  AlphaVaultProgram,
-  Escrow,
-  Vault,
-  VaultMode,
-  VaultParam,
-  PoolType,
-  DepositWithProofParams,
-} from "./type";
 import {
   deriveAlphaVault,
   deriveEscrow,
@@ -33,12 +26,22 @@ import {
   unwrapSOLInstruction,
   wrapSOLInstruction,
 } from "./helper";
-import { NATIVE_MINT, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { IDL } from "./idl";
+import {
+  AlphaVaultProgram,
+  DepositInfo,
+  DepositWithProofParams,
+  Escrow,
+  PoolType,
+  Vault,
+  VaultMode,
+  VaultParam,
+} from "./type";
 
-export * from "./merkle_tree/";
-export * from "./helper";
-export * from "./type";
 export * from "./constant";
+export * from "./helper";
+export * from "./merkle_tree/";
+export * from "./type";
 
 type Opt = {
   cluster: Cluster;
@@ -109,10 +112,10 @@ export class AlphaVault {
       provider
     );
 
-    return AlphaVault.createVault(program, vaultParam, owner, false);
+    return AlphaVault.createVault(program, vaultParam, owner, Permissionless);
   }
 
-  public static async createPermissionedVault(
+  public static async createPermissionedVaultWithMerkleProof(
     connection: Connection,
     vaultParam: VaultParam,
     owner: PublicKey,
@@ -129,7 +132,37 @@ export class AlphaVault {
       provider
     );
 
-    return AlphaVault.createVault(program, vaultParam, owner, true);
+    return AlphaVault.createVault(
+      program,
+      vaultParam,
+      owner,
+      PermissionWithMerkleProof
+    );
+  }
+
+  public static async createPermissionedVaultWithAuthorityFund(
+    connection: Connection,
+    vaultParam: VaultParam,
+    owner: PublicKey,
+    opt?: Opt
+  ): Promise<Transaction> {
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+    const program = new Program(
+      IDL,
+      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
+      provider
+    );
+
+    return AlphaVault.createVault(
+      program,
+      vaultParam,
+      owner,
+      PermissionWithAuthority
+    );
   }
 
   /**
@@ -200,6 +233,38 @@ export class AlphaVault {
   }
 
   /**
+   * Creates a stake escrow account by vault authority. Only applicable with PermissionWithAuthority whitelist mode
+   *
+   * @param {BN} maxAmount - The maximum amount for the escrow.
+   * @param {PublicKey} owner - The public key of the owner.
+   * @return {Promise<Transaction>} A promise that resolves to the transaction for creating a stake escrow.
+   */
+  public async createStakeEscrowByAuthority(
+    maxAmount: BN,
+    owner: PublicKey
+  ): Promise<Transaction> {
+    const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
+
+    const createStakeEscrowIx = await this.program.methods
+      .createPermissionedEscrowWithAuthority(maxAmount)
+      .accounts({
+        vault: this.pubkey,
+        pool: this.vault.pool,
+        escrow,
+        owner,
+      })
+      .instruction();
+
+    const { blockhash, lastValidBlockHeight } =
+      await this.program.provider.connection.getLatestBlockhash("confirmed");
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: owner,
+    }).add(createStakeEscrowIx);
+  }
+
+  /**
    * Deposits a specified amount of tokens into the vault.
    *
    * @param {BN} maxAmount - The maximum amount of tokens to deposit.
@@ -218,7 +283,7 @@ export class AlphaVault {
 
     const preInstructions: TransactionInstruction[] = [];
     if (!escrowAccount) {
-      if (this.vault.permissioned === 1) {
+      if (this.vault.whitelistMode === PermissionWithMerkleProof) {
         const { merkleRootConfig, maxCap, proof } = depositProof;
 
         const createEscrowTx = await this.program.methods
@@ -235,7 +300,7 @@ export class AlphaVault {
           })
           .instruction();
         preInstructions.push(createEscrowTx);
-      } else {
+      } else if (this.vault.whitelistMode === Permissionless) {
         const createEscrowTx = await this.program.methods
           .createNewEscrow()
           .accounts({
@@ -564,7 +629,7 @@ export class AlphaVault {
       config,
     }: VaultParam,
     owner: PublicKey,
-    permissioned: boolean
+    whitelistMode: WhitelistMode
   ) {
     const [alphaVault] = deriveAlphaVault(
       config,
@@ -581,7 +646,7 @@ export class AlphaVault {
       poolType,
       baseMint,
       quoteMint,
-      permissioned,
+      whitelistMode,
     })
       .accounts({
         vault: alphaVault,
