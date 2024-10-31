@@ -10,7 +10,7 @@ pub struct InitializeProrataVaultParams {
     pub end_vesting_point: u64,
     pub max_buying_cap: u64,
     pub escrow_fee: u64,
-    pub permissioned: bool,
+    pub whitelist_mode: u8,
 }
 
 #[event_cpi]

@@ -91,4 +91,28 @@ pub enum VaultError {
 
     #[msg("Activation type is mismatched")]
     ActivationTypeIsMismatched,
+
+    #[msg("Pool is not connected to the alpha vault")]
+    InvalidPool,
+
+    #[msg("Invalid creator")]
+    InvalidCreator,
+
+    #[msg("Permissioned vault cannot charge escrow fee")]
+    PermissionedVaultCannotChargeEscrowFee,
+
+    #[msg("Escrow fee too high")]
+    EscrowFeeTooHigh,
+
+    #[msg("Lock duration is invalid")]
+    LockDurationInvalid,
+
+    #[msg("Max buying cap is too small")]
+    MaxBuyingCapIsTooSmall,
+
+    #[msg("Max depositing cap is too small")]
+    MaxDepositingCapIsTooSmall,
+
+    #[msg("Invalid whitelist wallet mode")]
+    InvalidWhitelistWalletMode,
 }

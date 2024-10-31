@@ -11,7 +11,7 @@ pub struct InitializeFcfsVaultParams {
     pub max_depositing_cap: u64,
     pub individual_depositing_cap: u64,
     pub escrow_fee: u64,
-    pub permissioned: bool,
+    pub whitelist_mode: u8,
 }
 
 #[event_cpi]

@@ -1,8 +1,9 @@
 use crate::*;
+use anchor_lang::prelude::*;
 
 #[event_cpi]
 #[derive(Accounts)]
-pub struct CreatePermissionedEscrowWithMerkleProofCtx<'info> {
+pub struct CreatePermissionedEscrowWithAuthorityCtx<'info> {
     #[account(mut, has_one=pool)]
     pub vault: AccountLoader<'info, Vault>,
 
@@ -24,25 +25,19 @@ pub struct CreatePermissionedEscrowWithMerkleProofCtx<'info> {
     /// CHECK:
     pub owner: UncheckedAccount<'info>,
 
-    /// merkle_root_config
-    #[account(has_one=vault)]
-    pub merkle_root_config: AccountLoader<'info, MerkleRootConfig>,
-
-    #[account(mut)]
+    #[account(
+        mut,
+        address = vault.load()?.vault_authority @ VaultError::InvalidCreator
+    )]
     pub payer: Signer<'info>,
-
-    /// CHECK: escrow fee receiver
-    #[account(mut, address = treasury::ID @ VaultError::InvalidFeeReceiverAccount)]
-    pub escrow_fee_receiver: Option<AccountInfo<'info>>,
 
     // system program
     pub system_program: Program<'info, System>,
 }
 
-pub fn handle_create_permissioned_escrow<'info>(
-    _ctx: Context<'_, '_, '_, 'info, CreatePermissionedEscrowWithMerkleProofCtx<'info>>,
+pub fn handle_create_permissioned_escrow_with_authority<'info>(
+    _ctx: Context<'_, '_, '_, 'info, CreatePermissionedEscrowWithAuthorityCtx<'info>>,
     _max_cap: u64,
-    _proof: Vec<[u8; 32]>,
 ) -> Result<()> {
     Ok(())
 }
