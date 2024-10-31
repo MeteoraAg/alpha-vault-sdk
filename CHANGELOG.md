@@ -19,6 +19,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## @meteora-ag/alpha-vault [1.1.5] [PR #5](https://github.com/MeteoraAg/alpha-vault-sdk/pull/5)
+
+### Added
+
+- Added function `createStakeEscrowByAuthority` which allow vault creator to create stake escrow on user behalf. Vault whitelist mode must be `PermissionWithAuthority`
+
+### Changed
+
+- Renamed function `createPermissionedVault` to `createPermissionedVaultWithMerkleProof`
+- Added function `createPermissionedVaultWithAuthorityFund` which allow user to create alpha vault with whitelist wallet feature without merkle proof. Only the vault creator can create the stake escrow account.
+
+## alpha-vault [0.3.2] [PR #5](https://github.com/MeteoraAg/alpha-vault-sdk/pull/5)
+
+### Added
+
+- Create escrow now supports 3 modes: `Permissionless`, `PermissionWithMerkleProof` and `PermissionWithAuthority`
+
+- In the new mode `PermissionWithAuthority`, only `vault.vault_authority` is able to create new escrow, that allows alpha-vault creator is able to seed escrow accounts easily without merkle tree
+
+- Add the new endpoint `create_permissioned_escrow_with_authority`
+
+### Changed
+
+- Vault account field `permissioned` renamed to `whitelist_mode`
+- `initialize_fcfs_vault`, `initialize_prorata_vault` endpoint `permissioned` field updated to `whitelist_mode`
+
 ## @meteora-ag/alpha-vault [1.1.4] [PR #4](https://github.com/MeteoraAg/alpha-vault-sdk/pull/4)
 
 ### Changed

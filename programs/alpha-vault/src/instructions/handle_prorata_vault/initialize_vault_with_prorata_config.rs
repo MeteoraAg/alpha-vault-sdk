@@ -6,8 +6,7 @@ pub struct InitializeVaultWithConfigParams {
     pub pool_type: u8,
     pub quote_mint: Pubkey,
     pub base_mint: Pubkey,
-    /// Permissioned vault support whitelist wallet deposit cap feature
-    pub permissioned: bool,
+    pub whitelist_mode: u8,
 }
 
 #[event_cpi]
