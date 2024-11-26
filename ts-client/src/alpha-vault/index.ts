@@ -87,7 +87,7 @@ export class AlphaVault {
   }
 
   /**
-   * Creates a permissionless vault for dynamic amm pool.
+   * Creates a permissionless vault for dynamic amm / dlmm pool.
    *
    * @param {Connection} connection - The Solana connection to use.
    * @param {VaultParam} params - The vault parameters.
