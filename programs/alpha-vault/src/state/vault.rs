@@ -1,5 +1,5 @@
 use crate::*;
-use num_enum::{IntoPrimitive, TryFromPrimitive};
+use num_enum::{FromPrimitive, IntoPrimitive, TryFromPrimitive};
 use static_assertions::const_assert_eq;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
@@ -22,6 +22,16 @@ pub enum VaultMode {
     // User will not be able withdraw, once deposit
     // Vault will buy with all it has in reserve
     Fcfs,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, IntoPrimitive, FromPrimitive)]
+#[repr(u8)]
+// Permissionless = 0, PermissionWithMerkleProof = 1, PermissionWithAuthority = 2
+pub enum WhitelistMode {
+    #[num_enum(default)]
+    Permissionless,
+    PermissionWithMerkleProof,
+    PermissionWithAuthority,
 }
 
 #[account(zero_copy)]
@@ -78,14 +88,16 @@ pub struct Vault {
     pub escrow_fee: u64,
     /// total escrow fee just for statistic
     pub total_escrow_fee: u64,
-    /// permissioned flag
-    pub permissioned: u8,
+    /// deposit whitelist mode
+    pub whitelist_mode: u8,
     /// activation type
     pub activation_type: u8,
     /// padding 1
     pub padding_1: [u8; 6],
+    /// vault authority normally is vault creator, will be able to create merkle root config
+    pub vault_authority: Pubkey,
     // pub padding_0:
-    pub padding: [u128; 7],
+    pub padding: [u128; 5],
 }
 
 const_assert_eq!(std::mem::size_of::<Vault>(), 464);

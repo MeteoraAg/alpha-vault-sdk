@@ -206,18 +206,19 @@ async function createDynamicPoolWithPermissionedVault(
   console.log("Pool created", poolPubkey.toBase58());
 
   // 3. Create the alpha vault
-  const initPermissionlessVaultTx = await AlphaVault.createPermissionedVault(
-    connection,
-    {
-      baseMint: mintAInfo.mint,
-      quoteMint: mintBInfo.mint,
-      poolType: PoolType.DYNAMIC,
-      vaultMode: VaultMode.PRORATA,
-      poolAddress: poolPubkey,
-      config: poolConfig.account.vaultConfigKey,
-    },
-    payer.publicKey
-  );
+  const initPermissionlessVaultTx =
+    await AlphaVault.createPermissionedVaultWithMerkleProof(
+      connection,
+      {
+        baseMint: mintAInfo.mint,
+        quoteMint: mintBInfo.mint,
+        poolType: PoolType.DYNAMIC,
+        vaultMode: VaultMode.PRORATA,
+        poolAddress: poolPubkey,
+        config: poolConfig.account.vaultConfigKey,
+      },
+      payer.publicKey
+    );
 
   console.log("Creating vault");
   const txHash = await sendAndConfirmTransaction(

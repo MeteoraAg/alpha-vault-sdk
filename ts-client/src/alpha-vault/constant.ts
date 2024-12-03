@@ -31,3 +31,8 @@ export const MERKLE_PROOF_API = Object.freeze({
   devnet: "https://worker-dev.meteora.ag/merkle-root-config-proof",
   "mainnet-beta": "https://worker.meteora.ag/merkle-root-config-proof",
 });
+
+export type WhitelistMode = 0 | 1 | 2;
+export const Permissionless = 0;
+export const PermissionWithMerkleProof = 1;
+export const PermissionWithAuthority = 2;

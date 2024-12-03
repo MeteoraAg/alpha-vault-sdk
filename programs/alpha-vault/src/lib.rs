@@ -124,19 +124,28 @@ pub mod alpha_vault {
         handle_create_merkle_root_config(ctx, params)
     }
 
-/// USER FUNCTIONS
+    /// USER FUNCTIONS
     pub fn create_new_escrow<'info>(
         ctx: Context<'_, '_, '_, 'info, CreateNewEscrowCtx<'info>>,
     ) -> Result<()> {
         handle_create_new_escrow(ctx)
     }
 
+    // create_permissioned_escrow with merkle proof
     pub fn create_permissioned_escrow<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreatePermissionedEscrowCtx<'info>>,
+        ctx: Context<'_, '_, '_, 'info, CreatePermissionedEscrowWithMerkleProofCtx<'info>>,
         max_cap: u64,
         proof: Vec<[u8; 32]>,
     ) -> Result<()> {
         handle_create_permissioned_escrow(ctx, max_cap, proof)
+    }
+
+    // create_permissioned_escrow with authority
+    pub fn create_permissioned_escrow_with_authority<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreatePermissionedEscrowWithAuthorityCtx<'info>>,
+        max_cap: u64,
+    ) -> Result<()> {
+        handle_create_permissioned_escrow_with_authority(ctx, max_cap)
     }
 
     pub fn close_escrow(ctx: Context<CloseEscrowCtx>) -> Result<()> {
