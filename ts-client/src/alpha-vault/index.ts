@@ -29,6 +29,8 @@ import {
 import { IDL } from "./idl";
 import {
   AlphaVaultProgram,
+  CustomizableFcfsVaultParams,
+  CustomizableProrataVaultParams,
   DepositInfo,
   DepositWithProofParams,
   Escrow,
@@ -36,6 +38,7 @@ import {
   Vault,
   VaultMode,
   VaultParam,
+  WalletDepositCap,
 } from "./type";
 
 export * from "./constant";
@@ -87,6 +90,161 @@ export class AlphaVault {
   }
 
   /**
+   * Creates a customizable FCFS vault
+   *
+   * @param {Connection} connection - The Solana connection to use.
+   * @param {CustomizableFcfsVaultParams} vaultParam - The parameters for creating the vault.
+   * @param {PublicKey} owner - The owner of the vault.
+   * @param {Opt} [opt] - Optional configuration options.
+   * @return {Promise<Transaction>} The transaction for creating the vault.
+   */
+  public static async createCustomizableFcfsVault(
+    connection: Connection,
+    vaultParam: CustomizableFcfsVaultParams,
+    owner: PublicKey,
+    opt?: Opt
+  ) {
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+
+    const program = new Program(
+      IDL,
+      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
+      provider
+    );
+
+    const {
+      poolAddress,
+      poolType,
+      baseMint,
+      quoteMint,
+      depositingPoint,
+      startVestingPoint,
+      endVestingPoint,
+      maxDepositingCap,
+      individualDepositingCap,
+      escrowFee,
+      whitelistMode,
+    } = vaultParam;
+
+    const [alphaVault] = deriveAlphaVault(
+      owner,
+      poolAddress,
+      program.programId
+    );
+
+    const createTx = await program.methods
+      .initializeFcfsVault({
+        poolType,
+        baseMint,
+        quoteMint,
+        depositingPoint,
+        startVestingPoint,
+        endVestingPoint,
+        maxDepositingCap,
+        individualDepositingCap,
+        escrowFee,
+        whitelistMode,
+      })
+      .accounts({
+        base: owner,
+        vault: alphaVault,
+        pool: poolAddress,
+        funder: owner,
+        program: program.programId,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+
+    const { blockhash, lastValidBlockHeight } =
+      await program.provider.connection.getLatestBlockhash("confirmed");
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: owner,
+    }).add(createTx);
+  }
+
+  /**
+   * Creates a customizable Prorata vault.
+   *
+   * @param {Connection} connection - The Solana connection to use.
+   * @param {CustomizableProrataVaultParams} vaultParam - The parameters for creating the vault.
+   * @param {PublicKey} owner - The owner of the vault.
+   * @param {Opt} [opt] - Optional configuration options.
+   * @return {Promise<Transaction>} The transaction for creating the vault.
+   */
+  public static async createCustomizableProrataVault(
+    connection: Connection,
+    vaultParam: CustomizableProrataVaultParams,
+    owner: PublicKey,
+    opt?: Opt
+  ) {
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+    const program = new Program(
+      IDL,
+      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
+      provider
+    );
+
+    const {
+      poolAddress,
+      poolType,
+      baseMint,
+      quoteMint,
+      depositingPoint,
+      startVestingPoint,
+      endVestingPoint,
+      maxBuyingCap,
+      escrowFee,
+      whitelistMode,
+    } = vaultParam;
+
+    const [alphaVault] = deriveAlphaVault(
+      owner,
+      poolAddress,
+      program.programId
+    );
+
+    const createTx = await program.methods
+      .initializeProrataVault({
+        poolType,
+        baseMint,
+        quoteMint,
+        depositingPoint,
+        startVestingPoint,
+        endVestingPoint,
+        maxBuyingCap,
+        escrowFee,
+        whitelistMode,
+      })
+      .accounts({
+        base: owner,
+        vault: alphaVault,
+        pool: poolAddress,
+        funder: owner,
+        program: program.programId,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+
+    const { blockhash, lastValidBlockHeight } =
+      await program.provider.connection.getLatestBlockhash("confirmed");
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: owner,
+    }).add(createTx);
+  }
+
+  /**
    * Creates a permissionless vault for dynamic amm / dlmm pool.
    *
    * @param {Connection} connection - The Solana connection to use.
@@ -115,6 +273,15 @@ export class AlphaVault {
     return AlphaVault.createVault(program, vaultParam, owner, Permissionless);
   }
 
+  /**
+   * Creates a permissioned vault for dynamic amm / dlmm pool. Vault created with this function will require merkle proof to be passed along when create stake escrow.
+   *
+   * @param {Connection} connection - The Solana connection to use.
+   * @param {VaultParam} params - The vault parameters.
+   * @param {PublicKey} owner - The public key of the vault owner.
+   * @param {Opt} [opt] - Optional parameters.
+   * @return {Promise<Transaction>} The transaction creating the vault.
+   */
   public static async createPermissionedVaultWithMerkleProof(
     connection: Connection,
     vaultParam: VaultParam,
@@ -140,6 +307,15 @@ export class AlphaVault {
     );
   }
 
+  /**
+   * Creates a permissioned vault for dynamic amm / dlmm pool. Vault created with this function will require vault creator to create stake escrow for each users.
+   *
+   * @param {Connection} connection - The Solana connection to use.
+   * @param {VaultParam} params - The vault parameters.
+   * @param {PublicKey} owner - The public key of the vault owner.
+   * @param {Opt} [opt] - Optional parameters.
+   * @return {Promise<Transaction>} The transaction creating the vault.
+   */
   public static async createPermissionedVaultWithAuthorityFund(
     connection: Connection,
     vaultParam: VaultParam,
@@ -237,11 +413,13 @@ export class AlphaVault {
    *
    * @param {BN} maxAmount - The maximum amount for the escrow.
    * @param {PublicKey} owner - The public key of the owner.
+   * @param {PublicKey} vaultAuthority - The public key of the vault authority.
    * @return {Promise<Transaction>} A promise that resolves to the transaction for creating a stake escrow.
    */
   public async createStakeEscrowByAuthority(
     maxAmount: BN,
-    owner: PublicKey
+    owner: PublicKey,
+    vaultAuthority: PublicKey
   ): Promise<Transaction> {
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
 
@@ -252,16 +430,55 @@ export class AlphaVault {
         pool: this.vault.pool,
         escrow,
         owner,
+        payer: vaultAuthority,
       })
       .instruction();
 
     const { blockhash, lastValidBlockHeight } =
       await this.program.provider.connection.getLatestBlockhash("confirmed");
+
     return new Transaction({
       blockhash,
       lastValidBlockHeight,
-      feePayer: owner,
+      feePayer: vaultAuthority,
     }).add(createStakeEscrowIx);
+  }
+
+  /**
+   * Creates a stake escrow account by vault authority. Only applicable with PermissionWithAuthority whitelist mode
+   *
+   * @param {BN} maxAmount - The maximum amount for the escrow.
+   * @param {PublicKey[]} owners - The public key of the owners.
+   * @param {PublicKey} vaultAuthority - The public key of the vault authority.
+   * @return {Promise<Transaction>} A promise that resolves to the transaction for creating a stake escrow.
+   */
+  public async createMultipleStakeEscrowByAuthorityInstructions(
+    walletDepositCap: WalletDepositCap[],
+    vaultAuthority: PublicKey
+  ): Promise<TransactionInstruction[]> {
+    return Promise.all(
+      walletDepositCap.map((individualCap) => {
+        const owner = individualCap.address;
+        const maxAmount = individualCap.maxAmount;
+
+        const [escrow] = deriveEscrow(
+          this.pubkey,
+          owner,
+          this.program.programId
+        );
+
+        return this.program.methods
+          .createPermissionedEscrowWithAuthority(maxAmount)
+          .accounts({
+            vault: this.pubkey,
+            pool: this.vault.pool,
+            escrow,
+            owner,
+            payer: vaultAuthority,
+          })
+          .instruction();
+      })
+    );
   }
 
   /**

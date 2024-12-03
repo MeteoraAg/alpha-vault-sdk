@@ -10,6 +10,36 @@ import * as Token from "@solana/spl-token";
 import { struct, u64, i64 } from "@coral-xyz/borsh";
 import BN from "bn.js";
 
+export async function createDummyMint(connection: Connection, payer: Keypair) {
+  console.log("Create mint");
+  const mintAInfo = await createTokenAndMint(
+    connection,
+    payer,
+    6,
+    100_000_000_000
+  );
+
+  return mintAInfo;
+}
+
+export function bpsToNumerator(bps: BN) {
+  // Default fee denominator is 100_000
+  return bps.mul(new BN(10));
+}
+
+export async function createDummyMints(connection: Connection, payer: Keypair) {
+  console.log("Creating mint A");
+  const mintAInfo = await createDummyMint(connection, payer);
+
+  console.log("Creating mint B");
+  const mintBInfo = await createDummyMint(connection, payer);
+
+  return {
+    mintAInfo,
+    mintBInfo,
+  };
+}
+
 export interface Clock {
   slot: BN;
   epochStartTimestamp: BN;

@@ -5,14 +5,14 @@ import {
   PublicKey,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { loadKeypairFromFile } from "../utils";
-import { AlphaVault } from "../../alpha-vault";
+import { loadKeypairFromFile } from "../../utils";
+import { AlphaVault } from "../../../alpha-vault";
 import BN from "bn.js";
 import dotenv from "dotenv";
 import Decimal from "decimal.js";
-import { deriveMerkleRootConfig } from "../../alpha-vault/helper";
+import { deriveMerkleRootConfig } from "../../../alpha-vault/helper";
 import { createMerkleTree, loadWhitelistWalletCsv } from "./utils";
-import { PROGRAM_ID } from "../../alpha-vault/constant";
+import { PROGRAM_ID } from "../../../alpha-vault/constant";
 
 dotenv.config();
 

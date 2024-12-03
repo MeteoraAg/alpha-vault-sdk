@@ -5,8 +5,8 @@ import {
   PublicKey,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { loadKeypairFromFile } from "../utils";
-import { AlphaVault } from "../../alpha-vault";
+import { loadKeypairFromFile } from "../../utils";
+import { AlphaVault } from "../../../alpha-vault";
 import dotenv from "dotenv";
 import { createMerkleTree, loadWhitelistWalletCsv } from "./utils";
 import { BN } from "bn.js";

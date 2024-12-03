@@ -1,6 +1,7 @@
 import { BN, IdlAccounts, Program } from "@coral-xyz/anchor";
 import { AlphaVault } from "./idl";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { WhitelistMode } from "./constant";
 
 export interface GetOrCreateATAResponse {
   ataPubKey: PublicKey;
@@ -22,6 +23,11 @@ export interface DepositInfo {
   totalReturned: BN;
 }
 
+export interface WalletDepositCap {
+  address: PublicKey;
+  maxAmount: BN;
+}
+
 export interface VaultParam {
   quoteMint: PublicKey;
   baseMint: PublicKey;
@@ -29,6 +35,33 @@ export interface VaultParam {
   poolType: PoolType;
   vaultMode: VaultMode;
   config: PublicKey;
+}
+
+export interface CustomizableFcfsVaultParams {
+  quoteMint: PublicKey;
+  baseMint: PublicKey;
+  poolAddress: PublicKey;
+  poolType: PoolType;
+  depositingPoint: BN;
+  startVestingPoint: BN;
+  endVestingPoint: BN;
+  maxDepositingCap: BN;
+  individualDepositingCap: BN;
+  escrowFee: BN;
+  whitelistMode: WhitelistMode;
+}
+
+export interface CustomizableProrataVaultParams {
+  quoteMint: PublicKey;
+  baseMint: PublicKey;
+  poolAddress: PublicKey;
+  poolType: PoolType;
+  depositingPoint: BN;
+  startVestingPoint: BN;
+  endVestingPoint: BN;
+  maxBuyingCap: BN;
+  escrowFee: BN;
+  whitelistMode: WhitelistMode;
 }
 
 export type AlphaVaultProgram = Program<AlphaVault>;
