@@ -31,6 +31,31 @@ export interface VaultParam {
   config: PublicKey;
 }
 
+export interface CustomizableFcfsVaultParams {
+  quoteMint: PublicKey;
+  baseMint: PublicKey;
+  poolAddress: PublicKey;
+  poolType: PoolType;
+  depositingPoint: BN;
+  startVestingPoint: BN;
+  endVestingPoint: BN;
+  maxDepositingCap: BN;
+  individualDepositingCap: BN;
+  escrowFee: BN;
+}
+
+export interface CustomizableProrataVaultParams {
+  quoteMint: PublicKey;
+  baseMint: PublicKey;
+  poolAddress: PublicKey;
+  poolType: PoolType;
+  depositingPoint: BN;
+  startVestingPoint: BN;
+  endVestingPoint: BN;
+  maxBuyingCap: BN;
+  escrowFee: BN;
+}
+
 export type AlphaVaultProgram = Program<AlphaVault>;
 
 export type Vault = IdlAccounts<AlphaVault>["vault"];
