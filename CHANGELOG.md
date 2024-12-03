@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added function `createMultipleStakeEscrowByAuthorityInstructions` to allow vault creator to create multiple stake escrow accounts in single transaction.
+- Added function `createCustomizableFcfsPermissionlessVault`, `createCustomizableFcfsPermissionedVaultWithMerkleProof`, `createCustomizableFcfsPermissionedVaultWithAuthorityFund` to create FCFS vault with customizable parameters
+- Added function `createCustomizableProrataPermissionlessVault`, `createCustomizableProrataPermissionedVaultWithMerkleProof`, `createCustomizableProrataPermissionedVaultWithAuthorityFund` to create prorata vault with customizable parameters
 
 ## @meteora-ag/alpha-vault [1.1.5] [PR #5](https://github.com/MeteoraAg/alpha-vault-sdk/pull/5)
 
