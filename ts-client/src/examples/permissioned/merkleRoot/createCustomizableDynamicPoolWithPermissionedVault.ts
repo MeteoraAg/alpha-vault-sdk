@@ -104,9 +104,9 @@ async function createCustomizableDynamicPoolWithPermissionedVault(
       individualDepositingCap,
       maxDepositingCap,
       escrowFee,
+      whitelistMode: PermissionWithMerkleProof,
     },
     creator,
-    PermissionWithMerkleProof,
     {
       cluster: "devnet",
     }

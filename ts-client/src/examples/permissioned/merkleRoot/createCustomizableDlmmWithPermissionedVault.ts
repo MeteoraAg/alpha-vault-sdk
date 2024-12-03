@@ -101,9 +101,9 @@ async function createCustomizableDlmmWithPermissionedVault(
       endVestingPoint,
       maxBuyingCap,
       escrowFee,
+      whitelistMode: PermissionWithMerkleProof,
     },
     creator,
-    PermissionWithMerkleProof,
     {
       cluster: "devnet",
     }

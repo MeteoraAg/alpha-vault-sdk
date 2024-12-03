@@ -104,9 +104,9 @@ async function createCustomizableDynamicPoolWithPermissionlessVault(
       individualDepositingCap,
       maxDepositingCap,
       escrowFee,
+      whitelistMode: Permissionless,
     },
     creator,
-    Permissionless,
     {
       cluster: "devnet",
     }

@@ -95,7 +95,6 @@ export class AlphaVault {
    * @param {Connection} connection - The Solana connection to use.
    * @param {CustomizableFcfsVaultParams} vaultParam - The parameters for creating the vault.
    * @param {PublicKey} owner - The owner of the vault.
-   * @param {WhitelistMode} whitelistMode - The whitelist mode for the vault. 0 = Permissionless, 1 = PermissionWithMerkleProof, 2 = PermissionWithAuthority
    * @param {Opt} [opt] - Optional configuration options.
    * @return {Promise<Transaction>} The transaction for creating the vault.
    */
@@ -103,7 +102,6 @@ export class AlphaVault {
     connection: Connection,
     vaultParam: CustomizableFcfsVaultParams,
     owner: PublicKey,
-    whitelistMode: WhitelistMode,
     opt?: Opt
   ) {
     const provider = new AnchorProvider(
@@ -129,6 +127,7 @@ export class AlphaVault {
       maxDepositingCap,
       individualDepositingCap,
       escrowFee,
+      whitelistMode,
     } = vaultParam;
 
     const [alphaVault] = deriveAlphaVault(
@@ -175,7 +174,6 @@ export class AlphaVault {
    * @param {Connection} connection - The Solana connection to use.
    * @param {CustomizableProrataVaultParams} vaultParam - The parameters for creating the vault.
    * @param {PublicKey} owner - The owner of the vault.
-   * @param {WhitelistMode} whitelistMode - The whitelist mode for the vault. 0 = Permissionless, 1 = PermissionWithMerkleProof, 2 = PermissionWithAuthority
    * @param {Opt} [opt] - Optional configuration options.
    * @return {Promise<Transaction>} The transaction for creating the vault.
    */
@@ -183,7 +181,6 @@ export class AlphaVault {
     connection: Connection,
     vaultParam: CustomizableProrataVaultParams,
     owner: PublicKey,
-    whitelistMode: WhitelistMode,
     opt?: Opt
   ) {
     const provider = new AnchorProvider(
@@ -207,6 +204,7 @@ export class AlphaVault {
       endVestingPoint,
       maxBuyingCap,
       escrowFee,
+      whitelistMode,
     } = vaultParam;
 
     const [alphaVault] = deriveAlphaVault(

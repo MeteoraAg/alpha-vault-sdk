@@ -1,6 +1,7 @@
 import { BN, IdlAccounts, Program } from "@coral-xyz/anchor";
 import { AlphaVault } from "./idl";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { WhitelistMode } from "./constant";
 
 export interface GetOrCreateATAResponse {
   ataPubKey: PublicKey;
@@ -47,6 +48,7 @@ export interface CustomizableFcfsVaultParams {
   maxDepositingCap: BN;
   individualDepositingCap: BN;
   escrowFee: BN;
+  whitelistMode: WhitelistMode;
 }
 
 export interface CustomizableProrataVaultParams {
@@ -59,6 +61,7 @@ export interface CustomizableProrataVaultParams {
   endVestingPoint: BN;
   maxBuyingCap: BN;
   escrowFee: BN;
+  whitelistMode: WhitelistMode;
 }
 
 export type AlphaVaultProgram = Program<AlphaVault>;

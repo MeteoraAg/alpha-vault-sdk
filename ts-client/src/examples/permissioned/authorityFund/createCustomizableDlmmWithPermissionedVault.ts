@@ -101,9 +101,9 @@ async function createCustomizableDlmmWithPermissionlessVault(
       endVestingPoint,
       maxBuyingCap,
       escrowFee,
+      whitelistMode: PermissionWithAuthority,
     },
     creator,
-    PermissionWithAuthority,
     {
       cluster: "devnet",
     }
