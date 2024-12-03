@@ -3,6 +3,7 @@ import DLMM, {
   deriveCustomizablePermissionlessLbPair,
   LBCLMM_PROGRAM_IDS,
 } from "@meteora-ag/dlmm";
+import { NATIVE_MINT } from "@solana/spl-token";
 import {
   clusterApiUrl,
   Connection,
@@ -14,13 +15,16 @@ import {
 } from "@solana/web3.js";
 import { BN } from "bn.js";
 import {
+  AlphaVault,
+  PermissionWithMerkleProof,
+  PoolType,
+} from "../../../alpha-vault";
+import {
   Clock,
   ClockLayout,
   createDummyMint,
   loadKeypairFromFile,
 } from "./../../utils";
-import { NATIVE_MINT } from "@solana/spl-token";
-import { AlphaVault, PoolType } from "../../../alpha-vault";
 
 async function createCustomizableDlmmWithPermissionedVault(
   connection: Connection,
@@ -85,25 +89,25 @@ async function createCustomizableDlmmWithPermissionedVault(
   const maxBuyingCap = new BN(100).mul(new BN(LAMPORTS_PER_SOL)); // 100 SOL buying cap
   const escrowFee = new BN(0); // 0 fee to create stake escrow account
 
-  const createAlphaVaultTx =
-    await AlphaVault.createCustomizableProrataPermissionedVaultWithMerkleProof(
-      connection,
-      {
-        quoteMint: dlmm.lbPair.tokenYMint,
-        baseMint: dlmm.lbPair.tokenXMint,
-        poolAddress: dlmm.pubkey,
-        poolType: PoolType.DLMM,
-        depositingPoint,
-        startVestingPoint,
-        endVestingPoint,
-        maxBuyingCap,
-        escrowFee,
-      },
-      creator,
-      {
-        cluster: "devnet",
-      }
-    );
+  const createAlphaVaultTx = await AlphaVault.createCustomizableProrataVault(
+    connection,
+    {
+      quoteMint: dlmm.lbPair.tokenYMint,
+      baseMint: dlmm.lbPair.tokenXMint,
+      poolAddress: dlmm.pubkey,
+      poolType: PoolType.DLMM,
+      depositingPoint,
+      startVestingPoint,
+      endVestingPoint,
+      maxBuyingCap,
+      escrowFee,
+    },
+    creator,
+    PermissionWithMerkleProof,
+    {
+      cluster: "devnet",
+    }
+  );
 
   console.log("Creating alpha vault");
   const alphaVaultTxHash = await sendAndConfirmTransaction(

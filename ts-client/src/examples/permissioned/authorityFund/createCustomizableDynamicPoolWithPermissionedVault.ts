@@ -1,3 +1,7 @@
+import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
+import { ActivationType } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
+import { deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import { NATIVE_MINT } from "@solana/spl-token";
 import {
   clusterApiUrl,
   Connection,
@@ -7,6 +11,13 @@ import {
   sendAndConfirmTransaction,
   SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
+import BN from "bn.js";
+import {
+  AlphaVault,
+  DYNAMIC_AMM_PROGRAM_ID,
+  PermissionWithAuthority,
+  PoolType,
+} from "../../../alpha-vault";
 import {
   bpsToNumerator,
   Clock,
@@ -14,16 +25,6 @@ import {
   createDummyMint,
   loadKeypairFromFile,
 } from "./../../utils";
-import { NATIVE_MINT } from "@solana/spl-token";
-import {
-  AlphaVault,
-  DYNAMIC_AMM_PROGRAM_ID,
-  PoolType,
-} from "../../../alpha-vault";
-import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
-import { ActivationType } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
-import { deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
-import BN from "bn.js";
 
 async function createCustomizableDynamicPoolWithPermissionedVault(
   connection: Connection,
@@ -90,26 +91,26 @@ async function createCustomizableDynamicPoolWithPermissionedVault(
   const individualDepositingCap = new BN(1).mul(new BN(LAMPORTS_PER_SOL)); // Each user max deposit 1 SOL
   const escrowFee = new BN(0); // 0 fee to create stake escrow account
 
-  const createAlphaVaultTx =
-    await AlphaVault.createCustomizableFcfsPermissionedVaultWithAuthorityFund(
-      connection,
-      {
-        quoteMint: amm.poolState.tokenBMint,
-        baseMint: amm.poolState.tokenAMint,
-        poolAddress: amm.address,
-        poolType: PoolType.DYNAMIC,
-        depositingPoint,
-        startVestingPoint,
-        endVestingPoint,
-        individualDepositingCap,
-        maxDepositingCap,
-        escrowFee,
-      },
-      creator,
-      {
-        cluster: "devnet",
-      }
-    );
+  const createAlphaVaultTx = await AlphaVault.createCustomizableFcfsVault(
+    connection,
+    {
+      quoteMint: amm.poolState.tokenBMint,
+      baseMint: amm.poolState.tokenAMint,
+      poolAddress: amm.address,
+      poolType: PoolType.DYNAMIC,
+      depositingPoint,
+      startVestingPoint,
+      endVestingPoint,
+      individualDepositingCap,
+      maxDepositingCap,
+      escrowFee,
+    },
+    creator,
+    PermissionWithAuthority,
+    {
+      cluster: "devnet",
+    }
+  );
 
   console.log("Creating alpha vault");
   const alphaVaultTxHash = await sendAndConfirmTransaction(

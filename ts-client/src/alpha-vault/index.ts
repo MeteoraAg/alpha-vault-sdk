@@ -90,52 +90,20 @@ export class AlphaVault {
   }
 
   /**
-   * Creates a customizable FCFS permissionless vault.
-   *
-   * @param {Connection} connection - The Solana connection to use.
-   * @param {CustomizableFcfsVaultParams} vaultParam - The parameters to create the vault with.
-   * @param {PublicKey} owner - The owner of the vault.
-   * @param {Opt} [opt] - Optional configuration options.
-   * @return {Promise<Transaction>} The transaction creating the vault.
-   */
-  public static async createCustomizableFcfsPermissionlessVault(
-    connection: Connection,
-    vaultParam: CustomizableFcfsVaultParams,
-    owner: PublicKey,
-    opt?: Opt
-  ) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
-    return AlphaVault.createCustomizableFcfsVault(
-      program,
-      vaultParam,
-      owner,
-      Permissionless
-    );
-  }
-
-  /**
-   * Creates a customizable FCFS permissioned vault using a Merkle proof. Vault created with this function will require merkle proof to be passed along when create stake escrow.
+   * Creates a customizable FCFS vault
    *
    * @param {Connection} connection - The Solana connection to use.
    * @param {CustomizableFcfsVaultParams} vaultParam - The parameters for creating the vault.
    * @param {PublicKey} owner - The owner of the vault.
+   * @param {WhitelistMode} whitelistMode - The whitelist mode for the vault. 0 = Permissionless, 1 = PermissionWithMerkleProof, 2 = PermissionWithAuthority
    * @param {Opt} [opt] - Optional configuration options.
    * @return {Promise<Transaction>} The transaction for creating the vault.
    */
-  public static async createCustomizableFcfsPermissionedVaultWithMerkleProof(
+  public static async createCustomizableFcfsVault(
     connection: Connection,
     vaultParam: CustomizableFcfsVaultParams,
     owner: PublicKey,
+    whitelistMode: WhitelistMode,
     opt?: Opt
   ) {
     const provider = new AnchorProvider(
@@ -143,67 +111,79 @@ export class AlphaVault {
       {} as any,
       AnchorProvider.defaultOptions()
     );
+
     const program = new Program(
       IDL,
       PROGRAM_ID[opt?.cluster || "mainnet-beta"],
       provider
     );
 
-    return AlphaVault.createCustomizableFcfsVault(
-      program,
-      vaultParam,
+    const {
+      poolAddress,
+      poolType,
+      baseMint,
+      quoteMint,
+      depositingPoint,
+      startVestingPoint,
+      endVestingPoint,
+      maxDepositingCap,
+      individualDepositingCap,
+      escrowFee,
+    } = vaultParam;
+
+    const [alphaVault] = deriveAlphaVault(
       owner,
-      PermissionWithMerkleProof
+      poolAddress,
+      program.programId
     );
+
+    const createTx = await program.methods
+      .initializeFcfsVault({
+        poolType,
+        baseMint,
+        quoteMint,
+        depositingPoint,
+        startVestingPoint,
+        endVestingPoint,
+        maxDepositingCap,
+        individualDepositingCap,
+        escrowFee,
+        whitelistMode,
+      })
+      .accounts({
+        base: owner,
+        vault: alphaVault,
+        pool: poolAddress,
+        funder: owner,
+        program: program.programId,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+
+    const { blockhash, lastValidBlockHeight } =
+      await program.provider.connection.getLatestBlockhash("confirmed");
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: owner,
+    }).add(createTx);
   }
 
   /**
-   * Creates a customizable FCFS permissioned vault. Vault created with this function will require vault creator to create stake escrow for each users.
-   *
-   * @param {Connection} connection - The Solana connection to use.
-   * @param {CustomizableFcfsVaultParams} vaultParam - The parameters for creating the vault.
-   * @param {PublicKey} owner - The owner of the vault.
-   * @param {Opt} [opt] - Optional configuration options.
-   * @return {Promise<Transaction>} The transaction for creating the vault.
-   */
-  public static async createCustomizableFcfsPermissionedVaultWithAuthorityFund(
-    connection: Connection,
-    vaultParam: CustomizableFcfsVaultParams,
-    owner: PublicKey,
-    opt?: Opt
-  ) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
-    return AlphaVault.createCustomizableFcfsVault(
-      program,
-      vaultParam,
-      owner,
-      PermissionWithAuthority
-    );
-  }
-
-  /**
-   * Creates a customizable Prorata permissionless vault.
+   * Creates a customizable Prorata vault.
    *
    * @param {Connection} connection - The Solana connection to use.
    * @param {CustomizableProrataVaultParams} vaultParam - The parameters for creating the vault.
    * @param {PublicKey} owner - The owner of the vault.
+   * @param {WhitelistMode} whitelistMode - The whitelist mode for the vault. 0 = Permissionless, 1 = PermissionWithMerkleProof, 2 = PermissionWithAuthority
    * @param {Opt} [opt] - Optional configuration options.
    * @return {Promise<Transaction>} The transaction for creating the vault.
    */
-  public static async createCustomizableProrataPermissionlessVault(
+  public static async createCustomizableProrataVault(
     connection: Connection,
     vaultParam: CustomizableProrataVaultParams,
     owner: PublicKey,
+    whitelistMode: WhitelistMode,
     opt?: Opt
   ) {
     const provider = new AnchorProvider(
@@ -217,80 +197,53 @@ export class AlphaVault {
       provider
     );
 
-    return AlphaVault.createCustomizableProrataVault(
-      program,
-      vaultParam,
+    const {
+      poolAddress,
+      poolType,
+      baseMint,
+      quoteMint,
+      depositingPoint,
+      startVestingPoint,
+      endVestingPoint,
+      maxBuyingCap,
+      escrowFee,
+    } = vaultParam;
+
+    const [alphaVault] = deriveAlphaVault(
       owner,
-      Permissionless
-    );
-  }
-
-  /**
-   * Creates a customizable Prorata permissioned vault. Vault created with this function will require merkle proof to be passed along when create stake escrow.
-   *
-   * @param {Connection} connection - The Solana connection to use.
-   * @param {CustomizableProrataVaultParams} vaultParam - The parameters for creating the vault.
-   * @param {PublicKey} owner - The owner of the vault.
-   * @param {Opt} [opt] - Optional configuration options.
-   * @return {Promise<Transaction>} The transaction for creating the vault.
-   */
-  public static async createCustomizableProrataPermissionedVaultWithMerkleProof(
-    connection: Connection,
-    vaultParam: CustomizableProrataVaultParams,
-    owner: PublicKey,
-    opt?: Opt
-  ) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
+      poolAddress,
+      program.programId
     );
 
-    return AlphaVault.createCustomizableProrataVault(
-      program,
-      vaultParam,
-      owner,
-      PermissionWithMerkleProof
-    );
-  }
+    const createTx = await program.methods
+      .initializeProrataVault({
+        poolType,
+        baseMint,
+        quoteMint,
+        depositingPoint,
+        startVestingPoint,
+        endVestingPoint,
+        maxBuyingCap,
+        escrowFee,
+        whitelistMode,
+      })
+      .accounts({
+        base: owner,
+        vault: alphaVault,
+        pool: poolAddress,
+        funder: owner,
+        program: program.programId,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
 
-  /**
-   * Creates a customizable Prorata permissioned vault. Vault created with this function will require vault creator to create stake escrow for each users.
-   *
-   * @param {Connection} connection - The Solana connection to use.
-   * @param {CustomizableFcfsVaultParams} vaultParam - The parameters for creating the vault.
-   * @param {PublicKey} owner - The owner of the vault.
-   * @param {Opt} [opt] - Optional configuration options.
-   * @return {Promise<Transaction>} The transaction for creating the vault.
-   */
-  public static async createCustomizableProrataPermissionedVaultWithAuthorityFund(
-    connection: Connection,
-    vaultParam: CustomizableProrataVaultParams,
-    owner: PublicKey,
-    opt?: Opt
-  ) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
-    return AlphaVault.createCustomizableProrataVault(
-      program,
-      vaultParam,
-      owner,
-      PermissionWithAuthority
-    );
+    const { blockhash, lastValidBlockHeight } =
+      await program.provider.connection.getLatestBlockhash("confirmed");
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: owner,
+    }).add(createTx);
   }
 
   /**
@@ -882,114 +835,6 @@ export class AlphaVault {
       totalFilled,
       totalReturned,
     };
-  }
-
-  private static async createCustomizableProrataVault(
-    program: AlphaVaultProgram,
-    {
-      quoteMint,
-      baseMint,
-      poolAddress,
-      poolType,
-      depositingPoint,
-      startVestingPoint,
-      endVestingPoint,
-      maxBuyingCap,
-      escrowFee,
-    }: CustomizableProrataVaultParams,
-    owner: PublicKey,
-    whitelistMode: WhitelistMode
-  ) {
-    const [alphaVault] = deriveAlphaVault(
-      owner,
-      poolAddress,
-      program.programId
-    );
-
-    const createTx = await program.methods
-      .initializeProrataVault({
-        poolType,
-        baseMint,
-        quoteMint,
-        depositingPoint,
-        startVestingPoint,
-        endVestingPoint,
-        maxBuyingCap,
-        escrowFee,
-        whitelistMode,
-      })
-      .accounts({
-        base: owner,
-        vault: alphaVault,
-        pool: poolAddress,
-        funder: owner,
-        program: program.programId,
-        systemProgram: SystemProgram.programId,
-      })
-      .transaction();
-
-    const { blockhash, lastValidBlockHeight } =
-      await program.provider.connection.getLatestBlockhash("confirmed");
-    return new Transaction({
-      blockhash,
-      lastValidBlockHeight,
-      feePayer: owner,
-    }).add(createTx);
-  }
-
-  private static async createCustomizableFcfsVault(
-    program: AlphaVaultProgram,
-    {
-      quoteMint,
-      baseMint,
-      poolAddress,
-      poolType,
-      depositingPoint,
-      startVestingPoint,
-      endVestingPoint,
-      maxDepositingCap,
-      individualDepositingCap,
-      escrowFee,
-    }: CustomizableFcfsVaultParams,
-    owner: PublicKey,
-    whitelistMode: WhitelistMode
-  ) {
-    const [alphaVault] = deriveAlphaVault(
-      owner,
-      poolAddress,
-      program.programId
-    );
-
-    const createTx = await program.methods
-      .initializeFcfsVault({
-        poolType,
-        baseMint,
-        quoteMint,
-        depositingPoint,
-        startVestingPoint,
-        endVestingPoint,
-        maxDepositingCap,
-        individualDepositingCap,
-        escrowFee,
-        whitelistMode,
-      })
-      .accounts({
-        base: owner,
-        vault: alphaVault,
-        pool: poolAddress,
-        funder: owner,
-        program: program.programId,
-        systemProgram: SystemProgram.programId,
-      })
-      .transaction();
-
-    const { blockhash, lastValidBlockHeight } =
-      await program.provider.connection.getLatestBlockhash("confirmed");
-    return new Transaction({
-      blockhash,
-      lastValidBlockHeight,
-      feePayer: owner,
-    }).add(createTx);
   }
 
   private static async createVault(

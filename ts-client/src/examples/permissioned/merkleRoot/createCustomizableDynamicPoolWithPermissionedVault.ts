@@ -18,6 +18,7 @@ import { NATIVE_MINT } from "@solana/spl-token";
 import {
   AlphaVault,
   DYNAMIC_AMM_PROGRAM_ID,
+  PermissionWithMerkleProof,
   PoolType,
 } from "../../../alpha-vault";
 import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
@@ -90,26 +91,26 @@ async function createCustomizableDynamicPoolWithPermissionedVault(
   const individualDepositingCap = new BN(1).mul(new BN(LAMPORTS_PER_SOL)); // Each user max deposit 1 SOL
   const escrowFee = new BN(0); // 0 fee to create stake escrow account
 
-  const createAlphaVaultTx =
-    await AlphaVault.createCustomizableFcfsPermissionedVaultWithMerkleProof(
-      connection,
-      {
-        quoteMint: amm.poolState.tokenBMint,
-        baseMint: amm.poolState.tokenAMint,
-        poolAddress: amm.address,
-        poolType: PoolType.DYNAMIC,
-        depositingPoint,
-        startVestingPoint,
-        endVestingPoint,
-        individualDepositingCap,
-        maxDepositingCap,
-        escrowFee,
-      },
-      creator,
-      {
-        cluster: "devnet",
-      }
-    );
+  const createAlphaVaultTx = await AlphaVault.createCustomizableFcfsVault(
+    connection,
+    {
+      quoteMint: amm.poolState.tokenBMint,
+      baseMint: amm.poolState.tokenAMint,
+      poolAddress: amm.address,
+      poolType: PoolType.DYNAMIC,
+      depositingPoint,
+      startVestingPoint,
+      endVestingPoint,
+      individualDepositingCap,
+      maxDepositingCap,
+      escrowFee,
+    },
+    creator,
+    PermissionWithMerkleProof,
+    {
+      cluster: "devnet",
+    }
+  );
 
   console.log("Creating alpha vault");
   const alphaVaultTxHash = await sendAndConfirmTransaction(
