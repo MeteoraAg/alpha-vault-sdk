@@ -22,6 +22,11 @@ export interface DepositInfo {
   totalReturned: BN;
 }
 
+export interface WalletDepositCap {
+  address: PublicKey;
+  maxAmount: BN;
+}
+
 export interface VaultParam {
   quoteMint: PublicKey;
   baseMint: PublicKey;

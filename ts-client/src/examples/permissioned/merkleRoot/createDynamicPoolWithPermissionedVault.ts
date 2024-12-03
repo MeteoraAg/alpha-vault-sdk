@@ -1,3 +1,6 @@
+import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
+import { derivePoolAddressWithConfig } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import { NATIVE_MINT } from "@solana/spl-token";
 import {
   clusterApiUrl,
   Connection,
@@ -6,43 +9,22 @@ import {
   sendAndConfirmTransaction,
   SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
-import AlphaVault, { DYNAMIC_AMM_PROGRAM_ID, PoolType, VaultMode } from "../..";
-import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
+import { BN } from "bn.js";
+import dotenv from "dotenv";
+import AlphaVault, {
+  DYNAMIC_AMM_PROGRAM_ID,
+  PoolType,
+  VaultMode,
+} from "../../..";
 import {
   ActivationType,
   Clock,
   ClockLayout,
-  createTokenAndMint,
+  createDummyMint,
   loadKeypairFromFile,
-} from "../utils";
-import dotenv from "dotenv";
-import { BN } from "bn.js";
-import { derivePoolAddressWithConfig } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+} from "../../utils";
 
 dotenv.config();
-
-async function createDummyMints(connection: Connection, payer: Keypair) {
-  console.log("Creating mint A");
-  const mintAInfo = await createTokenAndMint(
-    connection,
-    payer,
-    6,
-    100_000_000_000
-  );
-
-  console.log("Creating mint B");
-  const mintBInfo = await createTokenAndMint(
-    connection,
-    payer,
-    6,
-    100_000_000_000
-  );
-
-  return {
-    mintAInfo,
-    mintBInfo,
-  };
-}
 
 /**
  *
@@ -105,6 +87,7 @@ async function getPoolConfigByRequirement(
       account.activationType == activationType &&
       account.activationDuration.toNumber() >= maximumActivationDuration
     ) {
+      // @ts-ignore
       const vaultConfig = configs.find((c) =>
         c.publicKey.equals(account.vaultConfigKey)
       );
@@ -140,7 +123,7 @@ async function createDynamicPoolWithPermissionedVault(
   connection: Connection,
   payer: Keypair
 ) {
-  const { mintAInfo, mintBInfo } = await createDummyMints(connection, payer);
+  const mintAInfo = await createDummyMint(connection, payer);
 
   // Pool and vault requirement
   const maximumActivationDuration = 86400; // 1 day
@@ -181,9 +164,9 @@ async function createDynamicPoolWithPermissionedVault(
       connection,
       payer.publicKey,
       mintAInfo.mint,
-      mintBInfo.mint,
-      new BN(100_000_000),
-      new BN(100_000_000),
+      NATIVE_MINT,
+      new BN(100_000),
+      new BN(100_000),
       poolConfig.publicKey,
       {
         activationPoint,
@@ -198,7 +181,7 @@ async function createDynamicPoolWithPermissionedVault(
 
   const poolPubkey = derivePoolAddressWithConfig(
     mintAInfo.mint,
-    mintBInfo.mint,
+    NATIVE_MINT,
     poolConfig.publicKey,
     DYNAMIC_AMM_PROGRAM_ID
   );
@@ -211,7 +194,7 @@ async function createDynamicPoolWithPermissionedVault(
       connection,
       {
         baseMint: mintAInfo.mint,
-        quoteMint: mintBInfo.mint,
+        quoteMint: NATIVE_MINT,
         poolType: PoolType.DYNAMIC,
         vaultMode: VaultMode.PRORATA,
         poolAddress: poolPubkey,

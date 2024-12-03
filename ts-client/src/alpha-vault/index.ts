@@ -38,6 +38,7 @@ import {
   Vault,
   VaultMode,
   VaultParam,
+  WalletDepositCap,
 } from "./type";
 
 export * from "./constant";
@@ -461,11 +462,13 @@ export class AlphaVault {
    *
    * @param {BN} maxAmount - The maximum amount for the escrow.
    * @param {PublicKey} owner - The public key of the owner.
+   * @param {PublicKey} vaultAuthority - The public key of the vault authority.
    * @return {Promise<Transaction>} A promise that resolves to the transaction for creating a stake escrow.
    */
   public async createStakeEscrowByAuthority(
     maxAmount: BN,
-    owner: PublicKey
+    owner: PublicKey,
+    vaultAuthority: PublicKey
   ): Promise<Transaction> {
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
 
@@ -476,16 +479,55 @@ export class AlphaVault {
         pool: this.vault.pool,
         escrow,
         owner,
+        payer: vaultAuthority,
       })
       .instruction();
 
     const { blockhash, lastValidBlockHeight } =
       await this.program.provider.connection.getLatestBlockhash("confirmed");
+
     return new Transaction({
       blockhash,
       lastValidBlockHeight,
-      feePayer: owner,
+      feePayer: vaultAuthority,
     }).add(createStakeEscrowIx);
+  }
+
+  /**
+   * Creates a stake escrow account by vault authority. Only applicable with PermissionWithAuthority whitelist mode
+   *
+   * @param {BN} maxAmount - The maximum amount for the escrow.
+   * @param {PublicKey[]} owners - The public key of the owners.
+   * @param {PublicKey} vaultAuthority - The public key of the vault authority.
+   * @return {Promise<Transaction>} A promise that resolves to the transaction for creating a stake escrow.
+   */
+  public async createMultipleStakeEscrowByAuthorityInstructions(
+    walletDepositCap: WalletDepositCap[],
+    vaultAuthority: PublicKey
+  ): Promise<TransactionInstruction[]> {
+    return Promise.all(
+      walletDepositCap.map((individualCap) => {
+        const owner = individualCap.address;
+        const maxAmount = individualCap.maxAmount;
+
+        const [escrow] = deriveEscrow(
+          this.pubkey,
+          owner,
+          this.program.programId
+        );
+
+        return this.program.methods
+          .createPermissionedEscrowWithAuthority(maxAmount)
+          .accounts({
+            vault: this.pubkey,
+            pool: this.vault.pool,
+            escrow,
+            owner,
+            payer: vaultAuthority,
+          })
+          .instruction();
+      })
+    );
   }
 
   /**

@@ -1,3 +1,6 @@
+import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
+import { derivePoolAddressWithConfig } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import { NATIVE_MINT } from "@solana/spl-token";
 import {
   clusterApiUrl,
   Connection,
@@ -6,19 +9,20 @@ import {
   sendAndConfirmTransaction,
   SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
-import AlphaVault, { DYNAMIC_AMM_PROGRAM_ID, PoolType, VaultMode } from "..";
-import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
+import { BN } from "bn.js";
+import dotenv from "dotenv";
+import AlphaVault, {
+  DYNAMIC_AMM_PROGRAM_ID,
+  PoolType,
+  VaultMode,
+} from "../../..";
 import {
   ActivationType,
   Clock,
   ClockLayout,
-  createDummyMints,
-  createTokenAndMint,
+  createDummyMint,
   loadKeypairFromFile,
-} from "./utils";
-import dotenv from "dotenv";
-import { BN } from "bn.js";
-import { derivePoolAddressWithConfig } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+} from "../../utils";
 
 dotenv.config();
 
@@ -83,21 +87,18 @@ async function getPoolConfigByRequirement(
       account.activationType == activationType &&
       account.activationDuration.toNumber() >= maximumActivationDuration
     ) {
+      // @ts-ignore
       const vaultConfig = configs.find((c) =>
         c.publicKey.equals(account.vaultConfigKey)
       );
-
       if (!vaultConfig) {
         continue;
       }
-
       const startVestingDuration =
         vaultConfig.account.startVestingDuration.toNumber();
       const endVestingDuration =
         vaultConfig.account.endVestingDuration.toNumber();
-
       const vestingDuration = endVestingDuration - startVestingDuration;
-
       // 3.2 Vault activation type, lock and vesting duration matches
       if (
         startVestingDuration >= minimumLockDuration &&
@@ -114,11 +115,11 @@ async function getPoolConfigByRequirement(
   return null;
 }
 
-async function createDynamicPoolWithPermissionlessVault(
+async function createDynamicPoolWithPermissionedVault(
   connection: Connection,
   payer: Keypair
 ) {
-  const { mintAInfo, mintBInfo } = await createDummyMints(connection, payer);
+  const mintAInfo = await createDummyMint(connection, payer);
 
   // Pool and vault requirement
   const maximumActivationDuration = 86400; // 1 day
@@ -159,9 +160,9 @@ async function createDynamicPoolWithPermissionlessVault(
       connection,
       payer.publicKey,
       mintAInfo.mint,
-      mintBInfo.mint,
-      new BN(100_000_000),
-      new BN(100_000_000),
+      NATIVE_MINT,
+      new BN(100_000),
+      new BN(100_000),
       poolConfig.publicKey,
       {
         activationPoint,
@@ -176,7 +177,7 @@ async function createDynamicPoolWithPermissionlessVault(
 
   const poolPubkey = derivePoolAddressWithConfig(
     mintAInfo.mint,
-    mintBInfo.mint,
+    NATIVE_MINT,
     poolConfig.publicKey,
     DYNAMIC_AMM_PROGRAM_ID
   );
@@ -184,18 +185,19 @@ async function createDynamicPoolWithPermissionlessVault(
   console.log("Pool created", poolPubkey.toBase58());
 
   // 3. Create the alpha vault
-  const initPermissionlessVaultTx = await AlphaVault.createPermissionlessVault(
-    connection,
-    {
-      baseMint: mintAInfo.mint,
-      quoteMint: mintBInfo.mint,
-      poolType: PoolType.DYNAMIC,
-      vaultMode: VaultMode.PRORATA,
-      poolAddress: poolPubkey,
-      config: poolConfig.account.vaultConfigKey,
-    },
-    payer.publicKey
-  );
+  const initPermissionlessVaultTx =
+    await AlphaVault.createPermissionedVaultWithAuthorityFund(
+      connection,
+      {
+        baseMint: mintAInfo.mint,
+        quoteMint: NATIVE_MINT,
+        poolType: PoolType.DYNAMIC,
+        vaultMode: VaultMode.PRORATA,
+        poolAddress: poolPubkey,
+        config: poolConfig.account.vaultConfigKey,
+      },
+      payer.publicKey
+    );
 
   console.log("Creating vault");
   const txHash = await sendAndConfirmTransaction(
@@ -210,11 +212,11 @@ const connection = new Connection(clusterApiUrl("devnet"));
 const payer = loadKeypairFromFile(process.env.KEYPAIR_PATH);
 
 /**
- * This example shows how to create dynamic pool with permissionless vault
+ * This example shows how to create dynamic pool with permissioned vault
  * Please contact meteora team if the existing pool and vault config doesn't meet the requirement
- * Currently only dynamic pool support permissionless vault
+ * Currently only dynamic pool support permissioned vault
  */
-createDynamicPoolWithPermissionlessVault(connection, payer)
+createDynamicPoolWithPermissionedVault(connection, payer)
   .then(() => {
     console.log("Done");
   })

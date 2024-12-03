@@ -3,8 +3,8 @@ import Decimal from "decimal.js";
 import { parse } from "csv-parse";
 import path from "path";
 import fs from "fs";
-import { AlphaVault } from "../../alpha-vault";
-import { BalanceTree } from "../../alpha-vault/merkle_tree";
+import { AlphaVault } from "../../../alpha-vault";
+import { BalanceTree } from "../../../alpha-vault/merkle_tree";
 import { BN } from "bn.js";
 
 type WhitelistWallet = {
