@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix `@solana/web3.js` version to `^1.95.4`
 
+### Added
+
+- Added localhost AlphaVault Program ID
+
 ## @meteora-ag/alpha-vault [1.1.6] [PR #6](https://github.com/MeteoraAg/alpha-vault-sdk/pull/6)
 
 ### Fixed
