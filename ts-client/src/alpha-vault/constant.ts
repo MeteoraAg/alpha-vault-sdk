@@ -3,6 +3,7 @@ import { PublicKey } from "@solana/web3.js";
 export const PROGRAM_ID = Object.freeze({
   devnet: "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
   "mainnet-beta": "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
+  "localhost": "SNPmGgnywBvvrAKMLundzG6StojyHTHDLu7T4sdhP4k"
 });
 
 export const SEED = Object.freeze({
