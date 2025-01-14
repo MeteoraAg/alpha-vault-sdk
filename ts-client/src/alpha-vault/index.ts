@@ -47,7 +47,7 @@ export * from "./merkle_tree/";
 export * from "./type";
 
 type Opt = {
-  cluster: Cluster;
+  cluster: Cluster | "localhost";
 };
 
 export class AlphaVault {
@@ -56,7 +56,7 @@ export class AlphaVault {
     public pubkey: PublicKey,
     public vault: Vault,
     public mode: VaultMode
-  ) {}
+  ) { }
 
   /**
    * Creates an AlphaVault instance from a given vault address.
@@ -819,12 +819,12 @@ export class AlphaVault {
 
     const totalReturned =
       this.vault.vaultMode === VaultMode.PRORATA &&
-      this.vault.totalDeposit.gt(this.vault.maxBuyingCap)
+        this.vault.totalDeposit.gt(this.vault.maxBuyingCap)
         ? escrowAccount.totalDeposit.sub(
-            escrowAccount.totalDeposit
-              .mul(this.vault.maxBuyingCap)
-              .div(this.vault.totalDeposit)
-          )
+          escrowAccount.totalDeposit
+            .mul(this.vault.maxBuyingCap)
+            .div(this.vault.totalDeposit)
+        )
         : new BN(0);
     const totalFilled = escrowAccount.totalDeposit.sub(totalReturned);
 
