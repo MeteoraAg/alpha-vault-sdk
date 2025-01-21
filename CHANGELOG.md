@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## @meteora-ag/alpha-vault [1.1.8] [PR #8](https://github.com/MeteoraAg/alpha-vault-sdk/pull/8)
+
+### Fixed
+
+- Add localhost value to cluster
+
 ## @meteora-ag/alpha-vault [1.1.7] [PR #7](https://github.com/MeteoraAg/alpha-vault-sdk/pull/7)
 
 ### Fixed
