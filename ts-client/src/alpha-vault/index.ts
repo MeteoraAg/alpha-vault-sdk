@@ -817,15 +817,9 @@ export class AlphaVault {
       };
     }
 
-    const totalReturned =
-      this.vault.vaultMode === VaultMode.PRORATA &&
-        this.vault.totalDeposit.gt(this.vault.maxBuyingCap)
-        ? escrowAccount.totalDeposit.sub(
-          escrowAccount.totalDeposit
-            .mul(this.vault.maxBuyingCap)
-            .div(this.vault.totalDeposit)
-        )
-        : new BN(0);
+    const remainingAmount = this.vault.totalDeposit.sub(this.vault.swappedAmount);
+    const totalReturned = remainingAmount.mul(escrowAccount.totalDeposit).div(this.vault.totalDeposit);
+    
     const totalFilled = escrowAccount.totalDeposit.sub(totalReturned);
 
     return {
@@ -884,4 +878,54 @@ export class AlphaVault {
       feePayer: owner,
     }).add(createTx);
   }
+
+  /**
+   * Retrieves a list of all escrows by owner
+   *
+   * @param {Connection} connection - The Solana connection to use.
+   * @param {PublicKey} owner - The owner of escrows.
+   * @param {Opt} [opt] - Optional configuration options.
+   * @return {Promise<Esrow[]>} A promise containing a list of escrow
+   */
+  public static async getEscrowByOwner(
+    connection: Connection,
+    owner: PublicKey,
+    opt?: Opt
+  ) {
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+    const program = new Program(
+      IDL,
+      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
+      provider
+    );
+
+    return program.account.escrow.all([
+      {
+        memcmp: {
+          bytes: owner.toBase58(),
+          offset: 40,
+        },
+      },
+    ]);
+  }
+
+  public static async getVault(connection: Connection, vaultAddress: PublicKey, opt?: Opt) {
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+    const program = new Program(
+      IDL,
+      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
+      provider
+    );
+
+    return program.account.vault.fetch(vaultAddress);
+  }
+
 }
