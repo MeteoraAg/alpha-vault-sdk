@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-## alpha-vault [0.3.3]
+## alpha-vault [0.3.3] [PR #11](https://github.com/MeteoraAg/alpha-vault-sdk/pull/11)
 
 ### Added
 
@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `fill_dlmm` endpoint require `cranker`, `crank_fee_whitelist` and `crank_fee_receiver` parameter.
 - `fill_dynamic_amm` endpoint require `cranker`, `crank_fee_whitelist` and `crank_fee_receiver` parameter.
 
-## @meteora-ag/alpha-vault [1.1.10]
+## @meteora-ag/alpha-vault [1.1.10] [PR #11](https://github.com/MeteoraAg/alpha-vault-sdk/pull/11)
 
 ### Changed
 
