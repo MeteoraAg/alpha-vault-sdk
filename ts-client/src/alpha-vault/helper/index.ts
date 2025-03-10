@@ -252,6 +252,7 @@ export const fillDlmmTransaction = async (
       cranker: payer,
       crankFeeReceiver: crankFeeWhitelistAccount ? program.programId : ALPHA_VAULT_TREASURY_ID,
       crankFeeWhitelist: crankFeeWhitelistAccount ? crankFeeWhitelist : program.programId,
+      systemProgram: SystemProgram.programId,
     })
     .preInstructions(preInstructions)
     .remainingAccounts(
@@ -330,6 +331,7 @@ export const fillDynamicAmmTransaction = async (
       cranker: payer,
       crankFeeReceiver: crankFeeWhitelistAccount ? program.programId : ALPHA_VAULT_TREASURY_ID,
       crankFeeWhitelist: crankFeeWhitelistAccount ? crankFeeWhitelist : program.programId,
+      systemProgram: SystemProgram.programId
     })
     .preInstructions(preInstructions)
     .transaction();
