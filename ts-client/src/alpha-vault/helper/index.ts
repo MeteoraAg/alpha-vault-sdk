@@ -33,6 +33,19 @@ import { Transaction } from "@solana/web3.js";
 import DLMM, { DlmmSdkError, SwapQuote } from "@meteora-ag/dlmm";
 import BN from "bn.js";
 
+export function deriveCrankFeeWhitelist(
+  cranker: PublicKey,
+  programId: PublicKey
+) {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from(SEED.crankFeeWhitelist),
+      cranker.toBuffer()
+    ],
+    programId
+  );
+}
+
 export function deriveMerkleRootConfig(
   alphaVault: PublicKey,
   version: BN,
@@ -158,6 +171,9 @@ export const fillDlmmTransaction = async (
 ) => {
   const connection = program.provider.connection;
   const pair = await DLMM.create(connection, vault.pool);
+  
+  const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
+  const crankFeeWhitelistAccount = await connection.getAccountInfo(crankFeeWhitelist);
 
   // TODO: Estimate CU
   const preInstructions: TransactionInstruction[] = [
@@ -233,6 +249,9 @@ export const fillDlmmTransaction = async (
       tokenXProgram: TOKEN_PROGRAM_ID,
       tokenYProgram: TOKEN_PROGRAM_ID,
       dlmmEventAuthority,
+      cranker: payer,
+      crankFeeReceiver: crankFeeWhitelistAccount ? program.programId : ALPHA_VAULT_TREASURY_ID,
+      crankFeeWhitelist: crankFeeWhitelistAccount ? crankFeeWhitelist : program.programId,
     })
     .preInstructions(preInstructions)
     .remainingAccounts(
@@ -272,6 +291,9 @@ export const fillDynamicAmmTransaction = async (
   const connection = program.provider.connection;
   const pool = await DynamicAmm.create(connection, vault.pool);
 
+  const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
+  const crankFeeWhitelistAccount = await connection.getAccountInfo(crankFeeWhitelist);
+
   const preInstructions: TransactionInstruction[] = [];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
     await getOrCreateATAInstruction(
@@ -305,6 +327,9 @@ export const fillDynamicAmmTransaction = async (
       adminTokenFee,
       vaultProgram: VAULT_PROGRAM_ID,
       tokenProgram: TOKEN_PROGRAM_ID,
+      cranker: payer,
+      crankFeeReceiver: crankFeeWhitelistAccount ? program.programId : ALPHA_VAULT_TREASURY_ID,
+      crankFeeWhitelist: crankFeeWhitelistAccount ? crankFeeWhitelist : program.programId,
     })
     .preInstructions(preInstructions)
     .transaction();

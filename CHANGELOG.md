@@ -19,6 +19,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## alpha-vault [0.3.3]
+
+### Added
+
+- `create_crank_fee_whitelist` endpoint. Used to create crank fee whitelist account for cranker. Cranker with crank fee whitelist PDA do not need to pay for crank fee if they pass in the account when `fill_dlmm` or `fill_amm`
+- `close_crank_fee_whitelist` endpoint. Used to close crank fee whitelist account.
+
+### Changed
+
+- `fill_dlmm` endpoint require `cranker`, `crank_fee_whitelist` and `crank_fee_receiver` parameter.
+- `fill_dynamic_amm` endpoint require `cranker`, `crank_fee_whitelist` and `crank_fee_receiver` parameter.
+
+## @meteora-ag/alpha-vault [1.1.10]
+
+### Changed
+
+- `fillVault` will pass in `crank_fee_whitelist` account to bypass crank fee if cranker is whitelisted.
+
 ## @meteora-ag/alpha-vault [1.1.9] [PR #9](https://github.com/MeteoraAg/alpha-vault-sdk/pull/9)
 
 ### Fixed

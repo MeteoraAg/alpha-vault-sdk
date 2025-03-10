@@ -10,6 +10,7 @@ export const SEED = Object.freeze({
   escrow: "escrow",
   vault: "vault",
   merkleRoot: "merkle_root",
+  crankFeeWhitelist: "crank_fee_whitelist",
 });
 
 export const ALPHA_VAULT_TREASURY_ID = new PublicKey(

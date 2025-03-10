@@ -16,7 +16,7 @@ pub struct InitializeVaultWithProrataConfigCtx<'info> {
     #[account(
         init,
         seeds = [
-            b"vault".as_ref(),
+            VAULT,
             config.key().as_ref(),
             pool.key().as_ref(),
         ],

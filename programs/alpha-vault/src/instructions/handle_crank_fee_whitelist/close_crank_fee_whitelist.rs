@@ -1,12 +1,13 @@
 use crate::*;
 
+#[event_cpi]
 #[derive(Accounts)]
-pub struct CloseFcfsConfig<'info> {
+pub struct CloseCrankFeeWhitelistCtx<'info> {
     #[account(
         mut,
         close = rent_receiver
     )]
-    pub config: Account<'info, FcfsVaultConfig>,
+    pub crank_fee_whitelist: AccountLoader<'info, CrankFeeWhitelist>,
 
     #[account(
         mut,
@@ -19,6 +20,6 @@ pub struct CloseFcfsConfig<'info> {
     pub rent_receiver: UncheckedAccount<'info>,
 }
 
-pub fn handle_close_fcfs_config(_ctx: Context<CloseFcfsConfig>) -> Result<()> {
+pub fn handle_close_crank_fee_whitelist(_ctx: Context<CloseCrankFeeWhitelistCtx>) -> Result<()> {
     Ok(())
 }
