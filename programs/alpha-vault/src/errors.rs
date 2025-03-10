@@ -36,8 +36,6 @@ pub enum VaultError {
     #[msg("Max buying cap is zero")]
     MaxBuyingCapIsZero,
 
-    // #[msg("Max depositing cap is zero")]
-    // MaxDepositingCapIsZero,
     #[msg("Max amount is too small")]
     MaxAmountIsTooSmall,
 
@@ -115,4 +113,10 @@ pub enum VaultError {
 
     #[msg("Invalid whitelist wallet mode")]
     InvalidWhitelistWalletMode,
+
+    #[msg("Invalid crank fee whitelist")]
+    InvalidCrankFeeWhitelist,
+
+    #[msg("Missing fee receiver")]
+    MissingFeeReceiver,
 }

@@ -1,8 +1,5 @@
-use crate::assert_eq_admin;
+use crate::*;
 
-use crate::ProrataVaultConfig;
-use crate::VaultError;
-use anchor_lang::prelude::*;
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct ProrataConfigParameters {
     pub max_buying_cap: u64,
@@ -19,7 +16,7 @@ pub struct CreateProrataConfig<'info> {
     #[account(
         init,
         seeds = [
-            b"prorata_config".as_ref(),
+            PRORATA_CONFIG,
             config_parameters.index.to_le_bytes().as_ref()
         ],
         bump,

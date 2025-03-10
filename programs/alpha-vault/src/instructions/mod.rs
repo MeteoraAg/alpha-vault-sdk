@@ -27,3 +27,6 @@ pub use handle_fcfs_vault::*;
 
 pub mod create_merkle_root_config;
 pub use create_merkle_root_config::*;
+
+pub mod handle_crank_fee_whitelist;
+pub use handle_crank_fee_whitelist::*;

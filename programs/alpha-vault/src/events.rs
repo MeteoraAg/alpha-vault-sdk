@@ -116,3 +116,13 @@ pub struct EscrowClaimToken {
     pub amount: u64,
     pub vault_total_claimed_token: u64,
 }
+
+#[event]
+pub struct CrankFeeWhitelistCreated {
+    pub cranker: Pubkey,
+}
+
+#[event]
+pub struct CrankFeeWhitelistClosed {
+    pub cranker: Pubkey,
+}

@@ -1,6 +1,5 @@
-use anchor_spl::token_interface::Mint;
-
 use crate::*;
+use anchor_spl::token_interface::Mint;
 
 #[event_cpi]
 #[derive(Accounts)]
@@ -9,7 +8,7 @@ pub struct InitializeVaultWithFcfsConfigCtx<'info> {
     #[account(
         init,
         seeds = [
-            b"vault".as_ref(),
+            VAULT,
             config.key().as_ref(),
             pool.key().as_ref(),
         ],

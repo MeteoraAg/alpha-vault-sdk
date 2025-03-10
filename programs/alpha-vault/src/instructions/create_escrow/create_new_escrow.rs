@@ -12,7 +12,7 @@ pub struct CreateNewEscrowCtx<'info> {
     #[account(
         init,
         seeds = [
-            b"escrow".as_ref(),
+            ESCROW,
             vault.key().as_ref(),
             owner.key().as_ref(),
         ],

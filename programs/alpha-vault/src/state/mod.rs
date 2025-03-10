@@ -9,3 +9,6 @@ pub use vault_config::*;
 
 pub mod root_config;
 pub use root_config::*;
+
+pub mod crank_fee_whitelist;
+pub use crank_fee_whitelist::*;

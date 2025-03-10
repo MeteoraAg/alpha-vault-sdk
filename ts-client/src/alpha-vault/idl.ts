@@ -960,6 +960,28 @@ export type AlphaVault = {
           "isSigner": false
         },
         {
+          "name": "crankFeeWhitelist",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "crankFeeReceiver",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "cranker",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "eventAuthority",
           "isMut": false,
           "isSigner": false
@@ -1061,6 +1083,28 @@ export type AlphaVault = {
           "isSigner": false
         },
         {
+          "name": "crankFeeWhitelist",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "crankFeeReceiver",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "cranker",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "eventAuthority",
           "isMut": false,
           "isSigner": false
@@ -1077,9 +1121,97 @@ export type AlphaVault = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "createCrankFeeWhitelist",
+      "accounts": [
+        {
+          "name": "crankFeeWhitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "cranker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeCrankFeeWhitelist",
+      "accounts": [
+        {
+          "name": "crankFeeWhitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "rentReceiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
+    {
+      "name": "crankFeeWhitelist",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u128",
+                5
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "escrow",
       "type": {
@@ -2272,6 +2404,26 @@ export type AlphaVault = {
           "index": false
         }
       ]
+    },
+    {
+      "name": "CrankFeeWhitelistCreated",
+      "fields": [
+        {
+          "name": "cranker",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "CrankFeeWhitelistClosed",
+      "fields": [
+        {
+          "name": "cranker",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -2459,6 +2611,16 @@ export type AlphaVault = {
       "code": 6036,
       "name": "InvalidWhitelistWalletMode",
       "msg": "Invalid whitelist wallet mode"
+    },
+    {
+      "code": 6037,
+      "name": "InvalidCrankFeeWhitelist",
+      "msg": "Invalid crank fee whitelist"
+    },
+    {
+      "code": 6038,
+      "name": "MissingFeeReceiver",
+      "msg": "Missing fee receiver"
     }
   ]
 };
@@ -3425,6 +3587,28 @@ export const IDL: AlphaVault = {
           "isSigner": false
         },
         {
+          "name": "crankFeeWhitelist",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "crankFeeReceiver",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "cranker",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "eventAuthority",
           "isMut": false,
           "isSigner": false
@@ -3526,6 +3710,28 @@ export const IDL: AlphaVault = {
           "isSigner": false
         },
         {
+          "name": "crankFeeWhitelist",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "crankFeeReceiver",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "cranker",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "eventAuthority",
           "isMut": false,
           "isSigner": false
@@ -3542,9 +3748,97 @@ export const IDL: AlphaVault = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "createCrankFeeWhitelist",
+      "accounts": [
+        {
+          "name": "crankFeeWhitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "cranker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeCrankFeeWhitelist",
+      "accounts": [
+        {
+          "name": "crankFeeWhitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "rentReceiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
+    {
+      "name": "crankFeeWhitelist",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u128",
+                5
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "escrow",
       "type": {
@@ -4737,6 +5031,26 @@ export const IDL: AlphaVault = {
           "index": false
         }
       ]
+    },
+    {
+      "name": "CrankFeeWhitelistCreated",
+      "fields": [
+        {
+          "name": "cranker",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "CrankFeeWhitelistClosed",
+      "fields": [
+        {
+          "name": "cranker",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -4924,6 +5238,16 @@ export const IDL: AlphaVault = {
       "code": 6036,
       "name": "InvalidWhitelistWalletMode",
       "msg": "Invalid whitelist wallet mode"
+    },
+    {
+      "code": 6037,
+      "name": "InvalidCrankFeeWhitelist",
+      "msg": "Invalid crank fee whitelist"
+    },
+    {
+      "code": 6038,
+      "name": "MissingFeeReceiver",
+      "msg": "Missing fee receiver"
     }
   ]
 };
