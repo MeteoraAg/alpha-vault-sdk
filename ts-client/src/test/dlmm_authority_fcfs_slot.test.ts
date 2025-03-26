@@ -63,7 +63,7 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
     await Promise.all(
       [keypair, walletWithAuthority, walletWithoutAuthority].map(
         async (wallet) => {
-          await airDropSol(connection, wallet.publicKey, 10);
+          await airDropSol(connection, wallet.publicKey, 20);
         }
       )
     );
