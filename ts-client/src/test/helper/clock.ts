@@ -19,10 +19,10 @@ export interface VaultPoint {
 }
 
 export const DLMM_SLOT_DELAY = Object.freeze({
-  ACTIVATION: 24,
-  DEPOSITING: 12,
-  VESTING: 30,
-  END: 35,
+  ACTIVATION: 30,
+  DEPOSITING: 20,
+  VESTING: 40,
+  END: 50,
 });
 
 export const DAMM_SLOT_DELAY = Object.freeze({
