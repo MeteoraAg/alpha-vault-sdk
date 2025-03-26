@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsup",
     "start": "npm run build -- --watch",
-    "test": "jest src/test/damm_permissionless_prorata_slot.test.ts --runInBand"
+    "test": "jest src/test/*.test.ts --runInBand"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.22.5",
