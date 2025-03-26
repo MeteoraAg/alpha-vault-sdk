@@ -582,48 +582,30 @@ export class AlphaVault {
     escrow: Escrow | null,
     merkleProof?: DepositWithProofParams
   ) {
-    // FCFS will stop allow to deposit after maxDepositCap/individualDepositCap reached
-    const modeCap = (() => {
-      if (this.mode === VaultMode.FCFS) {
-        return BN.min(
-          this.vault.maxDepositingCap,
-          this.vault.individualDepositingCap
-        );
-      }
+    const deposited = escrow?.totalDeposit ?? new BN(0);
+    let personalCap: BN = new BN(Number.MAX_SAFE_INTEGER);
+    let vaultCap: BN = new BN(Number.MAX_SAFE_INTEGER);
 
-      return new BN(Number.MAX_SAFE_INTEGER);
-    })();
-
-    // Merkle proof cap
-    const merkleCap = (() => {
-      if (
-        this.vault.whitelistMode === WhitelistMode.PermissionWithMerkleProof
-      ) {
-        return merkleProof.maxCap;
-      }
-
-      return new BN(Number.MAX_SAFE_INTEGER);
-    })();
-
-    // Authority cap
-    const authorityCap = (() => {
-      if (this.vault.whitelistMode === WhitelistMode.PermissionWithAuthority) {
-        return escrow.maxCap;
-      }
-
-      return new BN(Number.MAX_SAFE_INTEGER);
-    })();
-
-    // compare 3 cap and return the smallest one
-    const vaultAvailableCap = BN.min(BN.min(modeCap, merkleCap), authorityCap);
-    if (!escrow) {
-      return vaultAvailableCap;
+    // Priority: Merkle/Authority > FCFS
+    if (this.mode === VaultMode.FCFS) {
+      personalCap = BN.min(
+        this.vault.maxDepositingCap,
+        this.vault.individualDepositingCap.sub(deposited)
+      );
+      vaultCap = this.vault.maxDepositingCap.sub(this.vault.totalDeposit);
     }
-    const personalAvailableCap = this.vault.individualDepositingCap.sub(
-      escrow.totalDeposit
-    );
 
-    return personalAvailableCap;
+    if (this.vault.whitelistMode === WhitelistMode.PermissionWithMerkleProof) {
+      personalCap = BN.min(vaultCap, merkleProof.maxCap.sub(deposited));
+    }
+
+    if (this.vault.whitelistMode === WhitelistMode.PermissionWithAuthority) {
+      if (escrow) {
+        personalCap = BN.min(vaultCap, escrow.maxCap.sub(deposited));
+      }
+    }
+
+    return personalCap;
   }
 
   public async interactionState(
@@ -688,6 +670,7 @@ export class AlphaVault {
       escrow,
       merkleProof
     );
+
     if (personalAvailableCap.lten(0)) {
       return false;
     }

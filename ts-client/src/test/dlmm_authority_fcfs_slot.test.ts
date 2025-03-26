@@ -38,6 +38,17 @@ const MAX_VAULT_BUYING_CAP = 10;
 const walletWithAuthority = new Keypair();
 const walletWithoutAuthority = new Keypair();
 
+const DEPOSIT_CAP_WALLETS = [
+  {
+    address: walletWithAuthority.publicKey,
+    maxAmount: getAmountInLamports(MAX_INDIVIDUAL_CAP, 9),
+  },
+  {
+    address: keypair.publicKey,
+    maxAmount: getAmountInLamports(OWNER_ESCROW_CAP, 9),
+  },
+];
+
 let BTC: PublicKey;
 let SOL: PublicKey;
 let vaultPoint: VaultPoint;
@@ -132,16 +143,7 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
   test("DEPOSITING", async () => {
     await waitForState(connection, alphaVault, VaultState.DEPOSITING);
 
-    await createEscrowForAuthority(alphaVault, [
-      {
-        address: walletWithAuthority.publicKey,
-        maxAmount: getAmountInLamports(MAX_INDIVIDUAL_CAP, 9),
-      },
-      {
-        address: keypair.publicKey,
-        maxAmount: getAmountInLamports(OWNER_ESCROW_CAP, 9),
-      },
-    ]);
+    await createEscrowForAuthority(alphaVault, DEPOSIT_CAP_WALLETS);
     [escrowWithAuthority, escrowWithoutAuthority, escrow] = await Promise.all(
       [walletWithAuthority, walletWithoutAuthority, keypair].map(
         async (wallet) => {
@@ -200,7 +202,7 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
     );
 
     const depositTx = await alphaVault.deposit(
-      getAmountInLamports(OWNER_ESCROW_CAP, 9),
+      getAmountInLamports(2, 9),
       keypair.publicKey
     );
     const depositTxHash = await sendAndConfirmTransaction(
@@ -224,20 +226,61 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
     );
     expect(escrowWithoutAuthority).toBeNull();
     expect(escrow.totalDeposit.toString()).toEqual(
+      getAmountInLamports(2, 9).toString()
+    );
+
+    const [
+      {
+        canDeposit: canWalletWithAuthorityDepositAfter,
+        canClaim: canWalletWithAuthorityClaimAfter,
+        canWithdraw: canWalletWithAuthorityWithdrawAfter,
+      },
+      {
+        canDeposit: canDepositAfter,
+        canClaim: canClaimAfter,
+        canWithdraw: canWithdrawAfter,
+      },
+    ] = await Promise.all(
+      [escrowWithAuthority, escrow].map(async (escrow) => {
+        return alphaVault.interactionState(escrow);
+      })
+    );
+    expect(canDepositAfter).toBe(true);
+    expect(canClaimAfter).toBe(false);
+    expect(canWithdrawAfter).toBe(false);
+
+    expect(canWalletWithAuthorityDepositAfter).toBe(false);
+    expect(canWalletWithAuthorityClaimAfter).toBe(false);
+    expect(canWalletWithAuthorityWithdrawAfter).toBe(false);
+
+    const personalQuota = await alphaVault.getAvailableDepositQuota(escrow);
+    expect(personalQuota.toString()).toEqual(
       getAmountInLamports(
-        MAX_VAULT_DEPOSIT_CAP - MAX_INDIVIDUAL_CAP,
+        MAX_VAULT_DEPOSIT_CAP - 2 - MAX_INDIVIDUAL_CAP,
         9
       ).toString()
     );
 
+    const nextDepositTx = await alphaVault.deposit(
+      personalQuota,
+      keypair.publicKey
+    );
+    const nextDepositTxHash = await sendAndConfirmTransaction(
+      connection,
+      nextDepositTx,
+      [keypair]
+    );
+    console.log("🚀 ~ nextDepositTxHash:", nextDepositTxHash);
+
+    escrow = await alphaVault.getEscrow(keypair.publicKey);
     const {
-      canDeposit: canDepositAfter,
-      canClaim: canClaimAfter,
-      canWithdraw: canWithdrawAfter,
+      canDeposit: canDepositAfterNext,
+      canClaim: canClaimAfterNext,
+      canWithdraw: canWithdrawAfterNext,
     } = await alphaVault.interactionState(escrow);
-    expect(canDepositAfter).toBe(false);
-    expect(canClaimAfter).toBe(false);
-    expect(canWithdrawAfter).toBe(false);
+    expect(canDepositAfterNext).toBe(false);
+    expect(canClaimAfterNext).toBe(false);
+    expect(canWithdrawAfterNext).toBe(false);
   });
 
   test("PURCHASING", async () => {

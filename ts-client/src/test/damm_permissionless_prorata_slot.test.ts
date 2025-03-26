@@ -35,9 +35,9 @@ let amm: AmmImpl;
 let alphaVault: AlphaVault;
 let escrow: Escrow;
 
-describe("DAMM, Permissionless, FCFS, SLOT", () => {
+describe("DAMM, Permissionless, PRORATA, SLOT", () => {
   beforeAll(async () => {
-    await airDropSol(connection, keypair.publicKey, 10);
+    await airDropSol(connection, keypair.publicKey, 20);
 
     const { baseToken, quoteToken } = await createBaseAndQuoteToken(
       connection,
@@ -72,7 +72,7 @@ describe("DAMM, Permissionless, FCFS, SLOT", () => {
           activationPoint: vaultPoint.activationPoint,
         },
         vault: {
-          vaultMode: VaultMode.FCFS,
+          vaultMode: VaultMode.PRORATA,
           whiteListMode: WhitelistMode.Permissionless,
           depositingPoint: vaultPoint.depositingPoint,
           startVestingPoint: vaultPoint.startVestingPoint,
@@ -119,7 +119,7 @@ describe("DAMM, Permissionless, FCFS, SLOT", () => {
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
 
-    const depositAmount = getAmountInLamports(1, 9);
+    const depositAmount = getAmountInLamports(MAX_VAULT_BUYING_CAP + 1, 9);
     const depositTx = await alphaVault.deposit(
       depositAmount,
       keypair.publicKey
@@ -134,7 +134,7 @@ describe("DAMM, Permissionless, FCFS, SLOT", () => {
     escrow = await alphaVault.getEscrow(keypair.publicKey);
 
     expect(escrow.totalDeposit.toString()).toEqual(
-      getAmountInLamports(MAX_INDIVIDUAL_CAP, 9).toString()
+      getAmountInLamports(MAX_VAULT_BUYING_CAP + 1, 9).toString()
     );
 
     const {
@@ -142,9 +142,9 @@ describe("DAMM, Permissionless, FCFS, SLOT", () => {
       canClaim: canClaimAfter,
       canWithdraw: canWithdrawAfter,
     } = await alphaVault.interactionState(escrow);
-    expect(canDepositAfter).toBe(false);
+    expect(canDepositAfter).toBe(true);
     expect(canClaimAfter).toBe(false);
-    expect(canWithdrawAfter).toBe(false);
+    expect(canWithdrawAfter).toBe(true);
   });
 
   test("PURCHASING", async () => {
@@ -170,7 +170,7 @@ describe("DAMM, Permissionless, FCFS, SLOT", () => {
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.LOCKING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(false);
+    expect(canWithdraw).toBe(true);
     expect(canClaim).toBe(false);
   });
 
@@ -181,7 +181,7 @@ describe("DAMM, Permissionless, FCFS, SLOT", () => {
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.VESTING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(false);
+    expect(canWithdraw).toBe(true);
     expect(canClaim).toBe(true);
   });
 
@@ -198,7 +198,7 @@ describe("DAMM, Permissionless, FCFS, SLOT", () => {
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.ENDED);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(false);
+    expect(canWithdraw).toBe(true);
     expect(canClaim).toBe(true);
   });
 });

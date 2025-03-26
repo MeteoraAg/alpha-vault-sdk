@@ -43,7 +43,7 @@ export const MINT_AMOUNT = 100_000_000;
 
 export const OWNER_ESCROW_CAP = 10;
 
-export const OWNER_MERKLE_DEPOSIT_CAP = 100;
+export const OWNER_MERKLE_DEPOSIT_CAP = 10;
 export const MERKLEONE_DEPOSIT_CAP = 1;
 
 export function getAmountInLamports(

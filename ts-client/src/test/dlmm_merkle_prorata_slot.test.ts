@@ -66,7 +66,7 @@ let merkle: DepositWithProofParams | null;
 let merkleOne: DepositWithProofParams | null;
 let merkleTwo: DepositWithProofParams | null;
 
-describe("DLMM, Merkle, FCFS, SLOT", () => {
+describe("DLMM, Merkle, PRORATA, SLOT", () => {
   beforeAll(async () => {
     await Promise.all(
       [keypair, merkleWalletOne, merkleWalletTwo].map(async (wallet) => {
@@ -108,7 +108,7 @@ describe("DLMM, Merkle, FCFS, SLOT", () => {
           initialPrice: SEEDING_CONFIG.currentPrice,
         },
         vault: {
-          vaultMode: VaultMode.FCFS,
+          vaultMode: VaultMode.PRORATA,
           whiteListMode: WhitelistMode.PermissionWithMerkleProof,
           depositingPoint: vaultPoint.depositingPoint,
           startVestingPoint: vaultPoint.startVestingPoint,
@@ -271,26 +271,19 @@ describe("DLMM, Merkle, FCFS, SLOT", () => {
     );
     expect(canDepositAfter).toBe(true);
     expect(canClaimAfter).toBe(false);
-    expect(canWithdrawAfter).toBe(false);
+    expect(canWithdrawAfter).toBe(true);
 
     expect(canMerkleOneDepositAfter).toBe(false);
-    expect(canMerkleOneWithdrawAfter).toBe(false);
+    expect(canMerkleOneWithdrawAfter).toBe(true);
     expect(canMerkleOneClaimAfter).toBe(false);
 
     expect(canMerkleTwoDepositAfter).toBe(false);
     expect(canMerkleTwoWithdrawAfter).toBe(false);
     expect(canMerkleTwoClaimAfter).toBe(false);
 
-    const personalQuota = alphaVault.getAvailableDepositQuota(escrow, merkle);
-    expect(personalQuota.toString()).toBe(
-      getAmountInLamports(
-        MAX_VAULT_DEPOSIT_CAP - 3 - MERKLEONE_DEPOSIT_CAP,
-        9
-      ).toString()
-    );
-
+    const nextDepositAmount = getAmountInLamports(7, 9);
     const nextDepositTx = await alphaVault.deposit(
-      personalQuota,
+      nextDepositAmount,
       keypair.publicKey,
       merkle
     );
@@ -309,7 +302,7 @@ describe("DLMM, Merkle, FCFS, SLOT", () => {
     } = await alphaVault.interactionState(escrow, merkle);
     expect(canDepositAfterNext).toBe(false);
     expect(canClaimAfterNext).toBe(false);
-    expect(canWithdrawAfterNext).toBe(false);
+    expect(canWithdrawAfterNext).toBe(true);
   });
 
   test("PURCHASING", async () => {
