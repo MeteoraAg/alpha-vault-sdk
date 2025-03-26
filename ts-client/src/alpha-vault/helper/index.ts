@@ -1,4 +1,5 @@
 import {
+  Cluster,
   ComputeBudgetProgram,
   Connection,
   PublicKey,
@@ -28,9 +29,13 @@ import {
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError,
 } from "@solana/spl-token";
-import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
+import DynamicAmm from "@meteora-ag/dynamic-amm-sdk";
 import { Transaction } from "@solana/web3.js";
-import DLMM, { DlmmSdkError, SwapQuote } from "@meteora-ag/dlmm";
+import DLMM, {
+  DlmmSdkError,
+  LBCLMM_PROGRAM_IDS,
+  SwapQuote,
+} from "@meteora-ag/dlmm";
 import BN from "bn.js";
 
 export function deriveMerkleRootConfig(
@@ -154,10 +159,14 @@ export const fillDlmmTransaction = async (
   program: AlphaVaultProgram,
   vaultKey: PublicKey,
   vault: Vault,
-  payer: PublicKey
+  payer: PublicKey,
+  opt?: { cluster: string }
 ) => {
   const connection = program.provider.connection;
-  const pair = await DLMM.create(connection, vault.pool);
+  const cluster = (opt?.cluster ?? "mainnet-beta") as Cluster;
+  const pair = await DLMM.create(connection, vault.pool, {
+    cluster,
+  });
 
   // TODO: Estimate CU
   const preInstructions: TransactionInstruction[] = [
@@ -209,9 +218,10 @@ export const fillDlmmTransaction = async (
 
   const { consumedInAmount, binArraysPubkey } = quoteResult;
 
+  const dlmmProgramId = new PublicKey(LBCLMM_PROGRAM_IDS[cluster]);
   const [dlmmEventAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("__event_authority")],
-    DLMM_PROGRAM_ID
+    dlmmProgramId
   );
 
   const fillDlmmTransaction = await program.methods
@@ -220,7 +230,7 @@ export const fillDlmmTransaction = async (
       vault: vaultKey,
       tokenVault: vault.tokenVault,
       tokenOutVault,
-      ammProgram: DLMM_PROGRAM_ID,
+      ammProgram: dlmmProgramId,
       pool: vault.pool,
       binArrayBitmapExtension: pair.binArrayBitmapExtension
         ? pair.binArrayBitmapExtension.publicKey
@@ -267,10 +277,13 @@ export const fillDynamicAmmTransaction = async (
   program: AlphaVaultProgram,
   vaultKey: PublicKey,
   vault: Vault,
-  payer: PublicKey
+  payer: PublicKey,
+  opt?: { cluster: string }
 ) => {
   const connection = program.provider.connection;
-  const pool = await DynamicAmm.create(connection, vault.pool);
+  const pool = await DynamicAmm.create(connection, vault.pool, {
+    cluster: (opt?.cluster ?? "mainnet-beta") as Cluster,
+  });
 
   const preInstructions: TransactionInstruction[] = [];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
@@ -287,7 +300,11 @@ export const fillDynamicAmmTransaction = async (
     : pool.poolState.protocolTokenAFee;
 
   const fillAmmTransaction = await program.methods
-    .fillDynamicAmm(vault.maxBuyingCap)
+    .fillDynamicAmm(
+      vault.vaultMode === VaultMode.FCFS
+        ? vault.maxDepositingCap
+        : vault.maxBuyingCap
+    )
     .accounts({
       vault: vaultKey,
       tokenVault: vault.tokenVault,
@@ -317,4 +334,16 @@ export const fillDynamicAmmTransaction = async (
     lastValidBlockHeight,
     feePayer: payer,
   }).add(fillAmmTransaction);
+};
+
+export const estimateSlotDate = (
+  enableSlot: number,
+  slotAverageTime: number,
+  slot: number
+) => {
+  const estimateDate = new Date(
+    Date.now() + (enableSlot - slot) * slotAverageTime
+  );
+
+  return estimateDate;
 };

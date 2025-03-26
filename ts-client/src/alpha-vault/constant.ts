@@ -3,7 +3,7 @@ import { PublicKey } from "@solana/web3.js";
 export const PROGRAM_ID = Object.freeze({
   devnet: "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
   "mainnet-beta": "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
-  "localhost": "SNPmGgnywBvvrAKMLundzG6StojyHTHDLu7T4sdhP4k"
+  localhost: "SNPmGgnywBvvrAKMLundzG6StojyHTHDLu7T4sdhP4k",
 });
 
 export const SEED = Object.freeze({
@@ -33,7 +33,25 @@ export const MERKLE_PROOF_API = Object.freeze({
   "mainnet-beta": "https://worker.meteora.ag/merkle-root-config-proof",
 });
 
-export type WhitelistMode = 0 | 1 | 2;
-export const Permissionless = 0;
-export const PermissionWithMerkleProof = 1;
-export const PermissionWithAuthority = 2;
+export enum WhitelistMode {
+  Permissionless,
+  PermissionWithMerkleProof,
+  PermissionWithAuthority,
+}
+
+export enum VaultState {
+  PREPARING,
+  DEPOSITING,
+  PURCHASING,
+  LOCKING,
+  VESTING,
+  ENDED,
+}
+
+export interface VaultPoint {
+  firstJoinPoint: number;
+  lastJoinPoint: number;
+  lastBuyingPoint: number;
+  startVestingPoint: number;
+  endVestingPoint: number;
+}

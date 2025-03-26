@@ -2,6 +2,7 @@ import { BN, IdlAccounts, Program } from "@coral-xyz/anchor";
 import { AlphaVault } from "./idl";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { WhitelistMode } from "./constant";
+import { i64, struct, u64 } from "@coral-xyz/borsh";
 
 export interface GetOrCreateATAResponse {
   ataPubKey: PublicKey;
@@ -84,4 +85,20 @@ export enum PoolType {
 export enum ActivationType {
   SLOT,
   TIMESTAMP,
+}
+
+export const ClockLayout = struct([
+  u64("slot"),
+  i64("epochStartTimestamp"),
+  u64("epoch"),
+  u64("leaderScheduleEpoch"),
+  i64("unixTimestamp"),
+]);
+
+export interface Clock {
+  slot: BN;
+  epochStartTimestamp?: BN;
+  epoch?: BN;
+  leaderScheduleEpoch?: BN;
+  unixTimestamp: BN;
 }
