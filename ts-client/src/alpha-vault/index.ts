@@ -31,6 +31,7 @@ import { IDL } from "./idl";
 import {
   ActivationType,
   AlphaVaultProgram,
+  ClaimInfo,
   Clock,
   ClockLayout,
   CustomizableFcfsVaultParams,
@@ -38,6 +39,7 @@ import {
   DepositInfo,
   DepositWithProofParams,
   Escrow,
+  InteractionState,
   PoolType,
   Vault,
   VaultMode,
@@ -134,6 +136,8 @@ export class AlphaVault {
       lastBuyingPoint >= currentPoint
     ) {
       vaultState = VaultState.PURCHASING;
+      if (this.mode === VaultMode.PRORATA) {
+      }
     } else if (
       lastBuyingPoint < currentPoint &&
       startVestingPoint > currentPoint
@@ -534,7 +538,15 @@ export class AlphaVault {
    * @returns The `getClaimInfo` function returns an object with three properties: `totalAllocated`,
    * `totalClaimed`, and `totalClaimable`.
    */
-  public getClaimInfo(escrowAccount: Escrow) {
+  public getClaimInfo(escrowAccount: Escrow | null): ClaimInfo {
+    if (!escrowAccount || this.vault.totalDeposit.lten(0)) {
+      return {
+        totalAllocated: new BN(0),
+        totalClaimed: new BN(0),
+        totalClaimable: new BN(0),
+      };
+    }
+
     const currentSlot = this.clock.slot.toNumber();
     const currentTimestamp = this.clock.unixTimestamp.toNumber();
     const totalAllocated = this.vault.boughtToken
@@ -583,48 +595,61 @@ export class AlphaVault {
     merkleProof?: DepositWithProofParams
   ) {
     const deposited = escrow?.totalDeposit ?? new BN(0);
-    let personalCap: BN = new BN(Number.MAX_SAFE_INTEGER);
-    let vaultCap: BN = new BN(Number.MAX_SAFE_INTEGER);
-
-    // Priority: Merkle/Authority > FCFS
+    let remainingQuota = new BN(Number.MAX_SAFE_INTEGER);
+    if (this.vault.whitelistMode == WhitelistMode.Permissionless) {
+      if (this.mode === VaultMode.FCFS) {
+        remainingQuota = this.vault.individualDepositingCap.sub(deposited);
+      }
+    } else if (
+      this.vault.whitelistMode == WhitelistMode.PermissionWithMerkleProof
+    ) {
+      remainingQuota = merkleProof
+        ? merkleProof.maxCap.sub(deposited)
+        : new BN(0);
+    } else if (
+      this.vault.whitelistMode == WhitelistMode.PermissionWithAuthority
+    ) {
+      remainingQuota = escrow ? escrow.maxCap.sub(deposited) : new BN(0);
+    }
+    let vaultCap = new BN(Number.MAX_SAFE_INTEGER);
     if (this.mode === VaultMode.FCFS) {
-      personalCap = BN.min(
-        this.vault.maxDepositingCap,
-        this.vault.individualDepositingCap.sub(deposited)
-      );
       vaultCap = this.vault.maxDepositingCap.sub(this.vault.totalDeposit);
     }
 
-    if (this.vault.whitelistMode === WhitelistMode.PermissionWithMerkleProof) {
-      personalCap = BN.min(vaultCap, merkleProof.maxCap.sub(deposited));
-    }
-
-    if (this.vault.whitelistMode === WhitelistMode.PermissionWithAuthority) {
-      if (escrow) {
-        personalCap = BN.min(vaultCap, escrow.maxCap.sub(deposited));
-      }
-    }
-
-    return personalCap;
+    return BN.min(remainingQuota, vaultCap);
   }
 
   public async interactionState(
     escrow: Escrow | null,
     merkleProof?: DepositWithProofParams | null,
     clock?: Clock
-  ) {
+  ): Promise<InteractionState> {
     await this.refreshState(clock);
+
+    const claimInfo = this.getClaimInfo(escrow);
+    const depositInfo = this.getDepositInfo(escrow);
+
+    const availableQuota = this.getAvailableDepositQuota(escrow, merkleProof);
     const isWhitelisted = this.isWhitelisted(escrow, merkleProof);
     const canClaim = this.canClaim(escrow);
+    const hadClaimed = escrow ? escrow.claimedToken.gtn(0) : false;
     const canDeposit = this.canDeposit(escrow, merkleProof);
+    const hadDeposited = escrow ? escrow.totalDeposit.gtn(0) : false;
     const canWithdraw = this.canWithdraw(escrow);
-    const hadWithdrawn = this.hadWithdrawn(escrow);
+    const canWithdrawRemainingQuota = this.canWithdrawRemainingQuota(escrow);
+    const hadWithdrawnRemainingQuota = this.hadWithdrawnRemainingQuota(escrow);
     return {
+      claimInfo,
+      depositInfo,
+      availableQuota,
       isWhitelisted,
       canClaim,
+      hadClaimed,
       canDeposit,
+      hadDeposited,
       canWithdraw,
-      hadWithdrawn,
+      canWithdrawRemainingQuota,
+      hadWithdrawnRemainingQuota,
     };
   }
 
@@ -643,10 +668,12 @@ export class AlphaVault {
   private canClaim(escrow: Escrow | null) {
     if (!escrow) return false;
 
+    // Can only claim after vesting point
     if (![VaultState.VESTING, VaultState.ENDED].includes(this.vaultState)) {
       return false;
     }
 
+    // Can only claim if there are token to claim
     const claimInfo = this.getClaimInfo(escrow);
     return claimInfo.totalClaimable.gtn(0);
   }
@@ -692,6 +719,14 @@ export class AlphaVault {
       return true;
     }
 
+    return false;
+  }
+
+  private canWithdrawRemainingQuota(escrow: Escrow | null) {
+    if (!escrow) return false;
+
+    const depositInfo = this.getDepositInfo(escrow);
+
     // if totalReturned > 0, regardless of crank working or not, user can withdraw
     if (depositInfo.totalReturned.gtn(0)) {
       const currentPoint =
@@ -701,7 +736,7 @@ export class AlphaVault {
 
       // make sure the user can withdraw after the pool is activated
       if (
-        this.vault.totalDeposit.gt(depositInfo.totalFilled) &&
+        this.vault.totalDeposit.gt(this.vault.swappedAmount) &&
         currentPoint >= this.vaultPoint.lastBuyingPoint
       ) {
         return true;
@@ -711,7 +746,7 @@ export class AlphaVault {
     return false;
   }
 
-  private hadWithdrawn(escrow: Escrow | null) {
+  private hadWithdrawnRemainingQuota(escrow: Escrow | null) {
     if (!escrow) return false;
 
     return escrow.refunded === 1;
@@ -1172,7 +1207,7 @@ export class AlphaVault {
    * @return {Promise<DepositInfo>} A promise that resolves to the deposit information, including total deposit, total filled, and total returned.
    */
   public getDepositInfo(escrowAccount: Escrow | null): DepositInfo {
-    if (!escrowAccount) {
+    if (!escrowAccount || this.vault.totalDeposit.isZero()) {
       return {
         totalDeposit: new BN(0),
         totalFilled: new BN(0),
@@ -1183,13 +1218,16 @@ export class AlphaVault {
     const remainingAmount = this.vault.totalDeposit.sub(
       this.vault.swappedAmount
     );
-    const totalReturned = this.vault.totalDeposit.isZero()
-      ? new BN(0)
-      : remainingAmount
+    const hasVaultSwapped = this.vault.swappedAmount.gtn(0);
+    const totalReturned = hasVaultSwapped
+      ? remainingAmount
           .mul(escrowAccount.totalDeposit)
-          .div(this.vault.totalDeposit);
+          .div(this.vault.totalDeposit)
+      : new BN(0);
 
-    const totalFilled = escrowAccount.totalDeposit.sub(totalReturned);
+    const totalFilled = hasVaultSwapped
+      ? escrowAccount.totalDeposit.sub(totalReturned)
+      : new BN(0);
 
     return {
       totalDeposit: escrowAccount.totalDeposit,

@@ -192,6 +192,8 @@ export const fillDlmmTransaction = async (
 
   const remainingInAmount = inAmountCap.sub(vault.swappedAmount);
 
+  if (remainingInAmount.lte(new BN(0))) return;
+
   const swapForY = pair.lbPair.tokenXMint.equals(vault.quoteMint);
 
   const binArrays = await pair.getBinArrayForSwap(swapForY, 3);
@@ -280,6 +282,8 @@ export const fillDynamicAmmTransaction = async (
   payer: PublicKey,
   opt?: { cluster: string }
 ) => {
+  if (vault.swappedAmount.eq(vault.totalDeposit)) return;
+
   const connection = program.provider.connection;
   const pool = await DynamicAmm.create(connection, vault.pool, {
     cluster: (opt?.cluster ?? "mainnet-beta") as Cluster,
@@ -300,11 +304,7 @@ export const fillDynamicAmmTransaction = async (
     : pool.poolState.protocolTokenAFee;
 
   const fillAmmTransaction = await program.methods
-    .fillDynamicAmm(
-      vault.vaultMode === VaultMode.FCFS
-        ? vault.maxDepositingCap
-        : vault.maxBuyingCap
-    )
+    .fillDynamicAmm(vault.totalDeposit)
     .accounts({
       vault: vaultKey,
       tokenVault: vault.tokenVault,
@@ -339,10 +339,10 @@ export const fillDynamicAmmTransaction = async (
 export const estimateSlotDate = (
   enableSlot: number,
   slotAverageTime: number,
-  slot: number
+  currentSlot: number
 ) => {
   const estimateDate = new Date(
-    Date.now() + (enableSlot - slot) * slotAverageTime
+    Date.now() + (enableSlot - currentSlot) * slotAverageTime
   );
 
   return estimateDate;

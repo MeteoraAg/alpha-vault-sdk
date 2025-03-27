@@ -132,11 +132,12 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
   });
 
   test("PREPARING", async () => {
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PREPARING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
     expect(canClaim).toBe(false);
   });
 
@@ -158,34 +159,43 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
         canDeposit: canWalletWithAuthorityDeposit,
         canClaim: canWalletWithAuthorityClaim,
         canWithdraw: canWalletWithAuthorityWithdraw,
+        canWithdrawRemainingQuota: canWalletWithAuthorityWithdrawRemainingQuota,
       },
       {
         canDeposit: canWalletWithoutAuthorityDeposit,
         canClaim: canWalletWithoutAuthorityClaim,
         canWithdraw: canWalletWithoutAuthorityWithdraw,
+        canWithdrawRemainingQuota:
+          canWalletWithoutAuthorityWithdrawRemainingQuota,
       },
-      { canDeposit: canDeposit, canClaim: canClaim, canWithdraw: canWithdraw },
+      {
+        canDeposit: canDeposit,
+        canClaim: canClaim,
+        canWithdraw: canWithdraw,
+        canWithdrawRemainingQuota,
+      },
     ] = await Promise.all(
       [escrowWithAuthority, escrowWithoutAuthority, escrow].map(
         async (escrow) => {
-          const { canDeposit, canClaim, canWithdraw } =
-            await alphaVault.interactionState(escrow);
-          return { canDeposit, canClaim, canWithdraw };
+          return alphaVault.interactionState(escrow);
         }
       )
     );
     expect(alphaVault.vaultState).toBe(VaultState.DEPOSITING);
     expect(canDeposit).toBe(true);
     expect(canWithdraw).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
     expect(canClaim).toBe(false);
 
     expect(canWalletWithAuthorityDeposit).toBe(true);
     expect(canWalletWithAuthorityClaim).toBe(false);
     expect(canWalletWithAuthorityWithdraw).toBe(false);
+    expect(canWalletWithAuthorityWithdrawRemainingQuota).toBe(false);
 
     expect(canWalletWithoutAuthorityDeposit).toBe(false);
     expect(canWalletWithoutAuthorityClaim).toBe(false);
     expect(canWalletWithoutAuthorityWithdraw).toBe(false);
+    expect(canWalletWithoutAuthorityWithdrawRemainingQuota).toBe(false);
 
     const walletWithAuthorityDepositTx = await alphaVault.deposit(
       getAmountInLamports(MAX_INDIVIDUAL_CAP, 9),
@@ -234,11 +244,14 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
         canDeposit: canWalletWithAuthorityDepositAfter,
         canClaim: canWalletWithAuthorityClaimAfter,
         canWithdraw: canWalletWithAuthorityWithdrawAfter,
+        canWithdrawRemainingQuota:
+          canWalletWithAuthorityWithdrawRemainingQuotaAfter,
       },
       {
         canDeposit: canDepositAfter,
         canClaim: canClaimAfter,
         canWithdraw: canWithdrawAfter,
+        canWithdrawRemainingQuota: canWithdrawRemainingQuotaAfter,
       },
     ] = await Promise.all(
       [escrowWithAuthority, escrow].map(async (escrow) => {
@@ -248,10 +261,12 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
     expect(canDepositAfter).toBe(true);
     expect(canClaimAfter).toBe(false);
     expect(canWithdrawAfter).toBe(false);
+    expect(canWithdrawRemainingQuotaAfter).toBe(false);
 
     expect(canWalletWithAuthorityDepositAfter).toBe(false);
     expect(canWalletWithAuthorityClaimAfter).toBe(false);
     expect(canWalletWithAuthorityWithdrawAfter).toBe(false);
+    expect(canWalletWithAuthorityWithdrawRemainingQuotaAfter).toBe(false);
 
     const personalQuota = await alphaVault.getAvailableDepositQuota(escrow);
     expect(personalQuota.toString()).toEqual(
@@ -277,10 +292,12 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
       canDeposit: canDepositAfterNext,
       canClaim: canClaimAfterNext,
       canWithdraw: canWithdrawAfterNext,
+      canWithdrawRemainingQuota: canWithdrawRemainingQuotaAfterNext,
     } = await alphaVault.interactionState(escrow);
     expect(canDepositAfterNext).toBe(false);
     expect(canClaimAfterNext).toBe(false);
     expect(canWithdrawAfterNext).toBe(false);
+    expect(canWithdrawRemainingQuotaAfterNext).toBe(false);
   });
 
   test("PURCHASING", async () => {
@@ -291,35 +308,38 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
       keypair,
     ]);
     console.log("🚀 ~ fillTxHash:", fillTxHash);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PURCHASING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
   });
 
   test("LOCKING", async () => {
     await waitForState(connection, alphaVault, VaultState.LOCKING);
 
     escrow = await alphaVault.getEscrow(keypair.publicKey);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.LOCKING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(true);
   });
 
   test("VESTING", async () => {
     await waitForState(connection, alphaVault, VaultState.VESTING);
 
     escrow = await alphaVault.getEscrow(keypair.publicKey);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.VESTING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(true);
     expect(canClaim).toBe(true);
   });
 
@@ -332,11 +352,12 @@ describe("DLMM, Authority, FCFS, SLOT", () => {
       expect(claimInfo.totalClaimable.toNumber()).toBeGreaterThan(0);
     }
 
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.ENDED);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(true);
     expect(canClaim).toBe(true);
   });
 });

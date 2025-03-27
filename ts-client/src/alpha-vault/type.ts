@@ -24,6 +24,29 @@ export interface DepositInfo {
   totalReturned: BN;
 }
 
+export interface ClaimInfo {
+  // Total allocated amount
+  totalAllocated: BN;
+  // Total claimed amount
+  totalClaimed: BN;
+  // Total claimable amount by vesting
+  totalClaimable: BN;
+}
+
+export interface InteractionState {
+  claimInfo: ClaimInfo;
+  depositInfo: DepositInfo;
+  availableQuota: BN;
+  isWhitelisted: boolean;
+  canClaim: boolean;
+  hadClaimed: boolean;
+  canDeposit: boolean;
+  hadDeposited: boolean;
+  canWithdraw: boolean;
+  canWithdrawRemainingQuota: boolean;
+  hadWithdrawnRemainingQuota: boolean;
+}
+
 export interface WalletDepositCap {
   address: PublicKey;
   maxAmount: BN;

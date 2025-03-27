@@ -48,6 +48,11 @@ export enum VaultState {
   ENDED,
 }
 
+// firstJoinPoint: the first point user can deposit
+// lastJoinPoint: the last point user can deposit
+// lastBuyingPoint: the last point vault can buy from the pool
+// startVestingPoint: the first point user can claim token
+// endVestingPoint: the point that vesting is ended
 export interface VaultPoint {
   firstJoinPoint: number;
   lastJoinPoint: number;

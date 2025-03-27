@@ -165,28 +165,31 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
   });
 
   test("PREPARING", async () => {
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PREPARING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
   });
 
   test("DEPOSITING", async () => {
     await waitForState(connection, alphaVault, VaultState.DEPOSITING);
 
     const [
-      { canDeposit, canClaim, canWithdraw },
+      { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota },
       {
         canDeposit: canMerkleOneDeposit,
         canClaim: canMerkleOneClaim,
         canWithdraw: canMerkleOneWithdraw,
+        canWithdrawRemainingQuota: canMerkleOneWithdrawRemainingQuota,
       },
       {
         canDeposit: canMerkleTwoDeposit,
         canClaim: canMerkleTwoClaim,
         canWithdraw: canMerkleTwoWithdraw,
+        canWithdrawRemainingQuota: canMerkleTwoWithdrawRemainingQuota,
       },
     ] = await Promise.all(
       [merkle, merkleOne, merkleTwo].map(async (merkle, index) => {
@@ -198,14 +201,17 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
     expect(canDeposit).toBe(true);
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
 
     expect(canMerkleOneDeposit).toBe(true);
     expect(canMerkleOneWithdraw).toBe(false);
     expect(canMerkleOneClaim).toBe(false);
+    expect(canMerkleOneWithdrawRemainingQuota).toBe(false);
 
     expect(canMerkleTwoDeposit).toBe(false);
     expect(canMerkleTwoWithdraw).toBe(false);
     expect(canMerkleTwoClaim).toBe(false);
+    expect(canMerkleTwoWithdrawRemainingQuota).toBe(false);
 
     const depositAmount = getAmountInLamports(3, 9);
     const depositTx = await alphaVault.deposit(
@@ -252,16 +258,19 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
         canDeposit: canDepositAfter,
         canClaim: canClaimAfter,
         canWithdraw: canWithdrawAfter,
+        canWithdrawRemainingQuota: canWithdrawRemainingQuotaAfter,
       },
       {
         canDeposit: canMerkleOneDepositAfter,
         canClaim: canMerkleOneClaimAfter,
         canWithdraw: canMerkleOneWithdrawAfter,
+        canWithdrawRemainingQuota: canMerkleOneWithdrawRemainingQuotaAfter,
       },
       {
         canDeposit: canMerkleTwoDepositAfter,
         canClaim: canMerkleTwoClaimAfter,
         canWithdraw: canMerkleTwoWithdrawAfter,
+        canWithdrawRemainingQuota: canMerkleTwoWithdrawRemainingQuotaAfter,
       },
     ] = await Promise.all(
       [merkle, merkleOne, merkleTwo].map(async (merkle, index) => {
@@ -272,14 +281,17 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
     expect(canDepositAfter).toBe(true);
     expect(canClaimAfter).toBe(false);
     expect(canWithdrawAfter).toBe(true);
+    expect(canWithdrawRemainingQuotaAfter).toBe(false);
 
     expect(canMerkleOneDepositAfter).toBe(false);
     expect(canMerkleOneWithdrawAfter).toBe(true);
     expect(canMerkleOneClaimAfter).toBe(false);
+    expect(canMerkleOneWithdrawRemainingQuotaAfter).toBe(false);
 
     expect(canMerkleTwoDepositAfter).toBe(false);
     expect(canMerkleTwoWithdrawAfter).toBe(false);
     expect(canMerkleTwoClaimAfter).toBe(false);
+    expect(canMerkleTwoWithdrawRemainingQuotaAfter).toBe(false);
 
     const nextDepositAmount = getAmountInLamports(7, 9);
     const nextDepositTx = await alphaVault.deposit(
@@ -299,21 +311,24 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
       canDeposit: canDepositAfterNext,
       canClaim: canClaimAfterNext,
       canWithdraw: canWithdrawAfterNext,
+      canWithdrawRemainingQuota: canWithdrawRemainingQuotaAfterNext,
     } = await alphaVault.interactionState(escrow, merkle);
     expect(canDepositAfterNext).toBe(false);
     expect(canClaimAfterNext).toBe(false);
     expect(canWithdrawAfterNext).toBe(true);
+    expect(canWithdrawRemainingQuotaAfterNext).toBe(false);
   });
 
   test("PURCHASING", async () => {
     await waitForState(connection, alphaVault, VaultState.PURCHASING);
 
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PURCHASING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
 
     const fillTx = await alphaVault.fillVault(keypair.publicKey);
     const fillTxHash = await sendAndConfirmTransaction(connection, fillTx, [
@@ -326,11 +341,12 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
     await waitForState(connection, alphaVault, VaultState.LOCKING);
 
     escrow = await alphaVault.getEscrow(keypair.publicKey);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.LOCKING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(true);
     expect(canClaim).toBe(false);
   });
 
@@ -338,11 +354,12 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
     await waitForState(connection, alphaVault, VaultState.VESTING);
 
     escrow = await alphaVault.getEscrow(keypair.publicKey);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.VESTING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(true);
     expect(canClaim).toBe(true);
   });
 
@@ -355,11 +372,12 @@ describe("DLMM, Merkle, PRORATA, SLOT", () => {
       expect(claimInfo.totalClaimable.toNumber()).toBeGreaterThan(0);
     }
 
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.ENDED);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(true);
     expect(canClaim).toBe(true);
   });
 });

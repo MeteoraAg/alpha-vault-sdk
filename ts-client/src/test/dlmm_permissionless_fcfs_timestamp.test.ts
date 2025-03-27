@@ -105,24 +105,26 @@ describe("DLMM, Permissionless, FCFS, TIMESTAMP", () => {
   });
 
   test("PREPARING", async () => {
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PREPARING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
   });
 
   test("DEPOSITING", async () => {
     await waitForState(connection, alphaVault, VaultState.DEPOSITING);
 
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
 
     expect(alphaVault.vaultState).toBe(VaultState.DEPOSITING);
     expect(canDeposit).toBe(true);
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
 
     const depositAmount = getAmountInLamports(1, 9);
     const depositTx = await alphaVault.deposit(
@@ -146,10 +148,12 @@ describe("DLMM, Permissionless, FCFS, TIMESTAMP", () => {
       canDeposit: canDepositAfter,
       canClaim: canClaimAfter,
       canWithdraw: canWithdrawAfter,
+      canWithdrawRemainingQuota: canWithdrawRemainingQuotaAfter,
     } = await alphaVault.interactionState(escrow);
     expect(canDepositAfter).toBe(false);
     expect(canClaimAfter).toBe(false);
     expect(canWithdrawAfter).toBe(false);
+    expect(canWithdrawRemainingQuotaAfter).toBe(false);
   });
 
   test("PURCHASING", async () => {
@@ -160,37 +164,40 @@ describe("DLMM, Permissionless, FCFS, TIMESTAMP", () => {
       keypair,
     ]);
     console.log("🚀 ~ fillTxHash:", fillTxHash);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PURCHASING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(false);
   });
 
   test("LOCKING", async () => {
     await waitForState(connection, alphaVault, VaultState.LOCKING);
 
     escrow = await alphaVault.getEscrow(keypair.publicKey);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.LOCKING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawRemainingQuota).toBe(true);
   });
 
   test("VESTING", async () => {
     await waitForState(connection, alphaVault, VaultState.VESTING);
 
     escrow = await alphaVault.getEscrow(keypair.publicKey);
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
 
     expect(alphaVault.vaultState).toBe(VaultState.VESTING);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(true);
+    expect(canWithdrawRemainingQuota).toBe(true);
   });
 
   test("VESTING_ENDED", async () => {
@@ -202,11 +209,12 @@ describe("DLMM, Permissionless, FCFS, TIMESTAMP", () => {
       expect(claimInfo.totalClaimable.toNumber()).toBeGreaterThan(0);
     }
 
-    const { canDeposit, canClaim, canWithdraw } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.ENDED);
     expect(canDeposit).toBe(false);
-    expect(canWithdraw).toBe(true);
+    expect(canWithdraw).toBe(false);
     expect(canClaim).toBe(true);
+    expect(canWithdrawRemainingQuota).toBe(true);
   });
 });
