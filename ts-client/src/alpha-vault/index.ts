@@ -700,7 +700,10 @@ export class AlphaVault {
           : this.clock.unixTimestamp.toNumber();
 
       // make sure the user can withdraw after the pool is activated
-      if (currentPoint >= this.activationPoint.toNumber()) {
+      if (
+        this.vault.totalDeposit.gt(depositInfo.totalFilled) &&
+        currentPoint >= this.vaultPoint.lastBuyingPoint
+      ) {
         return true;
       }
     }
