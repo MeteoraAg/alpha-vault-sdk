@@ -282,7 +282,12 @@ export const fillDynamicAmmTransaction = async (
   payer: PublicKey,
   opt?: { cluster: string }
 ) => {
-  if (vault.swappedAmount.eq(vault.totalDeposit)) return;
+  if (vault.vaultMode === VaultMode.PRORATA) {
+    if (vault.swappedAmount.eq(BN.min(vault.totalDeposit, vault.maxBuyingCap)))
+      return;
+  } else {
+    if (vault.swappedAmount.eq(vault.totalDeposit)) return;
+  }
 
   const connection = program.provider.connection;
   const pool = await DynamicAmm.create(connection, vault.pool, {

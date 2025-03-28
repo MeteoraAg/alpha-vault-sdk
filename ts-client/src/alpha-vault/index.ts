@@ -539,7 +539,11 @@ export class AlphaVault {
    * `totalClaimed`, and `totalClaimable`.
    */
   public getClaimInfo(escrowAccount: Escrow | null): ClaimInfo {
-    if (!escrowAccount || this.vault.totalDeposit.lten(0)) {
+    if (
+      !escrowAccount ||
+      this.vault.totalDeposit.lten(0) ||
+      this.vault.boughtToken.lten(0)
+    ) {
       return {
         totalAllocated: new BN(0),
         totalClaimed: new BN(0),
@@ -586,9 +590,9 @@ export class AlphaVault {
 
   /**
    * The available deposit quota of the vault based on user's deposit info
-   * @param {DepositInfo} depositInfo - The `depositInfo` object can obtain from the `getDepositInfo` function.
-   * @returns The `getAvailableDepositQuota` function returns the available deposit quota based on the
-   * provided `depositInfo` and the current state of the vault.
+   * @param {escrow} Escrow - The `depositInfo` object can obtain from the `getEscrow` function.
+   * @param {merkleProof} DepositWithProofParams - The `merkleProof` object can be obtain from API by our dev.
+   * @returns The `getAvailableDepositQuota` function returns the available deposit quota in lamports
    */
   public getAvailableDepositQuota(
     escrow: Escrow | null,
@@ -636,8 +640,8 @@ export class AlphaVault {
     const canDeposit = this.canDeposit(escrow, merkleProof);
     const hadDeposited = escrow ? escrow.totalDeposit.gtn(0) : false;
     const canWithdraw = this.canWithdraw(escrow);
-    const canWithdrawRemainingQuota = this.canWithdrawRemainingQuota(escrow);
-    const hadWithdrawnRemainingQuota = this.hadWithdrawnRemainingQuota(escrow);
+    const canWithdrawRemainingQuote = this.canWithdrawRemainingQuote(escrow);
+    const hadWithdrawnRemainingQuote = this.hadWithdrawnRemainingQuote(escrow);
     return {
       claimInfo,
       depositInfo,
@@ -648,8 +652,8 @@ export class AlphaVault {
       canDeposit,
       hadDeposited,
       canWithdraw,
-      canWithdrawRemainingQuota,
-      hadWithdrawnRemainingQuota,
+      canWithdrawRemainingQuote,
+      hadWithdrawnRemainingQuote,
     };
   }
 
@@ -705,14 +709,12 @@ export class AlphaVault {
     return true;
   }
 
-  private canWithdraw(escrow: Escrow | null) {
+  private canWithdraw(escrow: Escrow) {
     if (!escrow) return false;
-
-    const depositInfo = this.getDepositInfo(escrow);
 
     // Can withdraw after deposit in prorata mode
     if (
-      depositInfo.totalDeposit.gtn(0) &&
+      escrow.totalDeposit.gtn(0) &&
       this.mode === VaultMode.PRORATA &&
       this.vaultState === VaultState.DEPOSITING
     ) {
@@ -722,31 +724,26 @@ export class AlphaVault {
     return false;
   }
 
-  private canWithdrawRemainingQuota(escrow: Escrow | null) {
+  private canWithdrawRemainingQuote(escrow: Escrow | null) {
     if (!escrow) return false;
 
-    const depositInfo = this.getDepositInfo(escrow);
+    const currentPoint =
+      this.vault.activationType === ActivationType.SLOT
+        ? this.clock.slot.toNumber()
+        : this.clock.unixTimestamp.toNumber();
 
-    // if totalReturned > 0, regardless of crank working or not, user can withdraw
-    if (depositInfo.totalReturned.gtn(0)) {
-      const currentPoint =
-        this.vault.activationType === ActivationType.SLOT
-          ? this.clock.slot.toNumber()
-          : this.clock.unixTimestamp.toNumber();
-
-      // make sure the user can withdraw after the pool is activated
-      if (
-        this.vault.totalDeposit.gt(this.vault.swappedAmount) &&
-        currentPoint >= this.vaultPoint.lastBuyingPoint
-      ) {
-        return true;
-      }
+    // make sure the user can withdraw after the pool is activated
+    if (
+      this.vault.totalDeposit.gt(this.vault.swappedAmount) &&
+      currentPoint >= this.vaultPoint.lastBuyingPoint
+    ) {
+      return true;
     }
 
     return false;
   }
 
-  private hadWithdrawnRemainingQuota(escrow: Escrow | null) {
+  private hadWithdrawnRemainingQuote(escrow: Escrow | null) {
     if (!escrow) return false;
 
     return escrow.refunded === 1;
@@ -1218,14 +1215,20 @@ export class AlphaVault {
     const remainingAmount = this.vault.totalDeposit.sub(
       this.vault.swappedAmount
     );
-    const hasVaultSwapped = this.vault.swappedAmount.gtn(0);
-    const totalReturned = hasVaultSwapped
+
+    const hasCrankDurationFinished = [
+      VaultState.LOCKING,
+      VaultState.LOCKING,
+      VaultState.ENDED,
+    ].includes(this.vaultState);
+
+    const totalReturned = hasCrankDurationFinished
       ? remainingAmount
           .mul(escrowAccount.totalDeposit)
           .div(this.vault.totalDeposit)
       : new BN(0);
 
-    const totalFilled = hasVaultSwapped
+    const totalFilled = hasCrankDurationFinished
       ? escrowAccount.totalDeposit.sub(totalReturned)
       : new BN(0);
 

@@ -43,8 +43,8 @@ export interface InteractionState {
   canDeposit: boolean;
   hadDeposited: boolean;
   canWithdraw: boolean;
-  canWithdrawRemainingQuota: boolean;
-  hadWithdrawnRemainingQuota: boolean;
+  canWithdrawRemainingQuote: boolean;
+  hadWithdrawnRemainingQuote: boolean;
 }
 
 export interface WalletDepositCap {

@@ -101,24 +101,24 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
   });
 
   test("PREPARING", async () => {
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PREPARING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
-    expect(canWithdrawRemainingQuota).toBe(false);
+    expect(canWithdrawRemainingQuote).toBe(false);
     expect(canClaim).toBe(false);
   });
 
   test("DEPOSITING", async () => {
     await waitForState(connection, alphaVault, VaultState.DEPOSITING);
 
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.DEPOSITING);
     expect(canDeposit).toBe(true);
     expect(canWithdraw).toBe(false);
-    expect(canWithdrawRemainingQuota).toBe(false);
+    expect(canWithdrawRemainingQuote).toBe(false);
     expect(canClaim).toBe(false);
 
     const depositAmount = getAmountInLamports(MAX_VAULT_BUYING_CAP + 1, 9);
@@ -143,11 +143,11 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
       canDeposit: canDepositAfter,
       canClaim: canClaimAfter,
       canWithdraw: canWithdrawAfter,
-      canWithdrawRemainingQuota: canWithdrawRemainingQuotaAfter,
+      canWithdrawRemainingQuote: canWithdrawRemainingQuoteAfter,
     } = await alphaVault.interactionState(escrow);
     expect(canDepositAfter).toBe(true);
     expect(canClaimAfter).toBe(false);
-    expect(canWithdrawRemainingQuotaAfter).toBe(false);
+    expect(canWithdrawRemainingQuoteAfter).toBe(false);
     expect(canWithdrawAfter).toBe(true);
   });
 
@@ -159,36 +159,36 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
       keypair,
     ]);
     console.log("🚀 ~ fillTxHash:", fillTxHash);
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PURCHASING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
-    expect(canWithdrawRemainingQuota).toBe(false);
+    expect(canWithdrawRemainingQuote).toBe(false);
     expect(canClaim).toBe(false);
   });
 
   test("LOCKING", async () => {
     await waitForState(connection, alphaVault, VaultState.LOCKING);
 
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.LOCKING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
-    expect(canWithdrawRemainingQuota).toBe(true);
+    expect(canWithdrawRemainingQuote).toBe(true);
     expect(canClaim).toBe(false);
   });
 
   test("VESTING", async () => {
     await waitForState(connection, alphaVault, VaultState.VESTING);
 
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.VESTING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
-    expect(canWithdrawRemainingQuota).toBe(true);
+    expect(canWithdrawRemainingQuote).toBe(true);
     expect(canClaim).toBe(true);
   });
 
@@ -201,12 +201,12 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
       expect(claimInfo.totalClaimable.toNumber()).toBeGreaterThan(0);
     }
 
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuota } =
+    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
       await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.ENDED);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
-    expect(canWithdrawRemainingQuota).toBe(true);
+    expect(canWithdrawRemainingQuote).toBe(true);
     expect(canClaim).toBe(true);
   });
 });
