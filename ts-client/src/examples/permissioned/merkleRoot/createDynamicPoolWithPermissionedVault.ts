@@ -1,5 +1,4 @@
-import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
-import { derivePoolAddressWithConfig } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import DynamicAmm from "@meteora-ag/dynamic-amm-sdk";
 import { NATIVE_MINT } from "@solana/spl-token";
 import {
   clusterApiUrl,
@@ -23,6 +22,7 @@ import {
   createDummyMint,
   loadKeypairFromFile,
 } from "../../utils";
+import { derivePoolAddressWithConfig } from "@meteora-ag/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 
 dotenv.config();
 
