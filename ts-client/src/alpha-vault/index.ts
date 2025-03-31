@@ -709,7 +709,7 @@ export class AlphaVault {
     return true;
   }
 
-  private canWithdraw(escrow: Escrow) {
+  private canWithdraw(escrow: Escrow | null) {
     if (!escrow) return false;
 
     // Can withdraw after deposit in prorata mode
@@ -732,10 +732,10 @@ export class AlphaVault {
         ? this.clock.slot.toNumber()
         : this.clock.unixTimestamp.toNumber();
 
-    // make sure the user can withdraw after the pool is activated
+    // make sure the user can withdraw after alpha-vault has done purchasing process
     if (
       this.vault.totalDeposit.gt(this.vault.swappedAmount) &&
-      currentPoint >= this.vaultPoint.lastBuyingPoint
+      currentPoint > this.vaultPoint.lastBuyingPoint
     ) {
       return true;
     }
@@ -1218,7 +1218,7 @@ export class AlphaVault {
 
     const hasCrankDurationFinished = [
       VaultState.LOCKING,
-      VaultState.LOCKING,
+      VaultState.VESTING,
       VaultState.ENDED,
     ].includes(this.vaultState);
 
