@@ -1001,6 +1001,18 @@ export class AlphaVault {
       );
     createDestinationTokenIx && preInstructions.push(createDestinationTokenIx);
 
+    const postInstructions: TransactionInstruction[] = [];
+    if (this.vault.quoteMint.equals(NATIVE_MINT)) {
+      preInstructions.push(
+        ...wrapSOLInstruction(
+          owner,
+          destinationToken,
+          BigInt(amount.toString())
+        )
+      );
+      postInstructions.push(unwrapSOLInstruction(owner));
+    }
+
     const withdrawTx = await this.program.methods
       .withdraw(amount)
       .accounts({
