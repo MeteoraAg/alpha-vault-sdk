@@ -12,7 +12,7 @@ type WhitelistWallet = {
   deposit_cap: String;
 };
 
-type ParsedWhitelistWallet = {
+export type ParsedWhitelistWallet = {
   wallet: PublicKey;
   depositCap: Decimal;
 };
