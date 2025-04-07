@@ -20,7 +20,7 @@ pub struct InitializeFcfsVaultCtx<'info> {
     #[account(
         init,
         seeds = [
-            b"vault".as_ref(),
+            VAULT,
             base.key().as_ref(),
             pool.key().as_ref(),
         ],

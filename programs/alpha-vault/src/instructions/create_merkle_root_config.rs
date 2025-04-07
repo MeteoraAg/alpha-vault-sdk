@@ -17,7 +17,7 @@ pub struct CreateMerkleRootConfigCtx<'info> {
     #[account(
         init,
         seeds = [
-            b"merkle_root".as_ref(),
+            MERKLE_ROOT,
             vault.key().as_ref(),
             params.version.to_le_bytes().as_ref()
         ],
