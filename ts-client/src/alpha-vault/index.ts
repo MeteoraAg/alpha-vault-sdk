@@ -175,11 +175,8 @@ export class AlphaVault {
       {} as any,
       AnchorProvider.defaultOptions()
     );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
+    const cluster = opt?.cluster || "mainnet-beta";
+    const program = new Program(IDL, PROGRAM_ID[cluster], provider);
 
     const accountsToFetch = [vaultAddress, SYSVAR_CLOCK_PUBKEY];
     const [vaultAccountBuffer, clockAccountBuffer] =
@@ -193,7 +190,7 @@ export class AlphaVault {
     if (vault.poolType === PoolType.DLMM) {
       const dlmmProgram = new Program(
         DlmmIdl,
-        LBCLMM_PROGRAM_IDS[opt.cluster],
+        LBCLMM_PROGRAM_IDS[cluster],
         provider
       );
       const pool = (await dlmmProgram.account.lbPair.fetch(
