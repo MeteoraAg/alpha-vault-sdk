@@ -1,20 +1,14 @@
-/**
- * Program IDL in camelCase format in order to be used in JS/TS.
- *
- * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/alpha_vault.json`.
- */
-export type AlphaVault = {
+{
   "address": "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
   "metadata": {
-    "name": "alphaVault",
+    "name": "alpha_vault",
     "version": "0.4.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
   },
   "instructions": [
     {
-      "name": "claimToken",
+      "name": "claim_token",
       "discriminator": [
         116,
         206,
@@ -38,21 +32,21 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "tokenOutVault",
+          "name": "token_out_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "destinationToken",
+          "name": "destination_token",
           "writable": true
         },
         {
-          "name": "tokenMint"
+          "name": "token_mint"
         },
         {
-          "name": "tokenProgram"
+          "name": "token_program"
         },
         {
           "name": "owner",
@@ -62,7 +56,7 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -97,7 +91,7 @@ export type AlphaVault = {
       "args": []
     },
     {
-      "name": "closeCrankFeeWhitelist",
+      "name": "close_crank_fee_whitelist",
       "discriminator": [
         189,
         166,
@@ -110,7 +104,7 @@ export type AlphaVault = {
       ],
       "accounts": [
         {
-          "name": "crankFeeWhitelist",
+          "name": "crank_fee_whitelist",
           "writable": true
         },
         {
@@ -119,11 +113,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "rentReceiver",
+          "name": "rent_receiver",
           "writable": true
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -158,7 +152,7 @@ export type AlphaVault = {
       "args": []
     },
     {
-      "name": "closeEscrow",
+      "name": "close_escrow",
       "discriminator": [
         139,
         171,
@@ -189,11 +183,11 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "rentReceiver",
+          "name": "rent_receiver",
           "writable": true
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -228,7 +222,7 @@ export type AlphaVault = {
       "args": []
     },
     {
-      "name": "closeFcfsConfig",
+      "name": "close_fcfs_config",
       "discriminator": [
         48,
         178,
@@ -250,14 +244,14 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "rentReceiver",
+          "name": "rent_receiver",
           "writable": true
         }
       ],
       "args": []
     },
     {
-      "name": "closeProrataConfig",
+      "name": "close_prorata_config",
       "discriminator": [
         84,
         140,
@@ -279,14 +273,14 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "rentReceiver",
+          "name": "rent_receiver",
           "writable": true
         }
       ],
       "args": []
     },
     {
-      "name": "createCrankFeeWhitelist",
+      "name": "create_crank_fee_whitelist",
       "discriminator": [
         120,
         91,
@@ -299,7 +293,7 @@ export type AlphaVault = {
       ],
       "accounts": [
         {
-          "name": "crankFeeWhitelist",
+          "name": "crank_fee_whitelist",
           "writable": true,
           "pda": {
             "seeds": [
@@ -343,11 +337,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -382,7 +376,7 @@ export type AlphaVault = {
       "args": []
     },
     {
-      "name": "createFcfsConfig",
+      "name": "create_fcfs_config",
       "discriminator": [
         7,
         255,
@@ -428,23 +422,23 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "configParameters",
+          "name": "config_parameters",
           "type": {
             "defined": {
-              "name": "fcfsConfigParameters"
+              "name": "FcfsConfigParameters"
             }
           }
         }
       ]
     },
     {
-      "name": "createMerkleRootConfig",
+      "name": "create_merkle_root_config",
       "discriminator": [
         55,
         243,
@@ -460,7 +454,7 @@ export type AlphaVault = {
           "name": "vault"
         },
         {
-          "name": "merkleRootConfig",
+          "name": "merkle_root_config",
           "writable": true,
           "pda": {
             "seeds": [
@@ -497,11 +491,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -538,14 +532,14 @@ export type AlphaVault = {
           "name": "params",
           "type": {
             "defined": {
-              "name": "createMerkleRootConfigParams"
+              "name": "CreateMerkleRootConfigParams"
             }
           }
         }
       ]
     },
     {
-      "name": "createNewEscrow",
+      "name": "create_new_escrow",
       "discriminator": [
         60,
         154,
@@ -603,17 +597,17 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "escrowFeeReceiver",
+          "name": "escrow_fee_receiver",
           "writable": true,
           "optional": true,
           "address": "BJQbRiRWhJCyTYZcAuAL3ngDCx3AyFQGKDq8zhiZAKUw"
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -648,7 +642,7 @@ export type AlphaVault = {
       "args": []
     },
     {
-      "name": "createPermissionedEscrow",
+      "name": "create_permissioned_escrow",
       "discriminator": [
         60,
         166,
@@ -664,7 +658,7 @@ export type AlphaVault = {
           "name": "vault",
           "writable": true,
           "relations": [
-            "merkleRootConfig"
+            "merkle_root_config"
           ]
         },
         {
@@ -704,9 +698,9 @@ export type AlphaVault = {
           "name": "owner"
         },
         {
-          "name": "merkleRootConfig",
+          "name": "merkle_root_config",
           "docs": [
-            "merkleRootConfig"
+            "merkle_root_config"
           ]
         },
         {
@@ -715,17 +709,17 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "escrowFeeReceiver",
+          "name": "escrow_fee_receiver",
           "writable": true,
           "optional": true,
           "address": "BJQbRiRWhJCyTYZcAuAL3ngDCx3AyFQGKDq8zhiZAKUw"
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -759,7 +753,7 @@ export type AlphaVault = {
       ],
       "args": [
         {
-          "name": "maxCap",
+          "name": "max_cap",
           "type": "u64"
         },
         {
@@ -776,7 +770,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "createPermissionedEscrowWithAuthority",
+      "name": "create_permissioned_escrow_with_authority",
       "discriminator": [
         211,
         231,
@@ -834,11 +828,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -872,13 +866,13 @@ export type AlphaVault = {
       ],
       "args": [
         {
-          "name": "maxCap",
+          "name": "max_cap",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "createProrataConfig",
+      "name": "create_prorata_config",
       "discriminator": [
         38,
         203,
@@ -927,16 +921,16 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "configParameters",
+          "name": "config_parameters",
           "type": {
             "defined": {
-              "name": "prorataConfigParameters"
+              "name": "ProrataConfigParameters"
             }
           }
         }
@@ -973,21 +967,21 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "sourceToken",
+          "name": "source_token",
           "writable": true
         },
         {
-          "name": "tokenVault",
+          "name": "token_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "tokenMint"
+          "name": "token_mint"
         },
         {
-          "name": "tokenProgram"
+          "name": "token_program"
         },
         {
           "name": "owner",
@@ -997,7 +991,7 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1031,13 +1025,13 @@ export type AlphaVault = {
       ],
       "args": [
         {
-          "name": "maxAmount",
+          "name": "max_amount",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "fillDammV2",
+      "name": "fill_damm_v2",
       "discriminator": [
         221,
         175,
@@ -1054,25 +1048,25 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "tokenVault",
+          "name": "token_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "tokenOutVault",
+          "name": "token_out_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "ammProgram",
+          "name": "amm_program",
           "address": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG"
         },
         {
-          "name": "poolAuthority"
+          "name": "pool_authority"
         },
         {
           "name": "pool",
@@ -1082,34 +1076,34 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "tokenAVault",
+          "name": "token_a_vault",
           "writable": true
         },
         {
-          "name": "tokenBVault",
+          "name": "token_b_vault",
           "writable": true
         },
         {
-          "name": "tokenAMint"
+          "name": "token_a_mint"
         },
         {
-          "name": "tokenBMint"
+          "name": "token_b_mint"
         },
         {
-          "name": "tokenAProgram"
+          "name": "token_a_program"
         },
         {
-          "name": "tokenBProgram"
+          "name": "token_b_program"
         },
         {
-          "name": "dammEventAuthority"
+          "name": "damm_event_authority"
         },
         {
-          "name": "crankFeeWhitelist",
+          "name": "crank_fee_whitelist",
           "optional": true
         },
         {
-          "name": "crankFeeReceiver",
+          "name": "crank_fee_receiver",
           "writable": true,
           "optional": true,
           "address": "BJQbRiRWhJCyTYZcAuAL3ngDCx3AyFQGKDq8zhiZAKUw"
@@ -1120,11 +1114,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1158,13 +1152,13 @@ export type AlphaVault = {
       ],
       "args": [
         {
-          "name": "maxAmount",
+          "name": "max_amount",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "fillDlmm",
+      "name": "fill_dlmm",
       "discriminator": [
         1,
         108,
@@ -1181,21 +1175,21 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "tokenVault",
+          "name": "token_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "tokenOutVault",
+          "name": "token_out_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "ammProgram",
+          "name": "amm_program",
           "address": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo"
         },
         {
@@ -1206,41 +1200,41 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "binArrayBitmapExtension"
+          "name": "bin_array_bitmap_extension"
         },
         {
-          "name": "reserveX",
+          "name": "reserve_x",
           "writable": true
         },
         {
-          "name": "reserveY",
+          "name": "reserve_y",
           "writable": true
         },
         {
-          "name": "tokenXMint"
+          "name": "token_x_mint"
         },
         {
-          "name": "tokenYMint"
+          "name": "token_y_mint"
         },
         {
           "name": "oracle",
           "writable": true
         },
         {
-          "name": "tokenXProgram"
+          "name": "token_x_program"
         },
         {
-          "name": "tokenYProgram"
+          "name": "token_y_program"
         },
         {
-          "name": "dlmmEventAuthority"
+          "name": "dlmm_event_authority"
         },
         {
-          "name": "crankFeeWhitelist",
+          "name": "crank_fee_whitelist",
           "optional": true
         },
         {
-          "name": "crankFeeReceiver",
+          "name": "crank_fee_receiver",
           "writable": true,
           "optional": true,
           "address": "BJQbRiRWhJCyTYZcAuAL3ngDCx3AyFQGKDq8zhiZAKUw"
@@ -1251,14 +1245,14 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "memoProgram"
+          "name": "memo_program"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1292,21 +1286,21 @@ export type AlphaVault = {
       ],
       "args": [
         {
-          "name": "maxAmount",
+          "name": "max_amount",
           "type": "u64"
         },
         {
-          "name": "remainingAccountsInfo",
+          "name": "remaining_accounts_info",
           "type": {
             "defined": {
-              "name": "remainingAccountsInfo"
+              "name": "RemainingAccountsInfo"
             }
           }
         }
       ]
     },
     {
-      "name": "fillDynamicAmm",
+      "name": "fill_dynamic_amm",
       "discriminator": [
         224,
         226,
@@ -1323,21 +1317,21 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "tokenVault",
+          "name": "token_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "tokenOutVault",
+          "name": "token_out_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "ammProgram",
+          "name": "amm_program",
           "address": "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB"
         },
         {
@@ -1348,53 +1342,53 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "aVault",
+          "name": "a_vault",
           "writable": true
         },
         {
-          "name": "bVault",
+          "name": "b_vault",
           "writable": true
         },
         {
-          "name": "aTokenVault",
+          "name": "a_token_vault",
           "writable": true
         },
         {
-          "name": "bTokenVault",
+          "name": "b_token_vault",
           "writable": true
         },
         {
-          "name": "aVaultLpMint",
+          "name": "a_vault_lp_mint",
           "writable": true
         },
         {
-          "name": "bVaultLpMint",
+          "name": "b_vault_lp_mint",
           "writable": true
         },
         {
-          "name": "aVaultLp",
+          "name": "a_vault_lp",
           "writable": true
         },
         {
-          "name": "bVaultLp",
+          "name": "b_vault_lp",
           "writable": true
         },
         {
-          "name": "adminTokenFee",
+          "name": "admin_token_fee",
           "writable": true
         },
         {
-          "name": "vaultProgram"
+          "name": "vault_program"
         },
         {
-          "name": "tokenProgram"
+          "name": "token_program"
         },
         {
-          "name": "crankFeeWhitelist",
+          "name": "crank_fee_whitelist",
           "optional": true
         },
         {
-          "name": "crankFeeReceiver",
+          "name": "crank_fee_receiver",
           "writable": true,
           "optional": true,
           "address": "BJQbRiRWhJCyTYZcAuAL3ngDCx3AyFQGKDq8zhiZAKUw"
@@ -1405,11 +1399,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1443,13 +1437,13 @@ export type AlphaVault = {
       ],
       "args": [
         {
-          "name": "maxAmount",
+          "name": "max_amount",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "initializeFcfsVault",
+      "name": "initialize_fcfs_vault",
       "discriminator": [
         163,
         205,
@@ -1500,11 +1494,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1541,14 +1535,14 @@ export type AlphaVault = {
           "name": "params",
           "type": {
             "defined": {
-              "name": "initializeFcfsVaultParams"
+              "name": "InitializeFcfsVaultParams"
             }
           }
         }
       ]
     },
     {
-      "name": "initializeProrataVault",
+      "name": "initialize_prorata_vault",
       "discriminator": [
         178,
         180,
@@ -1599,11 +1593,11 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1640,14 +1634,14 @@ export type AlphaVault = {
           "name": "params",
           "type": {
             "defined": {
-              "name": "initializeProrataVaultParams"
+              "name": "InitializeProrataVaultParams"
             }
           }
         }
       ]
     },
     {
-      "name": "initializeVaultWithFcfsConfig",
+      "name": "initialize_vault_with_fcfs_config",
       "discriminator": [
         189,
         251,
@@ -1689,7 +1683,7 @@ export type AlphaVault = {
           "name": "pool"
         },
         {
-          "name": "quoteMint"
+          "name": "quote_mint"
         },
         {
           "name": "funder",
@@ -1700,11 +1694,11 @@ export type AlphaVault = {
           "name": "config"
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1741,14 +1735,14 @@ export type AlphaVault = {
           "name": "params",
           "type": {
             "defined": {
-              "name": "initializeVaultWithConfigParams"
+              "name": "InitializeVaultWithConfigParams"
             }
           }
         }
       ]
     },
     {
-      "name": "initializeVaultWithProrataConfig",
+      "name": "initialize_vault_with_prorata_config",
       "discriminator": [
         155,
         216,
@@ -1790,7 +1784,7 @@ export type AlphaVault = {
           "name": "pool"
         },
         {
-          "name": "quoteMint"
+          "name": "quote_mint"
         },
         {
           "name": "funder",
@@ -1801,11 +1795,11 @@ export type AlphaVault = {
           "name": "config"
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1842,14 +1836,14 @@ export type AlphaVault = {
           "name": "params",
           "type": {
             "defined": {
-              "name": "initializeVaultWithConfigParams"
+              "name": "InitializeVaultWithConfigParams"
             }
           }
         }
       ]
     },
     {
-      "name": "transferVaultAuthority",
+      "name": "transfer_vault_authority",
       "discriminator": [
         139,
         35,
@@ -1866,7 +1860,7 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "vaultAuthority",
+          "name": "vault_authority",
           "signer": true,
           "relations": [
             "vault"
@@ -1875,13 +1869,13 @@ export type AlphaVault = {
       ],
       "args": [
         {
-          "name": "newAuthority",
+          "name": "new_authority",
           "type": "pubkey"
         }
       ]
     },
     {
-      "name": "updateFcfsVaultParameters",
+      "name": "update_fcfs_vault_parameters",
       "discriminator": [
         172,
         23,
@@ -1908,7 +1902,7 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -1945,14 +1939,14 @@ export type AlphaVault = {
           "name": "params",
           "type": {
             "defined": {
-              "name": "updateFcfsVaultParams"
+              "name": "UpdateFcfsVaultParams"
             }
           }
         }
       ]
     },
     {
-      "name": "updateProrataVaultParameters",
+      "name": "update_prorata_vault_parameters",
       "discriminator": [
         177,
         39,
@@ -1979,7 +1973,7 @@ export type AlphaVault = {
           "signer": true
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -2016,7 +2010,7 @@ export type AlphaVault = {
           "name": "params",
           "type": {
             "defined": {
-              "name": "updateProrataVaultParams"
+              "name": "UpdateProrataVaultParams"
             }
           }
         }
@@ -2053,21 +2047,21 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "destinationToken",
+          "name": "destination_token",
           "writable": true
         },
         {
-          "name": "tokenVault",
+          "name": "token_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "tokenMint"
+          "name": "token_mint"
         },
         {
-          "name": "tokenProgram"
+          "name": "token_program"
         },
         {
           "name": "owner",
@@ -2077,7 +2071,7 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -2117,7 +2111,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "withdrawRemainingQuote",
+      "name": "withdraw_remaining_quote",
       "discriminator": [
         54,
         253,
@@ -2147,21 +2141,21 @@ export type AlphaVault = {
           "writable": true
         },
         {
-          "name": "tokenVault",
+          "name": "token_vault",
           "writable": true,
           "relations": [
             "vault"
           ]
         },
         {
-          "name": "destinationToken",
+          "name": "destination_token",
           "writable": true
         },
         {
-          "name": "tokenMint"
+          "name": "token_mint"
         },
         {
-          "name": "tokenProgram"
+          "name": "token_program"
         },
         {
           "name": "owner",
@@ -2171,7 +2165,7 @@ export type AlphaVault = {
           ]
         },
         {
-          "name": "eventAuthority",
+          "name": "event_authority",
           "pda": {
             "seeds": [
               {
@@ -2208,7 +2202,7 @@ export type AlphaVault = {
   ],
   "accounts": [
     {
-      "name": "crankFeeWhitelist",
+      "name": "CrankFeeWhitelist",
       "discriminator": [
         39,
         105,
@@ -2221,7 +2215,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "escrow",
+      "name": "Escrow",
       "discriminator": [
         31,
         213,
@@ -2234,7 +2228,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "fcfsVaultConfig",
+      "name": "FcfsVaultConfig",
       "discriminator": [
         99,
         243,
@@ -2247,7 +2241,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "merkleRootConfig",
+      "name": "MerkleRootConfig",
       "discriminator": [
         103,
         2,
@@ -2260,7 +2254,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "prorataVaultConfig",
+      "name": "ProrataVaultConfig",
       "discriminator": [
         93,
         214,
@@ -2273,7 +2267,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "vault",
+      "name": "Vault",
       "discriminator": [
         211,
         8,
@@ -2288,7 +2282,7 @@ export type AlphaVault = {
   ],
   "events": [
     {
-      "name": "crankFeeWhitelistClosed",
+      "name": "CrankFeeWhitelistClosed",
       "discriminator": [
         157,
         171,
@@ -2301,7 +2295,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "crankFeeWhitelistCreated",
+      "name": "CrankFeeWhitelistCreated",
       "discriminator": [
         176,
         138,
@@ -2314,7 +2308,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "escrowClaimToken",
+      "name": "EscrowClaimToken",
       "discriminator": [
         179,
         72,
@@ -2327,7 +2321,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "escrowClosed",
+      "name": "EscrowClosed",
       "discriminator": [
         109,
         20,
@@ -2340,7 +2334,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "escrowCreated",
+      "name": "EscrowCreated",
       "discriminator": [
         70,
         127,
@@ -2353,7 +2347,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "escrowDeposit",
+      "name": "EscrowDeposit",
       "discriminator": [
         43,
         90,
@@ -2366,7 +2360,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "escrowRemainingWithdraw",
+      "name": "EscrowRemainingWithdraw",
       "discriminator": [
         113,
         14,
@@ -2379,7 +2373,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "escrowWithdraw",
+      "name": "EscrowWithdraw",
       "discriminator": [
         171,
         17,
@@ -2392,7 +2386,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "fcfsVaultCreated",
+      "name": "FcfsVaultCreated",
       "discriminator": [
         73,
         153,
@@ -2405,7 +2399,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "fcfsVaultParametersUpdated",
+      "name": "FcfsVaultParametersUpdated",
       "discriminator": [
         78,
         112,
@@ -2418,7 +2412,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "merkleRootConfigCreated",
+      "name": "MerkleRootConfigCreated",
       "discriminator": [
         121,
         112,
@@ -2431,7 +2425,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "prorataVaultCreated",
+      "name": "ProrataVaultCreated",
       "discriminator": [
         181,
         255,
@@ -2444,7 +2438,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "prorataVaultParametersUpdated",
+      "name": "ProrataVaultParametersUpdated",
       "discriminator": [
         24,
         147,
@@ -2457,7 +2451,7 @@ export type AlphaVault = {
       ]
     },
     {
-      "name": "swapFill",
+      "name": "SwapFill",
       "discriminator": [
         116,
         212,
@@ -2473,225 +2467,225 @@ export type AlphaVault = {
   "errors": [
     {
       "code": 6000,
-      "name": "timePointNotInFuture",
+      "name": "TimePointNotInFuture",
       "msg": "Time point is not in future"
     },
     {
       "code": 6001,
-      "name": "incorrectTokenMint",
+      "name": "IncorrectTokenMint",
       "msg": "Token mint is incorrect"
     },
     {
       "code": 6002,
-      "name": "incorrectPairType",
+      "name": "IncorrectPairType",
       "msg": "Pair is not permissioned"
     },
     {
       "code": 6003,
-      "name": "poolHasStarted",
+      "name": "PoolHasStarted",
       "msg": "Pool has started"
     },
     {
       "code": 6004,
-      "name": "notPermitThisActionInThisTimePoint",
+      "name": "NotPermitThisActionInThisTimePoint",
       "msg": "This action is not permitted in this time point"
     },
     {
       "code": 6005,
-      "name": "theSaleIsOngoing",
+      "name": "TheSaleIsOngoing",
       "msg": "The sale is on going, cannot withdraw"
     },
     {
       "code": 6006,
-      "name": "escrowIsNotClosable",
+      "name": "EscrowIsNotClosable",
       "msg": "Escrow is not closable"
     },
     {
       "code": 6007,
-      "name": "timePointOrdersAreIncorrect",
+      "name": "TimePointOrdersAreIncorrect",
       "msg": "Time point orders are incorrect"
     },
     {
       "code": 6008,
-      "name": "escrowHasRefuned",
+      "name": "EscrowHasRefuned",
       "msg": "Escrow has refunded"
     },
     {
       "code": 6009,
-      "name": "mathOverflow",
+      "name": "MathOverflow",
       "msg": "Math operation overflow"
     },
     {
       "code": 6010,
-      "name": "maxBuyingCapIsZero",
+      "name": "MaxBuyingCapIsZero",
       "msg": "Max buying cap is zero"
     },
     {
       "code": 6011,
-      "name": "maxAmountIsTooSmall",
+      "name": "MaxAmountIsTooSmall",
       "msg": "Max amount is too small"
     },
     {
       "code": 6012,
-      "name": "poolTypeIsNotSupported",
+      "name": "PoolTypeIsNotSupported",
       "msg": "Pool type is not supported"
     },
     {
       "code": 6013,
-      "name": "invalidAdmin",
+      "name": "InvalidAdmin",
       "msg": "Invalid admin"
     },
     {
       "code": 6014,
-      "name": "vaultModeIsIncorrect",
+      "name": "VaultModeIsIncorrect",
       "msg": "Vault mode is incorrect"
     },
     {
       "code": 6015,
-      "name": "maxDepositingCapIsInValid",
+      "name": "MaxDepositingCapIsInValid",
       "msg": "Max depositing cap is invalid"
     },
     {
       "code": 6016,
-      "name": "vestingDurationIsInValid",
+      "name": "VestingDurationIsInValid",
       "msg": "Vesting duration is invalid"
     },
     {
       "code": 6017,
-      "name": "depositAmountIsZero",
+      "name": "DepositAmountIsZero",
       "msg": "Deposit amount is zero"
     },
     {
       "code": 6018,
-      "name": "poolOwnerIsMismatched",
+      "name": "PoolOwnerIsMismatched",
       "msg": "Pool owner is mismatched"
     },
     {
       "code": 6019,
-      "name": "refundAmountIsZero",
+      "name": "RefundAmountIsZero",
       "msg": "Refund amount is zero"
     },
     {
       "code": 6020,
-      "name": "depositingDurationIsInvalid",
+      "name": "DepositingDurationIsInvalid",
       "msg": "Depositing duration is invalid"
     },
     {
       "code": 6021,
-      "name": "depositingTimePointIsInvalid",
+      "name": "DepositingTimePointIsInvalid",
       "msg": "Depositing time point is invalid"
     },
     {
       "code": 6022,
-      "name": "individualDepositingCapIsZero",
+      "name": "IndividualDepositingCapIsZero",
       "msg": "Individual depositing cap is zero"
     },
     {
       "code": 6023,
-      "name": "invalidFeeReceiverAccount",
+      "name": "InvalidFeeReceiverAccount",
       "msg": "Invalid fee receiver account"
     },
     {
       "code": 6024,
-      "name": "notPermissionedVault",
+      "name": "NotPermissionedVault",
       "msg": "Not permissioned vault"
     },
     {
       "code": 6025,
-      "name": "notPermitToDoThisAction",
+      "name": "NotPermitToDoThisAction",
       "msg": "Not permit to do this action"
     },
     {
       "code": 6026,
-      "name": "invalidProof",
+      "name": "InvalidProof",
       "msg": "Invalid Merkle proof"
     },
     {
       "code": 6027,
-      "name": "invalidActivationType",
+      "name": "InvalidActivationType",
       "msg": "Invalid activation type"
     },
     {
       "code": 6028,
-      "name": "activationTypeIsMismatched",
+      "name": "ActivationTypeIsMismatched",
       "msg": "Activation type is mismatched"
     },
     {
       "code": 6029,
-      "name": "invalidPool",
+      "name": "InvalidPool",
       "msg": "Pool is not connected to the alpha vault"
     },
     {
       "code": 6030,
-      "name": "invalidCreator",
+      "name": "InvalidCreator",
       "msg": "Invalid creator"
     },
     {
       "code": 6031,
-      "name": "permissionedVaultCannotChargeEscrowFee",
+      "name": "PermissionedVaultCannotChargeEscrowFee",
       "msg": "Permissioned vault cannot charge escrow fee"
     },
     {
       "code": 6032,
-      "name": "escrowFeeTooHigh",
+      "name": "EscrowFeeTooHigh",
       "msg": "Escrow fee too high"
     },
     {
       "code": 6033,
-      "name": "lockDurationInvalid",
+      "name": "LockDurationInvalid",
       "msg": "Lock duration is invalid"
     },
     {
       "code": 6034,
-      "name": "maxBuyingCapIsTooSmall",
+      "name": "MaxBuyingCapIsTooSmall",
       "msg": "Max buying cap is too small"
     },
     {
       "code": 6035,
-      "name": "maxDepositingCapIsTooSmall",
+      "name": "MaxDepositingCapIsTooSmall",
       "msg": "Max depositing cap is too small"
     },
     {
       "code": 6036,
-      "name": "invalidWhitelistWalletMode",
+      "name": "InvalidWhitelistWalletMode",
       "msg": "Invalid whitelist wallet mode"
     },
     {
       "code": 6037,
-      "name": "invalidCrankFeeWhitelist",
+      "name": "InvalidCrankFeeWhitelist",
       "msg": "Invalid crank fee whitelist"
     },
     {
       "code": 6038,
-      "name": "missingFeeReceiver",
+      "name": "MissingFeeReceiver",
       "msg": "Missing fee receiver"
     },
     {
       "code": 6039,
-      "name": "discriminatorIsMismatched",
+      "name": "DiscriminatorIsMismatched",
       "msg": "Discriminator is mismatched"
     }
   ],
   "types": [
     {
-      "name": "accountsType",
+      "name": "AccountsType",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "transferHookX"
+            "name": "TransferHookX"
           },
           {
-            "name": "transferHookY"
+            "name": "TransferHookY"
           },
           {
-            "name": "transferHookReward"
+            "name": "TransferHookReward"
           }
         ]
       }
     },
     {
-      "name": "crankFeeWhitelist",
+      "name": "CrankFeeWhitelist",
       "serialization": "bytemuck",
       "repr": {
         "kind": "c"
@@ -2716,7 +2710,7 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "crankFeeWhitelistClosed",
+      "name": "CrankFeeWhitelistClosed",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2728,7 +2722,7 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "crankFeeWhitelistCreated",
+      "name": "CrankFeeWhitelistCreated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2740,7 +2734,7 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "createMerkleRootConfigParams",
+      "name": "CreateMerkleRootConfigParams",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2767,7 +2761,7 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "escrow",
+      "name": "Escrow",
       "serialization": "bytemuck",
       "repr": {
         "kind": "c"
@@ -2790,21 +2784,21 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "totalDeposit",
+            "name": "total_deposit",
             "docs": [
               "total deposited quote token"
             ],
             "type": "u64"
           },
           {
-            "name": "claimedToken",
+            "name": "claimed_token",
             "docs": [
               "Total token that escrow has claimed"
             ],
             "type": "u64"
           },
           {
-            "name": "lastClaimedPoint",
+            "name": "last_claimed_point",
             "docs": [
               "Last claimed timestamp"
             ],
@@ -2818,7 +2812,7 @@ export type AlphaVault = {
             "type": "u8"
           },
           {
-            "name": "padding1",
+            "name": "padding_1",
             "docs": [
               "padding 1"
             ],
@@ -2830,14 +2824,14 @@ export type AlphaVault = {
             }
           },
           {
-            "name": "maxCap",
+            "name": "max_cap",
             "docs": [
               "Only has meaning in permissioned vault"
             ],
             "type": "u64"
           },
           {
-            "name": "padding2",
+            "name": "padding_2",
             "docs": [
               "padding 2"
             ],
@@ -2861,7 +2855,7 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "escrowClaimToken",
+      "name": "EscrowClaimToken",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2882,14 +2876,14 @@ export type AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "vaultTotalClaimedToken",
+            "name": "vault_total_claimed_token",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "escrowClosed",
+      "name": "EscrowClosed",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2906,14 +2900,14 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "vaultTotalEscrow",
+            "name": "vault_total_escrow",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "escrowCreated",
+      "name": "EscrowCreated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2930,46 +2924,18 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "vaultTotalEscrow",
+            "name": "vault_total_escrow",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "escrowDeposit",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "vault",
-            "type": "pubkey"
-          },
-          {
-            "name": "escrow",
-            "type": "pubkey"
-          },
-          {
-            "name": "owner",
-            "type": "pubkey"
-          },
-          {
-            "name": "amount",
-            "type": "u64"
-          },
-          {
-            "name": "vaultTotalDeposit",
+            "name": "escrow_fee",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "escrowRemainingWithdraw",
+      "name": "EscrowDeposit",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2990,14 +2956,14 @@ export type AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "vaultRemainingDeposit",
+            "name": "vault_total_deposit",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "escrowWithdraw",
+      "name": "EscrowRemainingWithdraw",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3018,43 +2984,71 @@ export type AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "vaultTotalDeposit",
+            "name": "vault_remaining_deposit",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "fcfsConfigParameters",
+      "name": "EscrowWithdraw",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "maxDepositingCap",
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
             "type": "u64"
           },
           {
-            "name": "startVestingDuration",
+            "name": "vault_total_deposit",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FcfsConfigParameters",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "max_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "endVestingDuration",
+            "name": "start_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "depositingDurationUntilLastJoinPoint",
+            "name": "end_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "individualDepositingCap",
+            "name": "depositing_duration_until_last_join_point",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "individual_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "activationType",
+            "name": "escrow_fee",
+            "type": "u64"
+          },
+          {
+            "name": "activation_type",
             "type": "u8"
           },
           {
@@ -3065,40 +3059,40 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "fcfsVaultConfig",
+      "name": "FcfsVaultConfig",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "maxDepositingCap",
+            "name": "max_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "startVestingDuration",
+            "name": "start_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "endVestingDuration",
+            "name": "end_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "depositingDurationUntilLastJoinPoint",
+            "name": "depositing_duration_until_last_join_point",
             "type": "u64"
           },
           {
-            "name": "individualDepositingCap",
+            "name": "individual_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "type": "u64"
           },
           {
-            "name": "activationType",
+            "name": "activation_type",
             "type": "u8"
           },
           {
-            "name": "padding",
+            "name": "_padding",
             "type": {
               "array": [
                 "u8",
@@ -3110,28 +3104,28 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "fcfsVaultCreated",
+      "name": "FcfsVaultCreated",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "baseMint",
+            "name": "base_mint",
             "type": "pubkey"
           },
           {
-            "name": "quoteMint",
+            "name": "quote_mint",
             "type": "pubkey"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           },
           {
-            "name": "maxDepositingCap",
+            "name": "max_depositing_cap",
             "type": "u64"
           },
           {
@@ -3139,30 +3133,30 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "poolType",
+            "name": "pool_type",
             "type": "u8"
           },
           {
-            "name": "depositingPoint",
+            "name": "depositing_point",
             "type": "u64"
           },
           {
-            "name": "individualDepositingCap",
+            "name": "individual_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "type": "u64"
           },
           {
-            "name": "activationType",
+            "name": "activation_type",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "fcfsVaultParametersUpdated",
+      "name": "FcfsVaultParametersUpdated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3171,146 +3165,146 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "maxDepositingCap",
+            "name": "max_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           },
           {
-            "name": "depositingPoint",
+            "name": "depositing_point",
             "type": "u64"
           },
           {
-            "name": "individualDepositingCap",
+            "name": "individual_depositing_cap",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "initializeFcfsVaultParams",
+      "name": "InitializeFcfsVaultParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "poolType",
+            "name": "pool_type",
             "type": "u8"
           },
           {
-            "name": "quoteMint",
+            "name": "quote_mint",
             "type": "pubkey"
           },
           {
-            "name": "baseMint",
+            "name": "base_mint",
             "type": "pubkey"
           },
           {
-            "name": "depositingPoint",
+            "name": "depositing_point",
             "type": "u64"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           },
           {
-            "name": "maxDepositingCap",
+            "name": "max_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "individualDepositingCap",
+            "name": "individual_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "type": "u64"
           },
           {
-            "name": "whitelistMode",
+            "name": "whitelist_mode",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "initializeProrataVaultParams",
+      "name": "InitializeProrataVaultParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "poolType",
+            "name": "pool_type",
             "type": "u8"
           },
           {
-            "name": "quoteMint",
+            "name": "quote_mint",
             "type": "pubkey"
           },
           {
-            "name": "baseMint",
+            "name": "base_mint",
             "type": "pubkey"
           },
           {
-            "name": "depositingPoint",
+            "name": "depositing_point",
             "type": "u64"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           },
           {
-            "name": "maxBuyingCap",
+            "name": "max_buying_cap",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "type": "u64"
           },
           {
-            "name": "whitelistMode",
+            "name": "whitelist_mode",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "initializeVaultWithConfigParams",
+      "name": "InitializeVaultWithConfigParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "poolType",
+            "name": "pool_type",
             "type": "u8"
           },
           {
-            "name": "quoteMint",
+            "name": "quote_mint",
             "type": "pubkey"
           },
           {
-            "name": "baseMint",
+            "name": "base_mint",
             "type": "pubkey"
           },
           {
-            "name": "whitelistMode",
+            "name": "whitelist_mode",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "merkleRootConfig",
+      "name": "MerkleRootConfig",
       "serialization": "bytemuck",
       "repr": {
         "kind": "c"
@@ -3345,7 +3339,7 @@ export type AlphaVault = {
             "type": "u64"
           },
           {
-            "name": "padding",
+            "name": "_padding",
             "docs": [
               "padding for further use"
             ],
@@ -3360,7 +3354,7 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "merkleRootConfigCreated",
+      "name": "MerkleRootConfigCreated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3393,28 +3387,28 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "prorataConfigParameters",
+      "name": "ProrataConfigParameters",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "maxBuyingCap",
+            "name": "max_buying_cap",
             "type": "u64"
           },
           {
-            "name": "startVestingDuration",
+            "name": "start_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "endVestingDuration",
+            "name": "end_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "type": "u64"
           },
           {
-            "name": "activationType",
+            "name": "activation_type",
             "type": "u8"
           },
           {
@@ -3425,32 +3419,32 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "prorataVaultConfig",
+      "name": "ProrataVaultConfig",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "maxBuyingCap",
+            "name": "max_buying_cap",
             "type": "u64"
           },
           {
-            "name": "startVestingDuration",
+            "name": "start_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "endVestingDuration",
+            "name": "end_vesting_duration",
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "type": "u64"
           },
           {
-            "name": "activationType",
+            "name": "activation_type",
             "type": "u8"
           },
           {
-            "name": "padding",
+            "name": "_padding",
             "type": {
               "array": [
                 "u8",
@@ -3462,28 +3456,28 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "prorataVaultCreated",
+      "name": "ProrataVaultCreated",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "baseMint",
+            "name": "base_mint",
             "type": "pubkey"
           },
           {
-            "name": "quoteMint",
+            "name": "quote_mint",
             "type": "pubkey"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           },
           {
-            "name": "maxBuyingCap",
+            "name": "max_buying_cap",
             "type": "u64"
           },
           {
@@ -3491,22 +3485,22 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "poolType",
+            "name": "pool_type",
             "type": "u8"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "type": "u64"
           },
           {
-            "name": "activationType",
+            "name": "activation_type",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "prorataVaultParametersUpdated",
+      "name": "ProrataVaultParametersUpdated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3515,22 +3509,22 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "maxBuyingCap",
+            "name": "max_buying_cap",
             "type": "u64"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "remainingAccountsInfo",
+      "name": "RemainingAccountsInfo",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3539,7 +3533,7 @@ export type AlphaVault = {
             "type": {
               "vec": {
                 "defined": {
-                  "name": "remainingAccountsSlice"
+                  "name": "RemainingAccountsSlice"
                 }
               }
             }
@@ -3548,15 +3542,15 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "remainingAccountsSlice",
+      "name": "RemainingAccountsSlice",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "accountsType",
+            "name": "accounts_type",
             "type": {
               "defined": {
-                "name": "accountsType"
+                "name": "AccountsType"
               }
             }
           },
@@ -3568,7 +3562,7 @@ export type AlphaVault = {
       }
     },
     {
-      "name": "swapFill",
+      "name": "SwapFill",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3581,70 +3575,70 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "fillAmount",
+            "name": "fill_amount",
             "type": "u64"
           },
           {
-            "name": "purchasedAmount",
+            "name": "purchased_amount",
             "type": "u64"
           },
           {
-            "name": "unfilledAmount",
+            "name": "unfilled_amount",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "updateFcfsVaultParams",
+      "name": "UpdateFcfsVaultParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "maxDepositingCap",
+            "name": "max_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "depositingPoint",
+            "name": "depositing_point",
             "type": "u64"
           },
           {
-            "name": "individualDepositingCap",
+            "name": "individual_depositing_cap",
             "type": "u64"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "updateProrataVaultParams",
+      "name": "UpdateProrataVaultParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "maxBuyingCap",
+            "name": "max_buying_cap",
             "type": "u64"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "vault",
+      "name": "Vault",
       "serialization": "bytemuck",
       "repr": {
         "kind": "c"
@@ -3660,28 +3654,28 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "tokenVault",
+            "name": "token_vault",
             "docs": [
               "reserve quote token"
             ],
             "type": "pubkey"
           },
           {
-            "name": "tokenOutVault",
+            "name": "token_out_vault",
             "docs": [
               "reserve base token"
             ],
             "type": "pubkey"
           },
           {
-            "name": "quoteMint",
+            "name": "quote_mint",
             "docs": [
               "quote token"
             ],
             "type": "pubkey"
           },
           {
-            "name": "baseMint",
+            "name": "base_mint",
             "docs": [
               "base token"
             ],
@@ -3702,63 +3696,63 @@ export type AlphaVault = {
             "type": "pubkey"
           },
           {
-            "name": "maxBuyingCap",
+            "name": "max_buying_cap",
             "docs": [
               "max buying cap"
             ],
             "type": "u64"
           },
           {
-            "name": "totalDeposit",
+            "name": "total_deposit",
             "docs": [
               "total deposited quote token"
             ],
             "type": "u64"
           },
           {
-            "name": "totalEscrow",
+            "name": "total_escrow",
             "docs": [
               "total user deposit"
             ],
             "type": "u64"
           },
           {
-            "name": "swappedAmount",
+            "name": "swapped_amount",
             "docs": [
-              "swappedAmount"
+              "swapped_amount"
             ],
             "type": "u64"
           },
           {
-            "name": "boughtToken",
+            "name": "bought_token",
             "docs": [
               "total bought token"
             ],
             "type": "u64"
           },
           {
-            "name": "totalRefund",
+            "name": "total_refund",
             "docs": [
               "Total quote refund"
             ],
             "type": "u64"
           },
           {
-            "name": "totalClaimedToken",
+            "name": "total_claimed_token",
             "docs": [
               "Total claimed_token"
             ],
             "type": "u64"
           },
           {
-            "name": "startVestingPoint",
+            "name": "start_vesting_point",
             "docs": [
               "Start vesting ts"
             ],
             "type": "u64"
           },
           {
-            "name": "endVestingPoint",
+            "name": "end_vesting_point",
             "docs": [
               "End vesting ts"
             ],
@@ -3772,21 +3766,21 @@ export type AlphaVault = {
             "type": "u8"
           },
           {
-            "name": "poolType",
+            "name": "pool_type",
             "docs": [
               "pool type"
             ],
             "type": "u8"
           },
           {
-            "name": "vaultMode",
+            "name": "vault_mode",
             "docs": [
               "vault mode"
             ],
             "type": "u8"
           },
           {
-            "name": "padding0",
+            "name": "padding_0",
             "docs": [
               "padding 0"
             ],
@@ -3798,56 +3792,56 @@ export type AlphaVault = {
             }
           },
           {
-            "name": "maxDepositingCap",
+            "name": "max_depositing_cap",
             "docs": [
               "max depositing cap"
             ],
             "type": "u64"
           },
           {
-            "name": "individualDepositingCap",
+            "name": "individual_depositing_cap",
             "docs": [
               "individual depositing cap"
             ],
             "type": "u64"
           },
           {
-            "name": "depositingPoint",
+            "name": "depositing_point",
             "docs": [
               "depositing point"
             ],
             "type": "u64"
           },
           {
-            "name": "escrowFee",
+            "name": "escrow_fee",
             "docs": [
               "flat fee when user open an escrow"
             ],
             "type": "u64"
           },
           {
-            "name": "totalEscrowFee",
+            "name": "total_escrow_fee",
             "docs": [
               "total escrow fee just for statistic"
             ],
             "type": "u64"
           },
           {
-            "name": "whitelistMode",
+            "name": "whitelist_mode",
             "docs": [
               "deposit whitelist mode"
             ],
             "type": "u8"
           },
           {
-            "name": "activationType",
+            "name": "activation_type",
             "docs": [
               "activation type"
             ],
             "type": "u8"
           },
           {
-            "name": "padding1",
+            "name": "padding_1",
             "docs": [
               "padding 1"
             ],
@@ -3859,7 +3853,7 @@ export type AlphaVault = {
             }
           },
           {
-            "name": "vaultAuthority",
+            "name": "vault_authority",
             "docs": [
               "vault authority normally is vault creator, will be able to create merkle root config"
             ],
@@ -3878,4 +3872,4 @@ export type AlphaVault = {
       }
     }
   ]
-};
+}

@@ -189,7 +189,7 @@ async function createDynamicPoolWithPermissionlessVault(
     {
       baseMint: mintAInfo.mint,
       quoteMint: mintBInfo.mint,
-      poolType: PoolType.DYNAMIC,
+      poolType: PoolType.DAMM,
       vaultMode: VaultMode.PRORATA,
       poolAddress: poolPubkey,
       config: poolConfig.account.vaultConfigKey,

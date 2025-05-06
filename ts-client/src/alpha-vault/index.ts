@@ -17,16 +17,17 @@ import {
   WhitelistMode,
 } from "./constant";
 import {
+  createProgram,
   deriveAlphaVault,
   deriveEscrow,
   deriveMerkleRootConfig,
   fillDlmmTransaction,
-  fillDynamicAmmTransaction,
+  fillDammTransaction,
   getOrCreateATAInstruction,
   unwrapSOLInstruction,
   wrapSOLInstruction,
 } from "./helper";
-import { IDL } from "./idl";
+import IDL from "./alpha_vault.json";
 import {
   AlphaVaultProgram,
   CustomizableFcfsVaultParams,
@@ -46,7 +47,7 @@ export * from "./helper";
 export * from "./merkle_tree/";
 export * from "./type";
 
-type Opt = {
+export type Opt = {
   cluster: Cluster | "localhost";
 };
 
@@ -56,7 +57,7 @@ export class AlphaVault {
     public pubkey: PublicKey,
     public vault: Vault,
     public mode: VaultMode
-  ) { }
+  ) {}
 
   /**
    * Creates an AlphaVault instance from a given vault address.
@@ -71,16 +72,7 @@ export class AlphaVault {
     vaultAddress: PublicKey,
     opt?: Opt
   ): Promise<AlphaVault> {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
+    const program = createProgram(connection, opt);
 
     const vault = await program.account.vault.fetch(vaultAddress);
     const vaultMode =
@@ -104,17 +96,7 @@ export class AlphaVault {
     owner: PublicKey,
     opt?: Opt
   ) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
+    const program = createProgram(connection, opt);
 
     const {
       poolAddress,
@@ -149,7 +131,7 @@ export class AlphaVault {
         escrowFee,
         whitelistMode,
       })
-      .accounts({
+      .accountsPartial({
         base: owner,
         vault: alphaVault,
         pool: poolAddress,
@@ -183,16 +165,7 @@ export class AlphaVault {
     owner: PublicKey,
     opt?: Opt
   ) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
+    const program = createProgram(connection, opt);
 
     const {
       poolAddress,
@@ -225,7 +198,7 @@ export class AlphaVault {
         escrowFee,
         whitelistMode,
       })
-      .accounts({
+      .accountsPartial({
         base: owner,
         vault: alphaVault,
         pool: poolAddress,
@@ -259,17 +232,7 @@ export class AlphaVault {
     owner: PublicKey,
     opt?: Opt
   ): Promise<Transaction> {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
+    const program = createProgram(connection, opt);
     return AlphaVault.createVault(program, vaultParam, owner, Permissionless);
   }
 
@@ -288,17 +251,7 @@ export class AlphaVault {
     owner: PublicKey,
     opt?: Opt
   ): Promise<Transaction> {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
+    const program = createProgram(connection, opt);
     return AlphaVault.createVault(
       program,
       vaultParam,
@@ -322,17 +275,7 @@ export class AlphaVault {
     owner: PublicKey,
     opt?: Opt
   ): Promise<Transaction> {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
+    const program = createProgram(connection, opt);
     return AlphaVault.createVault(
       program,
       vaultParam,
@@ -349,17 +292,7 @@ export class AlphaVault {
    * @return {Promise<fcfsVaultConfig[]>} A promise containing a list of FCFS vault configurations.
    */
   public static async getFcfsConfigs(connection: Connection, opt?: Opt) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
+    const program = createProgram(connection, opt);
     return program.account.fcfsVaultConfig.all();
   }
 
@@ -371,17 +304,7 @@ export class AlphaVault {
    * @return {Promise<prorataVaultConfig[]>} A promise containing a list of prorata vault configurations.
    */
   public static async getProrataConfigs(connection: Connection, opt?: Opt) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
+    const program = createProgram(connection, opt);
     return program.account.prorataVaultConfig.all();
   }
 
@@ -425,7 +348,7 @@ export class AlphaVault {
 
     const createStakeEscrowIx = await this.program.methods
       .createPermissionedEscrowWithAuthority(maxAmount)
-      .accounts({
+      .accountsPartial({
         vault: this.pubkey,
         pool: this.vault.pool,
         escrow,
@@ -469,7 +392,7 @@ export class AlphaVault {
 
         return this.program.methods
           .createPermissionedEscrowWithAuthority(maxAmount)
-          .accounts({
+          .accountsPartial({
             vault: this.pubkey,
             pool: this.vault.pool,
             escrow,
@@ -505,7 +428,7 @@ export class AlphaVault {
 
         const createEscrowTx = await this.program.methods
           .createPermissionedEscrow(maxCap, proof)
-          .accounts({
+          .accountsPartial({
             merkleRootConfig,
             vault: this.pubkey,
             pool: this.vault.pool,
@@ -520,7 +443,7 @@ export class AlphaVault {
       } else if (this.vault.whitelistMode === Permissionless) {
         const createEscrowTx = await this.program.methods
           .createNewEscrow()
-          .accounts({
+          .accountsPartial({
             vault: this.pubkey,
             escrow,
             owner,
@@ -570,7 +493,7 @@ export class AlphaVault {
 
     const depositTx = await this.program.methods
       .deposit(maxAmount)
-      .accounts({
+      .accountsPartial({
         vault: this.pubkey,
         escrow,
         sourceToken,
@@ -613,7 +536,7 @@ export class AlphaVault {
 
     const withdrawTx = await this.program.methods
       .withdraw(amount)
-      .accounts({
+      .accountsPartial({
         vault: this.pubkey,
         destinationToken,
         escrow,
@@ -655,7 +578,7 @@ export class AlphaVault {
 
     const withdrawRemainingTx = await this.program.methods
       .withdrawRemainingQuote()
-      .accounts({
+      .accountsPartial({
         vault: this.pubkey,
         escrow,
         owner,
@@ -697,7 +620,7 @@ export class AlphaVault {
 
     const claimTokenTx = await this.program.methods
       .claimToken()
-      .accounts({
+      .accountsPartial({
         vault: this.pubkey,
         escrow,
         owner,
@@ -728,13 +651,9 @@ export class AlphaVault {
   public async fillVault(payer: PublicKey): Promise<Transaction | null> {
     const poolType = this.vault.poolType;
 
-    if (poolType === PoolType.DYNAMIC) {
-      return fillDynamicAmmTransaction(
-        this.program,
-        this.pubkey,
-        this.vault,
-        payer
-      );
+    if (poolType === PoolType.DAMM) {
+      return fillDammTransaction(this.program, this.pubkey, this.vault, payer);
+    } else if (poolType === PoolType.DAMMV2) {
     } else {
       return fillDlmmTransaction(this.program, this.pubkey, this.vault, payer);
     }
@@ -763,7 +682,7 @@ export class AlphaVault {
         root: Array.from(new Uint8Array(root)),
         version,
       })
-      .accounts({
+      .accountsPartial({
         merkleRootConfig,
         vault: this.pubkey,
         admin: vaultCreator,
@@ -783,7 +702,7 @@ export class AlphaVault {
 
     const closeEscrowTx = await this.program.methods
       .closeEscrow()
-      .accounts({
+      .accountsPartial({
         vault: this.pubkey,
         escrow,
         owner,
@@ -817,9 +736,13 @@ export class AlphaVault {
       };
     }
 
-    const remainingAmount = this.vault.totalDeposit.sub(this.vault.swappedAmount);
-    const totalReturned = remainingAmount.mul(escrowAccount.totalDeposit).div(this.vault.totalDeposit);
-    
+    const remainingAmount = this.vault.totalDeposit.sub(
+      this.vault.swappedAmount
+    );
+    const totalReturned = remainingAmount
+      .mul(escrowAccount.totalDeposit)
+      .div(this.vault.totalDeposit);
+
     const totalFilled = escrowAccount.totalDeposit.sub(totalReturned);
 
     return {
@@ -859,7 +782,7 @@ export class AlphaVault {
       quoteMint,
       whitelistMode,
     })
-      .accounts({
+      .accountsPartial({
         vault: alphaVault,
         pool: poolAddress,
         funder: owner,
@@ -892,17 +815,7 @@ export class AlphaVault {
     owner: PublicKey,
     opt?: Opt
   ) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
+    const program = createProgram(connection, opt);
     return program.account.escrow.all([
       {
         memcmp: {
@@ -913,19 +826,12 @@ export class AlphaVault {
     ]);
   }
 
-  public static async getVault(connection: Connection, vaultAddress: PublicKey, opt?: Opt) {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
-
+  public static async getVault(
+    connection: Connection,
+    vaultAddress: PublicKey,
+    opt?: Opt
+  ) {
+    const program = createProgram(connection, opt);
     return program.account.vault.fetch(vaultAddress);
   }
-
 }
