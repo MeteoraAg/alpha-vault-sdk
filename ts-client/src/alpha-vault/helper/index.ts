@@ -20,6 +20,7 @@ import {
   VaultMode,
 } from "../type";
 import {
+  createAssociatedTokenAccountIdempotentInstruction,
   createAssociatedTokenAccountInstruction,
   createCloseAccountInstruction,
   getAccount,
@@ -109,12 +110,14 @@ export const getOrCreateATAInstruction = async (
   tokenMint: PublicKey,
   owner: PublicKey,
   payer: PublicKey = owner,
+  tokenProgram: PublicKey,
   allowOwnerOffCurve = true
 ): Promise<GetOrCreateATAResponse> => {
   const toAccount = getAssociatedTokenAddressSync(
     tokenMint,
     owner,
-    allowOwnerOffCurve
+    allowOwnerOffCurve,
+    tokenProgram
   );
 
   try {
@@ -126,11 +129,12 @@ export const getOrCreateATAInstruction = async (
       e instanceof TokenAccountNotFoundError ||
       e instanceof TokenInvalidAccountOwnerError
     ) {
-      const ix = createAssociatedTokenAccountInstruction(
+      const ix = createAssociatedTokenAccountIdempotentInstruction(
         payer,
         toAccount,
         owner,
-        tokenMint
+        tokenMint,
+        tokenProgram
       );
 
       return { ataPubKey: toAccount, ix };
@@ -195,6 +199,11 @@ export const fillDammV2Transaction = async (
 
   const pool = await cpAmm._program.account.pool.fetch(vault.pool);
 
+  const [dammEventAuthority] = PublicKey.findProgramAddressSync(
+    [Buffer.from("__event_authority")],
+    cpAmm._program.programId
+  );
+
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
   const crankFeeWhitelistAccount =
     await connection.getAccountInfo(crankFeeWhitelist);
@@ -205,27 +214,38 @@ export const fillDammV2Transaction = async (
       connection,
       vault.baseMint,
       vaultKey,
-      payer
+      payer,
+      pool.tokenAFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 
-  const swapTransaction = await cpAmm.swap({
-    payer,
-    pool: vault.pool,
-    inputTokenMint: vault.quoteMint,
-    outputTokenMint: vault.baseMint,
-    amountIn: vault.maxBuyingCap,
-    minimumAmountOut: new BN(0),
-    tokenAMint: pool.tokenAMint,
-    tokenBMint: pool.tokenBMint,
-    tokenAVault: pool.tokenAVault,
-    tokenBVault: pool.tokenBVault,
-    tokenAProgram:
-      pool.tokenAFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
-    tokenBProgram:
-      pool.tokenBFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
-    referralTokenAccount: null,
-  });
+  const fillDammInstruction = await program.methods
+    .fillDammV2(vault.maxBuyingCap)
+    .accountsPartial({
+      vault: vaultKey,
+      tokenVault: vault.tokenVault,
+      tokenOutVault,
+      ammProgram: cpAmm._program.programId,
+      pool: vault.pool,
+      tokenAMint: pool.tokenAMint,
+      tokenBMint: pool.tokenBMint,
+      tokenAVault: pool.tokenAVault,
+      tokenBVault: pool.tokenBVault,
+      tokenAProgram:
+        pool.tokenAFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
+      tokenBProgram:
+        pool.tokenBFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
+      cranker: payer,
+      crankFeeReceiver: crankFeeWhitelistAccount
+        ? program.programId
+        : ALPHA_VAULT_TREASURY_ID,
+      crankFeeWhitelist: crankFeeWhitelistAccount
+        ? crankFeeWhitelist
+        : program.programId,
+      dammEventAuthority,
+      systemProgram: SystemProgram.programId,
+    })
+    .instruction();
 
   const { lastValidBlockHeight, blockhash } =
     await connection.getLatestBlockhash("confirmed");
@@ -233,7 +253,7 @@ export const fillDammV2Transaction = async (
   new Transaction({
     lastValidBlockHeight,
     blockhash,
-  }).add(...swapTransaction.instructions);
+  }).add(...preInstructions, fillDammInstruction);
 };
 
 export const fillDlmmTransaction = async (
@@ -260,7 +280,8 @@ export const fillDlmmTransaction = async (
       connection,
       vault.baseMint,
       vaultKey,
-      payer
+      payer,
+      pair.tokenX.owner
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 
@@ -407,7 +428,8 @@ export const fillDammTransaction = async (
       connection,
       vault.baseMint,
       vaultKey,
-      payer
+      payer,
+      TOKEN_PROGRAM_ID
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 

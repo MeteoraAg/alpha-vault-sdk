@@ -1,5 +1,10 @@
 import { AnchorProvider, BN, Program } from "@coral-xyz/anchor";
-import { NATIVE_MINT, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import {
+  Mint,
+  NATIVE_MINT,
+  TOKEN_PROGRAM_ID,
+  unpackMint,
+} from "@solana/spl-token";
 import {
   Cluster,
   Connection,
@@ -51,12 +56,19 @@ export type Opt = {
   cluster: Cluster | "localhost";
 };
 
+interface MintInfo {
+  tokenProgram: PublicKey;
+  mint: Mint;
+}
+
 export class AlphaVault {
   constructor(
     public program: AlphaVaultProgram,
     public pubkey: PublicKey,
     public vault: Vault,
-    public mode: VaultMode
+    public mode: VaultMode,
+    public baseMintInfo: MintInfo,
+    public quoteMintInfo: MintInfo
   ) {}
 
   /**
@@ -78,7 +90,38 @@ export class AlphaVault {
     const vaultMode =
       vault.vaultMode === 0 ? VaultMode.PRORATA : VaultMode.FCFS;
 
-    return new AlphaVault(program, vaultAddress, vault, vaultMode);
+    const accounts = await connection.getMultipleAccountsInfo([
+      vault.baseMint,
+      vault.quoteMint,
+    ]);
+    const baseMintAccount = accounts[0];
+    const baseMint = unpackMint(
+      vault.baseMint,
+      baseMintAccount,
+      baseMintAccount.owner
+    );
+
+    const quoteMintAccount = accounts[1];
+    const quoteMint = unpackMint(
+      vault.quoteMint,
+      quoteMintAccount,
+      quoteMintAccount.owner
+    );
+
+    return new AlphaVault(
+      program,
+      vaultAddress,
+      vault,
+      vaultMode,
+      {
+        tokenProgram: baseMintAccount.owner,
+        mint: baseMint,
+      },
+      {
+        tokenProgram: quoteMintAccount.owner,
+        mint: quoteMint,
+      }
+    );
   }
 
   /**
@@ -465,18 +508,23 @@ export class AlphaVault {
       getOrCreateATAInstruction(
         this.program.provider.connection,
         this.vault.quoteMint,
-        owner
+        owner,
+        owner,
+        this.quoteMintInfo.tokenProgram
       ),
       getOrCreateATAInstruction(
         this.program.provider.connection,
         this.vault.baseMint,
-        owner
+        owner,
+        owner,
+        this.baseMintInfo.tokenProgram
       ),
       getOrCreateATAInstruction(
         this.program.provider.connection,
         this.vault.quoteMint,
         this.pubkey,
-        owner
+        owner,
+        this.quoteMintInfo.tokenProgram
       ),
     ]);
     createSourceTokenIx && preInstructions.push(createSourceTokenIx);
@@ -501,6 +549,7 @@ export class AlphaVault {
         tokenMint: this.vault.quoteMint,
         pool: this.vault.pool,
         owner,
+        tokenProgram: this.quoteMintInfo.tokenProgram,
       })
       .preInstructions(preInstructions)
       .postInstructions(postInstructions)
@@ -530,7 +579,9 @@ export class AlphaVault {
       await getOrCreateATAInstruction(
         this.program.provider.connection,
         this.vault.quoteMint,
-        owner
+        owner,
+        owner,
+        this.quoteMintInfo.tokenProgram
       );
     createDestinationTokenIx && preInstructions.push(createDestinationTokenIx);
 
@@ -544,7 +595,7 @@ export class AlphaVault {
         pool: this.vault.pool,
         tokenVault: this.vault.tokenVault,
         tokenMint: this.vault.quoteMint,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: this.quoteMintInfo.tokenProgram,
       })
       .preInstructions(preInstructions)
       .transaction();
@@ -572,7 +623,9 @@ export class AlphaVault {
       await getOrCreateATAInstruction(
         this.program.provider.connection,
         this.vault.quoteMint,
-        owner
+        owner,
+        owner,
+        this.quoteMintInfo.tokenProgram
       );
     createDestinationTokenIx && preInstructions.push(createDestinationTokenIx);
 
@@ -586,7 +639,7 @@ export class AlphaVault {
         pool: this.vault.pool,
         tokenVault: this.vault.tokenVault,
         tokenMint: this.vault.quoteMint,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: this.quoteMintInfo.tokenProgram,
       })
       .preInstructions(preInstructions)
       .transaction();
@@ -614,7 +667,9 @@ export class AlphaVault {
       await getOrCreateATAInstruction(
         this.program.provider.connection,
         this.vault.baseMint,
-        owner
+        owner,
+        owner,
+        this.baseMintInfo.tokenProgram
       );
     createDestinationTokenIx && preInstructions.push(createDestinationTokenIx);
 
@@ -627,7 +682,7 @@ export class AlphaVault {
         destinationToken,
         tokenOutVault: this.vault.tokenOutVault,
         tokenMint: this.vault.baseMint,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: this.baseMintInfo.tokenProgram,
       })
       .preInstructions(preInstructions)
       .transaction();
