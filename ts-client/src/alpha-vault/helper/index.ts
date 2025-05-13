@@ -45,6 +45,12 @@ import { Opt } from "..";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { CpAmm } from "@meteora-ag/cp-amm-sdk";
 
+
+
+const MEMO_PROGRAM_ID = new PublicKey(
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+);
+
 export function createProgram(connection: Connection, opt?: Opt) {
   const provider = new AnchorProvider(
     connection,
@@ -199,6 +205,11 @@ export const fillDammV2Transaction = async (
 
   const pool = await cpAmm._program.account.pool.fetch(vault.pool);
 
+  const [poolAuthority] = PublicKey.findProgramAddressSync(
+    [Buffer.from("pool_authority")],
+    cpAmm._program.programId
+  );
+
   const [dammEventAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("__event_authority")],
     cpAmm._program.programId
@@ -227,6 +238,7 @@ export const fillDammV2Transaction = async (
       tokenOutVault,
       ammProgram: cpAmm._program.programId,
       pool: vault.pool,
+      poolAuthority,
       tokenAMint: pool.tokenAMint,
       tokenBMint: pool.tokenBMint,
       tokenAVault: pool.tokenAVault,
@@ -385,6 +397,7 @@ export const fillDlmmTransaction = async (
         ? crankFeeWhitelist
         : program.programId,
       systemProgram: SystemProgram.programId,
+      memoProgram: MEMO_PROGRAM_ID,
     })
     .preInstructions(preInstructions)
     .remainingAccounts(remainingAccounts)
