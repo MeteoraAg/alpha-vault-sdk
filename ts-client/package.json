@@ -17,7 +17,6 @@
   "devDependencies": {
     "@babel/preset-env": "^7.22.5",
     "@coral-xyz/borsh": "^0.28.0",
-    "@mercurial-finance/dynamic-amm-sdk": "^1.1.23",
     "@mercurial-finance/vault-sdk": "^2.2.1",
     "@types/babar": "^0.2.1",
     "@types/bn.js": "^5.1.5",
