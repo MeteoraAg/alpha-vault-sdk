@@ -1,7 +1,4 @@
-use crate::assert_eq_admin;
-use crate::FcfsVaultConfig;
-use crate::VaultError;
-use anchor_lang::prelude::*;
+use crate::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct FcfsConfigParameters {
@@ -21,7 +18,7 @@ pub struct CreateFcfsConfig<'info> {
     #[account(
         init,
         seeds = [
-            b"fcfs_config".as_ref(),
+            FCFS_CONFIG,
             config_parameters.index.to_le_bytes().as_ref()
         ],
         bump,

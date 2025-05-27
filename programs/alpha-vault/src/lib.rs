@@ -26,6 +26,9 @@ pub use activation::*;
 pub mod constants;
 pub use constants::*;
 
+pub mod seeds;
+pub use seeds::*;
+
 pub mod admin {
     use anchor_lang::prelude::Pubkey;
     use anchor_lang::solana_program::pubkey;
@@ -180,5 +183,13 @@ pub mod alpha_vault {
         max_amount: u64,
     ) -> Result<()> {
         handle_fill_dynamic_amm(ctx, max_amount)
+    }
+
+    pub fn create_crank_fee_whitelist(ctx: Context<CreateCrankFeeWhitelistCtx>) -> Result<()> {
+        handle_create_crank_fee_whitelist(ctx)
+    }
+
+    pub fn close_crank_fee_whitelist(ctx: Context<CloseCrankFeeWhitelistCtx>) -> Result<()> {
+        handle_close_crank_fee_whitelist(ctx)
     }
 }
