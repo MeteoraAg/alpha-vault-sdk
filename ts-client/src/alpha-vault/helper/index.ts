@@ -32,22 +32,30 @@ import {
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError,
 } from "@solana/spl-token";
-import DynamicAmm from "@meteora-ag/dynamic-amm-sdk";
+import DynamicAmm, { Amm, AmmIdl } from "@meteora-ag/dynamic-amm-sdk";
 import { Transaction } from "@solana/web3.js";
 import DLMM, {
   DlmmSdkError,
   LBCLMM_PROGRAM_IDS,
   RemainingAccountInfo,
   SwapQuote,
+  IDL as DLMMIdl,
+  LbClmm,
 } from "@meteora-ag/dlmm";
 import BN from "bn.js";
 import IDL from "../alpha_vault.json";
 import { AlphaVault } from "../idl";
 import { Opt } from "..";
+import {
+  AnchorProvider as OldAnchorProvider,
+  Program as OldProgram,
+} from "@cora-xyz/anchor-0.28.0";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
-import { CpAmm } from "@meteora-ag/cp-amm-sdk";
-
-
+import CpAmmIDL, {
+  CpAmm,
+  CpAmmTypes,
+  CP_AMM_PROGRAM_ID,
+} from "@meteora-ag/cp-amm-sdk";
 
 const MEMO_PROGRAM_ID = new PublicKey(
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
@@ -62,6 +70,43 @@ export function createProgram(connection: Connection, opt?: Opt) {
 
   return new Program<AlphaVault>(
     { ...IDL, address: PROGRAM_ID[opt?.cluster || "mainnet-beta"] },
+    provider
+  );
+}
+
+export function createDlmmProgram(connection: Connection, opt?: Opt) {
+  const provider = new OldAnchorProvider(
+    connection,
+    {} as any,
+    AnchorProvider.defaultOptions()
+  );
+
+  return new OldProgram(
+    DLMMIdl,
+    LBCLMM_PROGRAM_IDS[opt?.cluster || "mainnet-beta"],
+    provider
+  );
+}
+
+export function createDammProgram(connection: Connection, opt?: Opt) {
+  const provider = new OldAnchorProvider(
+    connection,
+    {} as any,
+    AnchorProvider.defaultOptions()
+  );
+
+  // @ts-ignore
+  return new OldProgram(AmmIdl, DYNAMIC_AMM_PROGRAM_ID, provider);
+}
+
+export function createCpAmmProgram(connection: Connection, opt?: Opt) {
+  const provider = new AnchorProvider(
+    connection,
+    {} as any,
+    AnchorProvider.defaultOptions()
+  );
+  return new Program<CpAmmTypes>(
+    { ...CpAmmIDL, address: CP_AMM_PROGRAM_ID },
     provider
   );
 }
@@ -218,8 +263,9 @@ export const fillDammV2Transaction = async (
   );
 
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount =
-    await connection.getAccountInfo(crankFeeWhitelist);
+  const crankFeeWhitelistAccount = await connection.getAccountInfo(
+    crankFeeWhitelist
+  );
 
   const preInstructions: TransactionInstruction[] = [];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
@@ -282,10 +328,11 @@ export const fillDlmmTransaction = async (
   const pair = await DLMM.create(connection, vault.pool, {
     cluster,
   });
-  
+
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount =
-    await connection.getAccountInfo(crankFeeWhitelist);
+  const crankFeeWhitelistAccount = await connection.getAccountInfo(
+    crankFeeWhitelist
+  );
 
   // TODO: Estimate CU
   const preInstructions: TransactionInstruction[] = [
@@ -307,8 +354,8 @@ export const fillDlmmTransaction = async (
     vault.vaultMode == VaultMode.FCFS
       ? vault.totalDeposit
       : vault.totalDeposit.lt(vault.maxBuyingCap)
-        ? vault.totalDeposit
-        : vault.maxBuyingCap;
+      ? vault.totalDeposit
+      : vault.maxBuyingCap;
 
   const remainingInAmount = inAmountCap.sub(vault.swappedAmount);
 
@@ -451,8 +498,9 @@ export const fillDammTransaction = async (
   });
 
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount =
-    await connection.getAccountInfo(crankFeeWhitelist);
+  const crankFeeWhitelistAccount = await connection.getAccountInfo(
+    crankFeeWhitelist
+  );
 
   const preInstructions: TransactionInstruction[] = [];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
@@ -471,7 +519,7 @@ export const fillDammTransaction = async (
 
   const fillAmmTransaction = await program.methods
     .fillDynamicAmm(vault.totalDeposit)
-    .accounts({
+    .accountsPartial({
       vault: vaultKey,
       tokenVault: vault.tokenVault,
       tokenOutVault,

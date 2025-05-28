@@ -32,6 +32,9 @@ import {
   getOrCreateATAInstruction,
   unwrapSOLInstruction,
   wrapSOLInstruction,
+  createDlmmProgram,
+  createDammProgram,
+  createCpAmmProgram,
 } from "./helper";
 import IDL from "./alpha_vault.json";
 import {
@@ -54,7 +57,7 @@ import {
 } from "./type";
 import { AmmIdl, PoolState } from "@meteora-ag/dynamic-amm-sdk";
 import { IDL as DlmmIdl, LBCLMM_PROGRAM_IDS, LbPair } from "@meteora-ag/dlmm";
-import { IDL as AmmV2Idl } from "@meteora-ag/cp-amm-sdk";
+import { CpAmm } from "@meteora-ag/cp-amm-sdk";
 
 export * from "./constant";
 export * from "./helper";
@@ -190,7 +193,7 @@ export class AlphaVault {
       AnchorProvider.defaultOptions()
     );
     const cluster = opt?.cluster || "mainnet-beta";
-    const program = new Program(IDL, PROGRAM_ID[cluster], provider);
+    const program = createProgram(connection, opt);
 
     const accountsToFetch = [vaultAddress, SYSVAR_CLOCK_PUBKEY];
     const [vaultAccountBuffer, clockAccountBuffer] =
@@ -211,6 +214,10 @@ export class AlphaVault {
       baseMintAccount,
       baseMintAccount.owner
     );
+    const baseMintInfo = {
+      tokenProgram: baseMintAccount.owner,
+      mint: baseMint,
+    };
 
     const quoteMintAccount = accounts[1];
     const quoteMint = unpackMint(
@@ -218,13 +225,14 @@ export class AlphaVault {
       quoteMintAccount,
       quoteMintAccount.owner
     );
+    const quoteMintInfo = {
+      tokenProgram: quoteMintAccount.owner,
+      mint: quoteMint,
+    };
 
     if (vault.poolType === PoolType.DLMM) {
-      const dlmmProgram = new Program(
-        DlmmIdl,
-        LBCLMM_PROGRAM_IDS[cluster],
-        provider
-      );
+      const dlmmProgram = createDlmmProgram(connection, opt);
+      // @ts-ignore
       const pool = (await dlmmProgram.account.lbPair.fetch(
         vault.pool
       )) as unknown as LbPair;
@@ -235,11 +243,14 @@ export class AlphaVault {
         pool.activationPoint,
         pool.preActivationDuration,
         clockState,
+        baseMintInfo,
+        quoteMintInfo,
         opt
       );
-    } 
+    }
     if (vault.poolType === PoolType.DAMM) {
-      const ammProgram = new Program(AmmIdl, DYNAMIC_AMM_PROGRAM_ID, provider);
+      const ammProgram = createDammProgram(connection, opt);
+      // @ts-ignore
       const pool = (await ammProgram.account.pool.fetch(
         vault.pool
       )) as unknown as PoolState;
@@ -252,12 +263,14 @@ export class AlphaVault {
           ? new BN(9000)
           : new BN(3600),
         clockState,
+        baseMintInfo,
+        quoteMintInfo,
         opt
       );
     }
 
     if (vault.poolType === PoolType.DAMMV2) {
-      const cpAmm = new Program(AmmV2Idl, PROGRAM_ID[cluster], provider);
+      const cpAmm = createCpAmmProgram(connection, opt);
       const pool = (await cpAmm.account.pool.fetch(
         vault.pool
       )) as unknown as PoolState;
@@ -270,6 +283,8 @@ export class AlphaVault {
           ? new BN(9000)
           : new BN(3600),
         clockState,
+        baseMintInfo,
+        quoteMintInfo,
         opt
       );
     }
@@ -426,16 +441,7 @@ export class AlphaVault {
     owner: PublicKey,
     opt?: Opt
   ): Promise<Transaction> {
-    const provider = new AnchorProvider(
-      connection,
-      {} as any,
-      AnchorProvider.defaultOptions()
-    );
-    const program = new Program(
-      IDL,
-      PROGRAM_ID[opt?.cluster || "mainnet-beta"],
-      provider
-    );
+    const program = createProgram(connection, opt);
 
     return AlphaVault.createVault(
       program,
@@ -772,8 +778,9 @@ export class AlphaVault {
    */
   public async getEscrow(owner: PublicKey): Promise<Escrow | null> {
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
-    const escrowAccount =
-      await this.program.account.escrow.fetchNullable(escrow);
+    const escrowAccount = await this.program.account.escrow.fetchNullable(
+      escrow
+    );
 
     return escrowAccount;
   }
@@ -872,8 +879,9 @@ export class AlphaVault {
       }
     }
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
-    const escrowAccount =
-      await this.program.account.escrow.fetchNullable(escrow);
+    const escrowAccount = await this.program.account.escrow.fetchNullable(
+      escrow
+    );
 
     const preInstructions: TransactionInstruction[] = [];
     if (!escrowAccount) {

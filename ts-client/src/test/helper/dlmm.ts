@@ -62,7 +62,10 @@ export const createDlmmProgram = (connection: Connection) => {
     {} as any,
     AnchorProvider.defaultOptions()
   );
-  const program = new Program(IDL, LBCLMM_PROGRAM_IDS["localhost"], provider);
+  const program = new Program(
+    { ...IDL, address: LBCLMM_PROGRAM_IDS["localhost"] },
+    provider
+  );
 
   return program;
 };

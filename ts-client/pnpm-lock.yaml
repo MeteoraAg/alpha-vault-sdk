@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cora-xyz/anchor-0.28.0':
+        specifier: npm:@coral-xyz/anchor@0.28.0
+        version: '@coral-xyz/anchor@0.28.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)'
       '@coral-xyz/anchor':
         specifier: ^0.31.1
         version: 0.31.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)

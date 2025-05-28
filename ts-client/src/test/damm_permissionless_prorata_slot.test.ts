@@ -50,7 +50,7 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
     const dummySlot = await createDummyPoint(
       connection,
       ActivationType.SLOT,
-      PoolType.DYNAMIC
+      PoolType.DAMM
     );
     vaultPoint = {
       activationPoint: dummySlot.activationPoint,
