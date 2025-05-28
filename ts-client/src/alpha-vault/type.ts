@@ -1,4 +1,4 @@
-import { BN, IdlAccounts, Program } from "@coral-xyz/anchor";
+import { BN, IdlAccounts, IdlTypes, Program } from "@coral-xyz/anchor";
 import { AlphaVault } from "./idl";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { WhitelistMode } from "./constant";
@@ -78,7 +78,8 @@ export enum VaultMode {
 
 export enum PoolType {
   DLMM,
-  DYNAMIC,
+  DAMM,
+  DAMMV2,
 }
 
 export enum ActivationType {

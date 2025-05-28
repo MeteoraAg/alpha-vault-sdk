@@ -191,7 +191,7 @@ async function createDynamicPoolWithPermissionedVault(
       {
         baseMint: mintAInfo.mint,
         quoteMint: NATIVE_MINT,
-        poolType: PoolType.DYNAMIC,
+        poolType: PoolType.DAMM,
         vaultMode: VaultMode.PRORATA,
         poolAddress: poolPubkey,
         config: poolConfig.account.vaultConfigKey,

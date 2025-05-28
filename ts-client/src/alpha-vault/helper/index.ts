@@ -9,6 +9,7 @@ import {
   ALPHA_VAULT_TREASURY_ID,
   DLMM_PROGRAM_ID,
   DYNAMIC_AMM_PROGRAM_ID,
+  PROGRAM_ID,
   SEED,
   VAULT_PROGRAM_ID,
 } from "../constant";
@@ -19,29 +20,56 @@ import {
   VaultMode,
 } from "../type";
 import {
+  createAssociatedTokenAccountIdempotentInstruction,
   createAssociatedTokenAccountInstruction,
   createCloseAccountInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
   NATIVE_MINT,
+  TOKEN_2022_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError,
 } from "@solana/spl-token";
 import DynamicAmm from "@mercurial-finance/dynamic-amm-sdk";
 import { Transaction } from "@solana/web3.js";
-import DLMM, { DlmmSdkError, SwapQuote } from "@meteora-ag/dlmm";
+import DLMM, {
+  DlmmSdkError,
+  RemainingAccountInfo,
+  SwapQuote,
+} from "@meteora-ag/dlmm";
 import BN from "bn.js";
+import IDL from "../alpha_vault.json";
+import { AlphaVault } from "../idl";
+import { Opt } from "..";
+import { AnchorProvider, Program } from "@coral-xyz/anchor";
+import { CpAmm } from "@meteora-ag/cp-amm-sdk";
+
+
+
+const MEMO_PROGRAM_ID = new PublicKey(
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+);
+
+export function createProgram(connection: Connection, opt?: Opt) {
+  const provider = new AnchorProvider(
+    connection,
+    {} as any,
+    AnchorProvider.defaultOptions()
+  );
+
+  return new Program<AlphaVault>(
+    { ...IDL, address: PROGRAM_ID[opt?.cluster || "mainnet-beta"] },
+    provider
+  );
+}
 
 export function deriveCrankFeeWhitelist(
   cranker: PublicKey,
   programId: PublicKey
 ) {
   return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from(SEED.crankFeeWhitelist),
-      cranker.toBuffer()
-    ],
+    [Buffer.from(SEED.crankFeeWhitelist), cranker.toBuffer()],
     programId
   );
 }
@@ -88,12 +116,14 @@ export const getOrCreateATAInstruction = async (
   tokenMint: PublicKey,
   owner: PublicKey,
   payer: PublicKey = owner,
+  tokenProgram: PublicKey,
   allowOwnerOffCurve = true
 ): Promise<GetOrCreateATAResponse> => {
   const toAccount = getAssociatedTokenAddressSync(
     tokenMint,
     owner,
-    allowOwnerOffCurve
+    allowOwnerOffCurve,
+    tokenProgram
   );
 
   try {
@@ -105,11 +135,12 @@ export const getOrCreateATAInstruction = async (
       e instanceof TokenAccountNotFoundError ||
       e instanceof TokenInvalidAccountOwnerError
     ) {
-      const ix = createAssociatedTokenAccountInstruction(
+      const ix = createAssociatedTokenAccountIdempotentInstruction(
         payer,
         toAccount,
         owner,
-        tokenMint
+        tokenMint,
+        tokenProgram
       );
 
       return { ataPubKey: toAccount, ix };
@@ -163,6 +194,80 @@ export const unwrapSOLInstruction = (owner: PublicKey) => {
   return null;
 };
 
+export const fillDammV2Transaction = async (
+  program: AlphaVaultProgram,
+  vaultKey: PublicKey,
+  vault: Vault,
+  payer: PublicKey
+) => {
+  const connection = program.provider.connection;
+  const cpAmm = new CpAmm(connection);
+
+  const pool = await cpAmm._program.account.pool.fetch(vault.pool);
+
+  const [poolAuthority] = PublicKey.findProgramAddressSync(
+    [Buffer.from("pool_authority")],
+    cpAmm._program.programId
+  );
+
+  const [dammEventAuthority] = PublicKey.findProgramAddressSync(
+    [Buffer.from("__event_authority")],
+    cpAmm._program.programId
+  );
+
+  const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
+  const crankFeeWhitelistAccount =
+    await connection.getAccountInfo(crankFeeWhitelist);
+
+  const preInstructions: TransactionInstruction[] = [];
+  const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
+    await getOrCreateATAInstruction(
+      connection,
+      vault.baseMint,
+      vaultKey,
+      payer,
+      pool.tokenAFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID
+    );
+  createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
+
+  const fillDammInstruction = await program.methods
+    .fillDammV2(vault.maxBuyingCap)
+    .accountsPartial({
+      vault: vaultKey,
+      tokenVault: vault.tokenVault,
+      tokenOutVault,
+      ammProgram: cpAmm._program.programId,
+      pool: vault.pool,
+      poolAuthority,
+      tokenAMint: pool.tokenAMint,
+      tokenBMint: pool.tokenBMint,
+      tokenAVault: pool.tokenAVault,
+      tokenBVault: pool.tokenBVault,
+      tokenAProgram:
+        pool.tokenAFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
+      tokenBProgram:
+        pool.tokenBFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
+      cranker: payer,
+      crankFeeReceiver: crankFeeWhitelistAccount
+        ? program.programId
+        : ALPHA_VAULT_TREASURY_ID,
+      crankFeeWhitelist: crankFeeWhitelistAccount
+        ? crankFeeWhitelist
+        : program.programId,
+      dammEventAuthority,
+      systemProgram: SystemProgram.programId,
+    })
+    .instruction();
+
+  const { lastValidBlockHeight, blockhash } =
+    await connection.getLatestBlockhash("confirmed");
+
+  new Transaction({
+    lastValidBlockHeight,
+    blockhash,
+  }).add(...preInstructions, fillDammInstruction);
+};
+
 export const fillDlmmTransaction = async (
   program: AlphaVaultProgram,
   vaultKey: PublicKey,
@@ -171,9 +276,10 @@ export const fillDlmmTransaction = async (
 ) => {
   const connection = program.provider.connection;
   const pair = await DLMM.create(connection, vault.pool);
-  
+
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount = await connection.getAccountInfo(crankFeeWhitelist);
+  const crankFeeWhitelistAccount =
+    await connection.getAccountInfo(crankFeeWhitelist);
 
   // TODO: Estimate CU
   const preInstructions: TransactionInstruction[] = [
@@ -186,7 +292,8 @@ export const fillDlmmTransaction = async (
       connection,
       vault.baseMint,
       vaultKey,
-      payer
+      payer,
+      pair.tokenX.owner
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 
@@ -230,9 +337,42 @@ export const fillDlmmTransaction = async (
     DLMM_PROGRAM_ID
   );
 
+  const tokenXProgram = pair.tokenX.owner;
+  const tokenYProgram = pair.tokenY.owner;
+
+  const remainingAccountInfos: RemainingAccountInfo = {
+    slices: [
+      {
+        accountsType: {
+          transferHookX: {},
+        },
+        length: pair.tokenX.transferHookAccountMetas.length,
+      },
+      {
+        accountsType: {
+          transferHookY: {},
+        },
+        length: pair.tokenY.transferHookAccountMetas.length,
+      },
+    ],
+  };
+
+  const binArrayAccounts = binArraysPubkey.map((x) => ({
+    pubkey: x,
+    isSigner: false,
+    isWritable: true,
+  }));
+
+  const transferHookAccounts = [
+    ...pair.tokenX.transferHookAccountMetas,
+    ...pair.tokenY.transferHookAccountMetas,
+  ];
+
+  const remainingAccounts = [...transferHookAccounts, ...binArrayAccounts];
+
   const fillDlmmTransaction = await program.methods
-    .fillDlmm(consumedInAmount)
-    .accounts({
+    .fillDlmm(consumedInAmount, remainingAccountInfos)
+    .accountsPartial({
       vault: vaultKey,
       tokenVault: vault.tokenVault,
       tokenOutVault,
@@ -246,22 +386,21 @@ export const fillDlmmTransaction = async (
       tokenXMint: pair.lbPair.tokenXMint,
       tokenYMint: pair.lbPair.tokenYMint,
       oracle: pair.lbPair.oracle,
-      tokenXProgram: TOKEN_PROGRAM_ID,
-      tokenYProgram: TOKEN_PROGRAM_ID,
+      tokenXProgram,
+      tokenYProgram,
       dlmmEventAuthority,
       cranker: payer,
-      crankFeeReceiver: crankFeeWhitelistAccount ? program.programId : ALPHA_VAULT_TREASURY_ID,
-      crankFeeWhitelist: crankFeeWhitelistAccount ? crankFeeWhitelist : program.programId,
+      crankFeeReceiver: crankFeeWhitelistAccount
+        ? program.programId
+        : ALPHA_VAULT_TREASURY_ID,
+      crankFeeWhitelist: crankFeeWhitelistAccount
+        ? crankFeeWhitelist
+        : program.programId,
       systemProgram: SystemProgram.programId,
+      memoProgram: MEMO_PROGRAM_ID,
     })
     .preInstructions(preInstructions)
-    .remainingAccounts(
-      binArraysPubkey.map((x) => ({
-        pubkey: x,
-        isSigner: false,
-        isWritable: true,
-      }))
-    )
+    .remainingAccounts(remainingAccounts)
     .transaction();
 
   const { blockhash, lastValidBlockHeight } =
@@ -283,7 +422,7 @@ export const fillDlmmTransaction = async (
  * @param {PublicKey} payer - The public key of the payer.
  * @return {Promise<Transaction>} A transaction to fill the dynamic AMM.
  */
-export const fillDynamicAmmTransaction = async (
+export const fillDammTransaction = async (
   program: AlphaVaultProgram,
   vaultKey: PublicKey,
   vault: Vault,
@@ -293,7 +432,8 @@ export const fillDynamicAmmTransaction = async (
   const pool = await DynamicAmm.create(connection, vault.pool);
 
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount = await connection.getAccountInfo(crankFeeWhitelist);
+  const crankFeeWhitelistAccount =
+    await connection.getAccountInfo(crankFeeWhitelist);
 
   const preInstructions: TransactionInstruction[] = [];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
@@ -301,7 +441,8 @@ export const fillDynamicAmmTransaction = async (
       connection,
       vault.baseMint,
       vaultKey,
-      payer
+      payer,
+      TOKEN_PROGRAM_ID
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 
@@ -311,7 +452,7 @@ export const fillDynamicAmmTransaction = async (
 
   const fillAmmTransaction = await program.methods
     .fillDynamicAmm(vault.maxBuyingCap)
-    .accounts({
+    .accountsPartial({
       vault: vaultKey,
       tokenVault: vault.tokenVault,
       tokenOutVault,
@@ -329,9 +470,13 @@ export const fillDynamicAmmTransaction = async (
       vaultProgram: VAULT_PROGRAM_ID,
       tokenProgram: TOKEN_PROGRAM_ID,
       cranker: payer,
-      crankFeeReceiver: crankFeeWhitelistAccount ? program.programId : ALPHA_VAULT_TREASURY_ID,
-      crankFeeWhitelist: crankFeeWhitelistAccount ? crankFeeWhitelist : program.programId,
-      systemProgram: SystemProgram.programId
+      crankFeeReceiver: crankFeeWhitelistAccount
+        ? program.programId
+        : ALPHA_VAULT_TREASURY_ID,
+      crankFeeWhitelist: crankFeeWhitelistAccount
+        ? crankFeeWhitelist
+        : program.programId,
+      systemProgram: SystemProgram.programId,
     })
     .preInstructions(preInstructions)
     .transaction();

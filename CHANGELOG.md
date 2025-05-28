@@ -19,6 +19,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## @meteora-ag/alpha-vault [1.1.11] [PR #13](https://github.com/MeteoraAg/alpha-vault-sdk/pull/13)
+
+### Added
+
+- Support on DAMM v2
+- Support DLMM token 2022
+
+## alpha-vault [0.4.0] [PR #13](https://github.com/MeteoraAg/alpha-vault-sdk/pull/13)
+
+### Changed
+
+- Use `declare_program!` macro for program interface
+
 ## alpha-vault [0.3.3] [PR #11](https://github.com/MeteoraAg/alpha-vault-sdk/pull/11)
 
 ### Added

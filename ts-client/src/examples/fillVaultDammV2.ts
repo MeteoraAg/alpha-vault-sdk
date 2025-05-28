@@ -12,7 +12,7 @@ import { PoolType } from "../alpha-vault/type";
 
 dotenv.config();
 
-async function fillVaultWithDynamicAmm(vault: PublicKey, payer: Keypair) {
+async function fillVaultWithDammV2(vault: PublicKey, payer: Keypair) {
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
   const alphaVault = await AlphaVault.create(connection, vault);
@@ -34,15 +34,15 @@ async function fillVaultWithDynamicAmm(vault: PublicKey, payer: Keypair) {
   }
   console.log("Pool type: ", poolTypeName);
 
-  // Dynamic AMM require only single fill transaction
-  const fillVaultWithDynamicAmmTransaction = await alphaVault.fillVault(
+  // Dynamic AMM v2 require only single fill transaction
+  const fillVaultWithDammV2Transaction = await alphaVault.fillVault(
     payer.publicKey
   );
 
-  console.log("Fill vault with dynamic AMM");
+  console.log("Fill vault with dynamic AMM v2");
   const txHash = await sendAndConfirmTransaction(
     connection,
-    fillVaultWithDynamicAmmTransaction,
+    fillVaultWithDammV2Transaction,
     [payer]
   );
   console.log(txHash);
@@ -55,7 +55,7 @@ const payer = loadKeypairFromFile(process.env.KEYPAIR_PATH);
 /**
  * This example shows how to crank the vault to purchase base token from the pool, with deposited token from the vault.
  */
-fillVaultWithDynamicAmm(vault, payer)
+fillVaultWithDammV2(vault, payer)
   .then(() => {
     console.log("Done");
   })

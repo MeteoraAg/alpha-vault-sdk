@@ -59,6 +59,7 @@ async function createCustomizableDlmmWithPermissionlessVault(
     hasAlphaVault,
     creator,
     activationPoint,
+    false,
     {
       cluster: "devnet",
     }
