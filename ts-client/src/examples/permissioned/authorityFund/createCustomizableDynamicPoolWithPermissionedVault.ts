@@ -98,7 +98,7 @@ async function createCustomizableDynamicPoolWithPermissionedVault(
       quoteMint: amm.poolState.tokenBMint,
       baseMint: amm.poolState.tokenAMint,
       poolAddress: amm.address,
-      poolType: PoolType.DYNAMIC,
+      poolType: PoolType.DAMM,
       depositingPoint,
       startVestingPoint,
       endVestingPoint,

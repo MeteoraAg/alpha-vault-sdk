@@ -16,3 +16,4 @@ ts-client/dist/**
 outputs/*
 
 ts-client/.env
+pnpm-lock.yaml

@@ -17,10 +17,22 @@ async function fillVaultWithDlmm(vault: PublicKey, payer: Keypair) {
 
   const alphaVault = await AlphaVault.create(connection, vault);
 
-  console.log(
-    "Pool type: ",
-    alphaVault.vault.poolType == PoolType.DYNAMIC ? "Dynamic AMM" : "DLMM"
-  );
+  let poolTypeName = "Unknown";
+  switch (alphaVault.vault.poolType) {
+    case PoolType.DLMM: {
+      poolTypeName = "DLMM";
+      break;
+    }
+    case PoolType.DAMM: {
+      poolTypeName = "Dynamic AMM";
+      break;
+    }
+    case PoolType.DAMMV2: {
+      poolTypeName = "DAMM v2";
+      break;
+    }
+  }
+  console.log("Pool type: ", poolTypeName);
 
   // DLMM require require one to many transactions
   while (true) {
