@@ -232,7 +232,6 @@ export class AlphaVault {
 
     if (vault.poolType === PoolType.DLMM) {
       const dlmmProgram = createDlmmProgram(connection, opt);
-      // @ts-ignore
       const pool = (await dlmmProgram.account.lbPair.fetch(
         vault.pool
       )) as unknown as LbPair;
@@ -250,7 +249,6 @@ export class AlphaVault {
     }
     if (vault.poolType === PoolType.DAMM) {
       const ammProgram = createDammProgram(connection, opt);
-      // @ts-ignore
       const pool = (await ammProgram.account.pool.fetch(
         vault.pool
       )) as unknown as PoolState;
