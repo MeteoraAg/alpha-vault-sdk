@@ -153,8 +153,6 @@ export class AlphaVault {
       lastBuyingPoint >= currentPoint
     ) {
       vaultState = VaultState.PURCHASING;
-      if (this.mode === VaultMode.PRORATA) {
-      }
     } else if (
       lastBuyingPoint < currentPoint &&
       startVestingPoint > currentPoint
@@ -776,9 +774,8 @@ export class AlphaVault {
    */
   public async getEscrow(owner: PublicKey): Promise<Escrow | null> {
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
-    const escrowAccount = await this.program.account.escrow.fetchNullable(
-      escrow
-    );
+    const escrowAccount =
+      await this.program.account.escrow.fetchNullable(escrow);
 
     return escrowAccount;
   }
@@ -877,9 +874,8 @@ export class AlphaVault {
       }
     }
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
-    const escrowAccount = await this.program.account.escrow.fetchNullable(
-      escrow
-    );
+    const escrowAccount =
+      await this.program.account.escrow.fetchNullable(escrow);
 
     const preInstructions: TransactionInstruction[] = [];
     if (!escrowAccount) {
