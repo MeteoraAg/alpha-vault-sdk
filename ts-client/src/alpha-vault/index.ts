@@ -10,15 +10,16 @@ import {
   Connection,
   PublicKey,
   SystemProgram,
+  SYSVAR_CLOCK_PUBKEY,
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
 import {
   ALPHA_VAULT_TREASURY_ID,
-  Permissionless,
-  PermissionWithAuthority,
-  PermissionWithMerkleProof,
+  DYNAMIC_AMM_PROGRAM_ID,
   PROGRAM_ID,
+  VaultPoint,
+  VaultState,
   WhitelistMode,
 } from "./constant";
 import {
@@ -31,21 +32,32 @@ import {
   getOrCreateATAInstruction,
   unwrapSOLInstruction,
   wrapSOLInstruction,
+  createDlmmProgram,
+  createDammProgram,
+  createCpAmmProgram,
 } from "./helper";
 import IDL from "./alpha_vault.json";
 import {
+  ActivationType,
   AlphaVaultProgram,
+  ClaimInfo,
+  Clock,
+  ClockLayout,
   CustomizableFcfsVaultParams,
   CustomizableProrataVaultParams,
   DepositInfo,
   DepositWithProofParams,
   Escrow,
+  InteractionState,
   PoolType,
   Vault,
   VaultMode,
   VaultParam,
   WalletDepositCap,
 } from "./type";
+import { AmmIdl, PoolState } from "@meteora-ag/dynamic-amm-sdk";
+import { IDL as DlmmIdl, LBCLMM_PROGRAM_IDS, LbPair } from "@meteora-ag/dlmm";
+import { CpAmm } from "@meteora-ag/cp-amm-sdk";
 
 export * from "./constant";
 export * from "./helper";
@@ -66,11 +78,100 @@ export class AlphaVault {
     public program: AlphaVaultProgram,
     public pubkey: PublicKey,
     public vault: Vault,
-    public mode: VaultMode,
+    public activationPoint: BN,
+    public preActivationDuration: BN,
+    public clock: Clock,
     public baseMintInfo: MintInfo,
-    public quoteMintInfo: MintInfo
+    public quoteMintInfo: MintInfo,
+    private opt?: Opt
   ) {}
 
+  /** Getter */
+
+  get mode() {
+    return this.vault.vaultMode === 0 ? VaultMode.PRORATA : VaultMode.FCFS;
+  }
+
+  get vaultPoint(): VaultPoint {
+    const firstJoinPoint = Number(this.vault.depositingPoint.toString());
+    const lastJoinPoint = Number(
+      this.activationPoint
+        .sub(
+          process.env.NODE_ENV === "test"
+            ? new BN(5)
+            : this.preActivationDuration
+        ) // Time window for vault to purchase token from the pool
+        .sub(
+          process.env.NODE_ENV === "test"
+            ? new BN(1)
+            : new BN(
+                this.vault.activationType === ActivationType.SLOT ? 750 : 5 * 60
+              )
+        )
+        .toString()
+    );
+    const lastBuyingPoint = Number(
+      this.activationPoint.sub(new BN(1)).toString()
+    );
+    const startVestingPoint = Number(this.vault.startVestingPoint.toString());
+    const endVestingPoint = Number(this.vault.endVestingPoint.toString());
+
+    return {
+      firstJoinPoint,
+      lastJoinPoint,
+      lastBuyingPoint,
+      startVestingPoint,
+      endVestingPoint,
+    };
+  }
+
+  get vaultState(): VaultState {
+    const currentSlot = this.clock.slot.toNumber();
+    const currentTimestamp = this.clock.unixTimestamp.toNumber();
+    const {
+      firstJoinPoint,
+      lastJoinPoint,
+      lastBuyingPoint,
+      startVestingPoint,
+      endVestingPoint,
+    } = this.vaultPoint;
+    let vaultState = VaultState.PREPARING;
+    const currentPoint =
+      this.vault.activationType === ActivationType.SLOT
+        ? currentSlot
+        : currentTimestamp;
+
+    if (firstJoinPoint > currentPoint) {
+      vaultState = VaultState.PREPARING;
+    } else if (
+      lastJoinPoint >= currentPoint &&
+      firstJoinPoint <= currentPoint
+    ) {
+      vaultState = VaultState.DEPOSITING;
+    } else if (
+      lastJoinPoint < currentPoint &&
+      lastBuyingPoint >= currentPoint
+    ) {
+      vaultState = VaultState.PURCHASING;
+    } else if (
+      lastBuyingPoint < currentPoint &&
+      startVestingPoint > currentPoint
+    ) {
+      vaultState = VaultState.LOCKING;
+    } else if (
+      startVestingPoint <= currentPoint &&
+      endVestingPoint > currentPoint
+    ) {
+      vaultState = VaultState.VESTING;
+    } else if (endVestingPoint <= currentPoint) {
+      vaultState = VaultState.ENDED;
+    }
+
+    return vaultState;
+  }
+  /** End Getter */
+
+  /** Static Function */
   /**
    * Creates an AlphaVault instance from a given vault address.
    *
@@ -84,11 +185,22 @@ export class AlphaVault {
     vaultAddress: PublicKey,
     opt?: Opt
   ): Promise<AlphaVault> {
+    const provider = new AnchorProvider(
+      connection,
+      {} as any,
+      AnchorProvider.defaultOptions()
+    );
+    const cluster = opt?.cluster || "mainnet-beta";
     const program = createProgram(connection, opt);
 
-    const vault = await program.account.vault.fetch(vaultAddress);
-    const vaultMode =
-      vault.vaultMode === 0 ? VaultMode.PRORATA : VaultMode.FCFS;
+    const accountsToFetch = [vaultAddress, SYSVAR_CLOCK_PUBKEY];
+    const [vaultAccountBuffer, clockAccountBuffer] =
+      await connection.getMultipleAccountsInfo(accountsToFetch);
+    const vault: Vault = program.coder.accounts.decode(
+      "vault",
+      vaultAccountBuffer.data
+    );
+    const clockState: Clock = ClockLayout.decode(clockAccountBuffer.data);
 
     const accounts = await connection.getMultipleAccountsInfo([
       vault.baseMint,
@@ -100,6 +212,10 @@ export class AlphaVault {
       baseMintAccount,
       baseMintAccount.owner
     );
+    const baseMintInfo = {
+      tokenProgram: baseMintAccount.owner,
+      mint: baseMint,
+    };
 
     const quoteMintAccount = accounts[1];
     const quoteMint = unpackMint(
@@ -107,21 +223,67 @@ export class AlphaVault {
       quoteMintAccount,
       quoteMintAccount.owner
     );
+    const quoteMintInfo = {
+      tokenProgram: quoteMintAccount.owner,
+      mint: quoteMint,
+    };
 
-    return new AlphaVault(
-      program,
-      vaultAddress,
-      vault,
-      vaultMode,
-      {
-        tokenProgram: baseMintAccount.owner,
-        mint: baseMint,
-      },
-      {
-        tokenProgram: quoteMintAccount.owner,
-        mint: quoteMint,
-      }
-    );
+    if (vault.poolType === PoolType.DLMM) {
+      const dlmmProgram = createDlmmProgram(connection, opt);
+      const pool = (await dlmmProgram.account.lbPair.fetch(
+        vault.pool
+      )) as unknown as LbPair;
+      return new AlphaVault(
+        program,
+        vaultAddress,
+        vault,
+        pool.activationPoint,
+        pool.preActivationDuration,
+        clockState,
+        baseMintInfo,
+        quoteMintInfo,
+        opt
+      );
+    }
+    if (vault.poolType === PoolType.DAMM) {
+      const ammProgram = createDammProgram(connection, opt);
+      const pool = (await ammProgram.account.pool.fetch(
+        vault.pool
+      )) as unknown as PoolState;
+      return new AlphaVault(
+        program,
+        vaultAddress,
+        vault,
+        pool.bootstrapping.activationPoint,
+        pool.bootstrapping.activationType === ActivationType.SLOT
+          ? new BN(9000)
+          : new BN(3600),
+        clockState,
+        baseMintInfo,
+        quoteMintInfo,
+        opt
+      );
+    }
+
+    if (vault.poolType === PoolType.DAMMV2) {
+      const cpAmm = createCpAmmProgram(connection, opt);
+      const pool = (await cpAmm.account.pool.fetch(
+        vault.pool
+      )) as unknown as PoolState;
+      return new AlphaVault(
+        program,
+        vaultAddress,
+        vault,
+        pool.bootstrapping.activationPoint,
+        pool.bootstrapping.activationType === ActivationType.SLOT
+          ? new BN(9000)
+          : new BN(3600),
+        clockState,
+        baseMintInfo,
+        quoteMintInfo,
+        opt
+      );
+    }
   }
 
   /**
@@ -276,7 +438,13 @@ export class AlphaVault {
     opt?: Opt
   ): Promise<Transaction> {
     const program = createProgram(connection, opt);
-    return AlphaVault.createVault(program, vaultParam, owner, Permissionless);
+
+    return AlphaVault.createVault(
+      program,
+      vaultParam,
+      owner,
+      WhitelistMode.Permissionless
+    );
   }
 
   /**
@@ -299,7 +467,7 @@ export class AlphaVault {
       program,
       vaultParam,
       owner,
-      PermissionWithMerkleProof
+      WhitelistMode.PermissionWithMerkleProof
     );
   }
 
@@ -323,7 +491,7 @@ export class AlphaVault {
       program,
       vaultParam,
       owner,
-      PermissionWithAuthority
+      WhitelistMode.PermissionWithAuthority
     );
   }
 
@@ -350,14 +518,252 @@ export class AlphaVault {
     const program = createProgram(connection, opt);
     return program.account.prorataVaultConfig.all();
   }
+  /** End Static Function */
+
+  /** Public Function */
+  /**
+   * Calculates and returns information about the total allocated, claimed,
+   * and claimable tokens in an escrow account based on certain conditions.
+   * @param {Escrow} escrowAccount - An object representing an escrow account, which likely contains
+   * information such as total deposits, claimed tokens, and other relevant data.
+   * @returns The `getClaimInfo` function returns an object with three properties: `totalAllocated`,
+   * `totalClaimed`, and `totalClaimable`.
+   */
+  public getClaimInfo(escrowAccount: Escrow | null): ClaimInfo {
+    if (
+      !escrowAccount ||
+      this.vault.totalDeposit.lten(0) ||
+      this.vault.boughtToken.lten(0)
+    ) {
+      return {
+        totalAllocated: new BN(0),
+        totalClaimed: new BN(0),
+        totalClaimable: new BN(0),
+      };
+    }
+
+    const currentSlot = this.clock.slot.toNumber();
+    const currentTimestamp = this.clock.unixTimestamp.toNumber();
+    const totalAllocated = this.vault.boughtToken
+      .mul(escrowAccount.totalDeposit)
+      .div(this.vault.totalDeposit);
+    const totalClaimed = escrowAccount.claimedToken;
+    const totalClaimable = (() => {
+      const currentSlotBN = new BN(
+        this.vault.activationType === ActivationType.SLOT
+          ? currentSlot
+          : currentTimestamp
+      );
+      if (currentSlotBN.lt(this.vault.startVestingPoint)) {
+        return new BN(0);
+      }
+
+      const endSlot = BN.min(currentSlotBN, this.vault.endVestingPoint);
+      const totalClaimableToken = this.vault.boughtToken
+        .mul(endSlot.add(new BN(1)).sub(this.vault.startVestingPoint))
+        .div(
+          this.vault.endVestingPoint
+            .add(new BN(1))
+            .sub(this.vault.startVestingPoint)
+        );
+      const drippedEscrowAmount = totalClaimableToken
+        .mul(escrowAccount.totalDeposit)
+        .div(this.vault.totalDeposit);
+      return drippedEscrowAmount.sub(escrowAccount.claimedToken);
+    })();
+
+    return {
+      totalAllocated,
+      totalClaimed,
+      totalClaimable,
+    };
+  }
+
+  /**
+   * The available deposit quota of the vault based on user's deposit info
+   * @param {escrow} Escrow - The `depositInfo` object can obtain from the `getEscrow` function.
+   * @param {merkleProof} DepositWithProofParams - The `merkleProof` object can be obtain from API by our dev.
+   * @returns The `getAvailableDepositQuota` function returns the available deposit quota in lamports
+   */
+  public getAvailableDepositQuota(
+    escrow: Escrow | null,
+    merkleProof?: DepositWithProofParams
+  ) {
+    const deposited = escrow?.totalDeposit ?? new BN(0);
+    let remainingQuota = new BN(Number.MAX_SAFE_INTEGER);
+    if (this.vault.whitelistMode == WhitelistMode.Permissionless) {
+      if (this.mode === VaultMode.FCFS) {
+        remainingQuota = this.vault.individualDepositingCap.sub(deposited);
+      }
+    } else if (
+      this.vault.whitelistMode == WhitelistMode.PermissionWithMerkleProof
+    ) {
+      remainingQuota = merkleProof
+        ? merkleProof.maxCap.sub(deposited)
+        : new BN(0);
+    } else if (
+      this.vault.whitelistMode == WhitelistMode.PermissionWithAuthority
+    ) {
+      remainingQuota = escrow ? escrow.maxCap.sub(deposited) : new BN(0);
+    }
+    let vaultCap = new BN(Number.MAX_SAFE_INTEGER);
+    if (this.mode === VaultMode.FCFS) {
+      vaultCap = this.vault.maxDepositingCap.sub(this.vault.totalDeposit);
+    }
+
+    return BN.min(remainingQuota, vaultCap);
+  }
+
+  public async interactionState(
+    escrow: Escrow | null,
+    merkleProof?: DepositWithProofParams | null,
+    clock?: Clock
+  ): Promise<InteractionState> {
+    await this.refreshState(clock);
+
+    const claimInfo = this.getClaimInfo(escrow);
+    const depositInfo = this.getDepositInfo(escrow);
+
+    const availableQuota = this.getAvailableDepositQuota(escrow, merkleProof);
+    const isWhitelisted = this.isWhitelisted(escrow, merkleProof);
+    const canClaim = this.canClaim(escrow);
+    const hadClaimed = escrow ? escrow.claimedToken.gtn(0) : false;
+    const canDeposit = this.canDeposit(escrow, merkleProof);
+    const hadDeposited = escrow ? escrow.totalDeposit.gtn(0) : false;
+    const canWithdraw = this.canWithdraw(escrow);
+    const canWithdrawRemainingQuote = this.canWithdrawRemainingQuote(escrow);
+    const hadWithdrawnRemainingQuote = this.hadWithdrawnRemainingQuote(escrow);
+    return {
+      claimInfo,
+      depositInfo,
+      availableQuota,
+      isWhitelisted,
+      canClaim,
+      hadClaimed,
+      canDeposit,
+      hadDeposited,
+      canWithdraw,
+      canWithdrawRemainingQuote,
+      hadWithdrawnRemainingQuote,
+    };
+  }
+
+  private isWhitelisted(
+    escrow: Escrow | null,
+    merkleProof: DepositWithProofParams | null
+  ) {
+    if (this.vault.whitelistMode === WhitelistMode.PermissionWithMerkleProof)
+      return !!merkleProof;
+    if (this.vault.whitelistMode === WhitelistMode.PermissionWithAuthority)
+      return !!escrow;
+
+    return true;
+  }
+
+  private canClaim(escrow: Escrow | null) {
+    if (!escrow) return false;
+
+    // Can only claim after vesting point
+    if (![VaultState.VESTING, VaultState.ENDED].includes(this.vaultState)) {
+      return false;
+    }
+
+    // Can only claim if there are token to claim
+    const claimInfo = this.getClaimInfo(escrow);
+    return claimInfo.totalClaimable.gtn(0);
+  }
+
+  private canDeposit(
+    escrow: Escrow | null,
+    merkleProof: DepositWithProofParams | null
+  ) {
+    // If not whitelisted, user cannot deposit
+    if (!this.isWhitelisted(escrow, merkleProof)) {
+      return false;
+    }
+
+    // If not in deposit mode, user cannot deposit
+    if (this.vaultState !== VaultState.DEPOSITING) {
+      return false;
+    }
+
+    // If personal cap is finished, user cannot deposit
+    const personalAvailableCap = this.getAvailableDepositQuota(
+      escrow,
+      merkleProof
+    );
+
+    if (personalAvailableCap.lten(0)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private canWithdraw(escrow: Escrow | null) {
+    if (!escrow) return false;
+
+    // Can withdraw after deposit in prorata mode
+    if (
+      escrow.totalDeposit.gtn(0) &&
+      this.mode === VaultMode.PRORATA &&
+      this.vaultState === VaultState.DEPOSITING
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private canWithdrawRemainingQuote(escrow: Escrow | null) {
+    if (!escrow) return false;
+
+    const currentPoint =
+      this.vault.activationType === ActivationType.SLOT
+        ? this.clock.slot.toNumber()
+        : this.clock.unixTimestamp.toNumber();
+
+    // make sure the user can withdraw after alpha-vault has done purchasing process
+    if (
+      this.vault.totalDeposit.gt(this.vault.swappedAmount) &&
+      currentPoint > this.vaultPoint.lastBuyingPoint
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private hadWithdrawnRemainingQuote(escrow: Escrow | null) {
+    if (!escrow) return false;
+
+    return escrow.refunded === 1;
+  }
 
   /**
    * Refreshes the state of the Alpha Vault by fetching the latest vault data.
    *
    * @return {void} No return value, updates the internal state of the Alpha Vault.
    */
-  public async refreshState() {
-    this.vault = await this.program.account.vault.fetch(this.pubkey);
+  public async refreshState(clock?: Clock) {
+    if (clock) {
+      this.vault = await this.program.account.vault.fetch(this.pubkey);
+      this.clock = clock;
+    } else {
+      const accountsToFetch = [this.pubkey, SYSVAR_CLOCK_PUBKEY];
+      const [vaultAccountBuffer, clockAccountBuffer] =
+        await this.program.provider.connection.getMultipleAccountsInfo(
+          accountsToFetch
+        );
+      const vault: Vault = this.program.coder.accounts.decode(
+        "vault",
+        vaultAccountBuffer.data
+      );
+      const clockState: Clock = ClockLayout.decode(clockAccountBuffer.data);
+
+      this.vault = vault;
+      this.clock = clockState;
+    }
   }
 
   /**
@@ -458,16 +864,25 @@ export class AlphaVault {
   public async deposit(
     maxAmount: BN,
     owner: PublicKey,
-    depositProof?: DepositWithProofParams
+    merkleProof?: DepositWithProofParams
   ): Promise<Transaction> {
+    if (this.vault.whitelistMode === WhitelistMode.PermissionWithMerkleProof) {
+      if (!merkleProof) {
+        throw new Error(
+          "Merkle proof is required for permissioned vault with merkle proof"
+        );
+      }
+    }
     const [escrow] = deriveEscrow(this.pubkey, owner, this.program.programId);
     const escrowAccount =
       await this.program.account.escrow.fetchNullable(escrow);
 
     const preInstructions: TransactionInstruction[] = [];
     if (!escrowAccount) {
-      if (this.vault.whitelistMode === PermissionWithMerkleProof) {
-        const { merkleRootConfig, maxCap, proof } = depositProof;
+      if (
+        this.vault.whitelistMode === WhitelistMode.PermissionWithMerkleProof
+      ) {
+        const { merkleRootConfig, maxCap, proof } = merkleProof;
 
         const createEscrowTx = await this.program.methods
           .createPermissionedEscrow(maxCap, proof)
@@ -483,7 +898,7 @@ export class AlphaVault {
           })
           .instruction();
         preInstructions.push(createEscrowTx);
-      } else if (this.vault.whitelistMode === Permissionless) {
+      } else if (this.vault.whitelistMode === WhitelistMode.Permissionless) {
         const createEscrowTx = await this.program.methods
           .createNewEscrow()
           .accountsPartial({
@@ -584,6 +999,18 @@ export class AlphaVault {
         this.quoteMintInfo.tokenProgram
       );
     createDestinationTokenIx && preInstructions.push(createDestinationTokenIx);
+
+    const postInstructions: TransactionInstruction[] = [];
+    if (this.vault.quoteMint.equals(NATIVE_MINT)) {
+      preInstructions.push(
+        ...wrapSOLInstruction(
+          owner,
+          destinationToken,
+          BigInt(amount.toString())
+        )
+      );
+      postInstructions.push(unwrapSOLInstruction(owner));
+    }
 
     const withdrawTx = await this.program.methods
       .withdraw(amount)
@@ -710,7 +1137,13 @@ export class AlphaVault {
       return fillDammTransaction(this.program, this.pubkey, this.vault, payer);
     } else if (poolType === PoolType.DAMMV2) {
     } else {
-      return fillDlmmTransaction(this.program, this.pubkey, this.vault, payer);
+      return fillDlmmTransaction(
+        this.program,
+        this.pubkey,
+        this.vault,
+        payer,
+        this.opt
+      );
     }
   }
 
@@ -780,10 +1213,8 @@ export class AlphaVault {
    * @param {Escrow | null} escrowAccount - The escrow account to retrieve deposit information for.
    * @return {Promise<DepositInfo>} A promise that resolves to the deposit information, including total deposit, total filled, and total returned.
    */
-  public async getDepositInfo(
-    escrowAccount: Escrow | null
-  ): Promise<DepositInfo> {
-    if (!escrowAccount) {
+  public getDepositInfo(escrowAccount: Escrow | null): DepositInfo {
+    if (!escrowAccount || this.vault.totalDeposit.isZero()) {
       return {
         totalDeposit: new BN(0),
         totalFilled: new BN(0),
@@ -794,11 +1225,22 @@ export class AlphaVault {
     const remainingAmount = this.vault.totalDeposit.sub(
       this.vault.swappedAmount
     );
-    const totalReturned = remainingAmount
-      .mul(escrowAccount.totalDeposit)
-      .div(this.vault.totalDeposit);
 
-    const totalFilled = escrowAccount.totalDeposit.sub(totalReturned);
+    const hasCrankDurationFinished = [
+      VaultState.LOCKING,
+      VaultState.VESTING,
+      VaultState.ENDED,
+    ].includes(this.vaultState);
+
+    const totalReturned = hasCrankDurationFinished
+      ? remainingAmount
+          .mul(escrowAccount.totalDeposit)
+          .div(this.vault.totalDeposit)
+      : new BN(0);
+
+    const totalFilled = hasCrankDurationFinished
+      ? escrowAccount.totalDeposit.sub(totalReturned)
+      : new BN(0);
 
     return {
       totalDeposit: escrowAccount.totalDeposit,
@@ -880,13 +1322,5 @@ export class AlphaVault {
       },
     ]);
   }
-
-  public static async getVault(
-    connection: Connection,
-    vaultAddress: PublicKey,
-    opt?: Opt
-  ) {
-    const program = createProgram(connection, opt);
-    return program.account.vault.fetch(vaultAddress);
-  }
+  /** End Public Function */
 }

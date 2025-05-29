@@ -18,13 +18,13 @@ import { NATIVE_MINT } from "@solana/spl-token";
 import {
   AlphaVault,
   DYNAMIC_AMM_PROGRAM_ID,
-  PermissionWithMerkleProof,
+  WhitelistMode,
   PoolType,
 } from "../../../alpha-vault";
-import AmmImpl from "@mercurial-finance/dynamic-amm-sdk";
-import { ActivationType } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/types";
-import { deriveCustomizablePermissionlessConstantProductPoolAddress } from "@mercurial-finance/dynamic-amm-sdk/dist/cjs/src/amm/utils";
+import AmmImpl from "@meteora-ag/dynamic-amm-sdk";
+import { ActivationType } from "@meteora-ag/dynamic-amm-sdk/dist/cjs/src/amm/types";
 import BN from "bn.js";
+import { deriveCustomizablePermissionlessConstantProductPoolAddress } from "@meteora-ag/dynamic-amm-sdk/dist/cjs/src/amm/utils";
 
 async function createCustomizableDynamicPoolWithPermissionedVault(
   connection: Connection,
@@ -104,7 +104,7 @@ async function createCustomizableDynamicPoolWithPermissionedVault(
       individualDepositingCap,
       maxDepositingCap,
       escrowFee,
-      whitelistMode: PermissionWithMerkleProof,
+      whitelistMode: WhitelistMode.PermissionWithMerkleProof,
     },
     creator,
     {
