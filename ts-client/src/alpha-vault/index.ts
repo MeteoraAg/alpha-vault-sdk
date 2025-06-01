@@ -269,13 +269,14 @@ export class AlphaVault {
       const cpAmm = createCpAmmProgram(connection, opt);
       const pool = (await cpAmm.account.pool.fetch(
         vault.pool
-      )) as unknown as PoolState;
+      ))
+      
       return new AlphaVault(
         program,
         vaultAddress,
         vault,
-        pool.bootstrapping.activationPoint,
-        pool.bootstrapping.activationType === ActivationType.SLOT
+        pool.activationPoint,
+        pool.activationType === ActivationType.SLOT
           ? new BN(9000)
           : new BN(3600),
         clockState,
