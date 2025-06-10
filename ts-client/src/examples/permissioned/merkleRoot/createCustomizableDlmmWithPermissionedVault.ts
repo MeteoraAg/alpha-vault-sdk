@@ -14,11 +14,7 @@ import {
   SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
 import { BN } from "bn.js";
-import {
-  AlphaVault,
-  PermissionWithMerkleProof,
-  PoolType,
-} from "../../../alpha-vault";
+import { AlphaVault, PoolType, WhitelistMode } from "../../../alpha-vault";
 import {
   Clock,
   ClockLayout,
@@ -102,7 +98,7 @@ async function createCustomizableDlmmWithPermissionedVault(
       endVestingPoint,
       maxBuyingCap,
       escrowFee,
-      whitelistMode: PermissionWithMerkleProof,
+      whitelistMode: WhitelistMode.PermissionWithMerkleProof,
     },
     creator,
     {
