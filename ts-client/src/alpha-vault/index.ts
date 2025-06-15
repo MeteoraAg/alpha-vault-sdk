@@ -17,6 +17,7 @@ import {
 import {
   ALPHA_VAULT_TREASURY_ID,
   DYNAMIC_AMM_PROGRAM_ID,
+  MERKLE_PROOF_API,
   PROGRAM_ID,
   VaultPoint,
   VaultState,
@@ -35,6 +36,7 @@ import {
   createDlmmProgram,
   createDammProgram,
   createCpAmmProgram,
+  deriveMerkleProofMetadata,
 } from "./helper";
 import IDL from "./alpha_vault.json";
 import {
@@ -741,7 +743,12 @@ export class AlphaVault {
   }
 
   private escrowAvailableDepositOverflowAmount(escrow: Escrow | null) {
-    if (!escrow || this.vault.vaultMode == VaultMode.FCFS) return new BN(0);
+    if (
+      !escrow ||
+      this.vault.vaultMode == VaultMode.FCFS ||
+      this.vault.totalDeposit.isZero()
+    )
+      return new BN(0);
 
     const vaultDepositOverflow = this.vault.totalDeposit.gt(
       this.vault.maxBuyingCap
@@ -764,9 +771,13 @@ export class AlphaVault {
         ? this.clock.slot.toNumber()
         : this.clock.unixTimestamp.toNumber();
 
+    const remainingQuoteAmount = this.vault.totalDeposit.sub(
+      this.vault.swappedAmount
+    );
+
     return (
       currentPoint > this.vaultPoint.lastBuyingPoint &&
-      this.vault.vaultMode == VaultMode.PRORATA &&
+      remainingQuoteAmount.gt(new BN(0)) &&
       escrow.refunded === 0
     );
   }
@@ -1214,6 +1225,97 @@ export class AlphaVault {
         systemProgram: SystemProgram.programId,
       })
       .transaction();
+  }
+
+  /**
+   * Creates a Merkle proof metadata for the vault.
+   *
+   * @param {PublicKey} vaultCreator - The public key of the creator's wallet.
+   * @param {string} proofUrl - The URL pointing to the Merkle proof data.
+   * @return {Promise<Transaction>} A promise that resolves to the transaction for creating the Merkle proof metadata.
+   */
+
+  public async createMerkleProofMetadata(
+    vaultCreator: PublicKey,
+    proofUrl: string
+  ) {
+    const [merkleProofMetadata] = deriveMerkleProofMetadata(
+      this.pubkey,
+      this.program.programId
+    );
+
+    const { blockhash, lastValidBlockHeight } =
+      await this.program.provider.connection.getLatestBlockhash("confirmed");
+
+    const createMerkleProofMetadataTx = await this.program.methods
+      .createMerkleProofMetadata(proofUrl)
+      .accountsPartial({
+        merkleProofMetadata,
+        vault: this.pubkey,
+        admin: vaultCreator,
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: vaultCreator,
+    }).add(createMerkleProofMetadataTx);
+  }
+
+  /**
+   * Retrieves the URL of the Merkle proof data associated with the vault.
+   *
+   * @return {Promise<string>} A promise that resolves to the URL of the Merkle proof data.
+   */
+
+  public async getMerkleProofUrl(): Promise<string> {
+    const [merkleProofMetadata] = deriveMerkleProofMetadata(
+      this.pubkey,
+      this.program.programId
+    );
+
+    const merkleProofMetadataState =
+      await this.program.account.merkleProofMetadata.fetchNullable(
+        merkleProofMetadata
+      );
+
+    return merkleProofMetadataState
+      ? merkleProofMetadataState.proofUrl
+      : MERKLE_PROOF_API[this.opt.cluster || "mainnet-beta"];
+  }
+
+  /**
+   * Closes the Merkle proof metadata for the vault.
+   *
+   * @param {PublicKey} vaultCreator - The public key of the creator's wallet.
+   * @return {Promise<Transaction>} A promise that resolves to the transaction for closing the Merkle proof metadata.
+   */
+  public async closeMerkleProofMetadata(vaultCreator: PublicKey) {
+    const [merkleProofMetadata] = deriveMerkleProofMetadata(
+      this.pubkey,
+      this.program.programId
+    );
+
+    const closeMerkleProofMetadataTx = await this.program.methods
+      .closeMerkleProofMetadata()
+      .accountsPartial({
+        merkleProofMetadata,
+        vault: this.pubkey,
+        rentReceiver: vaultCreator,
+        admin: vaultCreator,
+      })
+      .transaction();
+
+    const { blockhash, lastValidBlockHeight } =
+      await this.program.provider.connection.getLatestBlockhash("confirmed");
+
+    return new Transaction({
+      blockhash,
+      lastValidBlockHeight,
+      feePayer: vaultCreator,
+    }).add(closeMerkleProofMetadataTx);
   }
 
   /**

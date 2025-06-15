@@ -121,6 +121,16 @@ export function deriveCrankFeeWhitelist(
   );
 }
 
+export function deriveMerkleProofMetadata(
+  alphaVault: PublicKey,
+  programId: PublicKey
+) {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from(SEED.merkleProofMetadata), alphaVault.toBuffer()],
+    programId
+  );
+}
+
 export function deriveMerkleRootConfig(
   alphaVault: PublicKey,
   version: BN,
@@ -263,9 +273,8 @@ export const fillDammV2Transaction = async (
   );
 
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount = await connection.getAccountInfo(
-    crankFeeWhitelist
-  );
+  const crankFeeWhitelistAccount =
+    await connection.getAccountInfo(crankFeeWhitelist);
 
   const preInstructions: TransactionInstruction[] = [];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =
@@ -330,9 +339,8 @@ export const fillDlmmTransaction = async (
   });
 
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount = await connection.getAccountInfo(
-    crankFeeWhitelist
-  );
+  const crankFeeWhitelistAccount =
+    await connection.getAccountInfo(crankFeeWhitelist);
 
   // TODO: Estimate CU
   const preInstructions: TransactionInstruction[] = [
@@ -354,8 +362,8 @@ export const fillDlmmTransaction = async (
     vault.vaultMode == VaultMode.FCFS
       ? vault.totalDeposit
       : vault.totalDeposit.lt(vault.maxBuyingCap)
-      ? vault.totalDeposit
-      : vault.maxBuyingCap;
+        ? vault.totalDeposit
+        : vault.maxBuyingCap;
 
   const remainingInAmount = inAmountCap.sub(vault.swappedAmount);
 
@@ -498,9 +506,8 @@ export const fillDammTransaction = async (
   });
 
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
-  const crankFeeWhitelistAccount = await connection.getAccountInfo(
-    crankFeeWhitelist
-  );
+  const crankFeeWhitelistAccount =
+    await connection.getAccountInfo(crankFeeWhitelist);
 
   const preInstructions: TransactionInstruction[] = [];
   const { ataPubKey: tokenOutVault, ix: createTokenOutVaultIx } =

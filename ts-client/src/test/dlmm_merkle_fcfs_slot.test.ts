@@ -26,6 +26,7 @@ import {
   createBaseAndQuoteToken,
   createIndividualMerkle,
   createMerkle,
+  createMerkleMetadata,
   getAmountInLamports,
   keypair,
   MERKLEONE_DEPOSIT_CAP,
@@ -141,6 +142,11 @@ describe("DLMM, Merkle, FCFS, SLOT", () => {
       alphaVault.getEscrow(merkleWalletOne.publicKey),
       alphaVault.getEscrow(merkleWalletTwo.publicKey),
     ]);
+
+    const proofUrl = "https://test-proof.com";
+    await createMerkleMetadata(alphaVault, keypair, proofUrl);
+    const gottenProofUrl = await alphaVault.getMerkleProofUrl();
+    expect(gottenProofUrl).toBe(proofUrl);
 
     const { tree, merkleRootConfig } = await createMerkle(
       alphaVault,
