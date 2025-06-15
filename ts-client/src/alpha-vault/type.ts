@@ -43,6 +43,8 @@ export interface InteractionState {
   canDeposit: boolean;
   hadDeposited: boolean;
   canWithdraw: boolean;
+  canWithdrawDepositOverflow: boolean;
+  availableDepositOverflow: BN;
   canWithdrawRemainingQuote: boolean;
   hadWithdrawnRemainingQuote: boolean;
 }

@@ -267,10 +267,8 @@ export class AlphaVault {
 
     if (vault.poolType === PoolType.DAMMV2) {
       const cpAmm = createCpAmmProgram(connection, opt);
-      const pool = (await cpAmm.account.pool.fetch(
-        vault.pool
-      ))
-      
+      const pool = await cpAmm.account.pool.fetch(vault.pool);
+
       return new AlphaVault(
         program,
         vaultAddress,
@@ -549,19 +547,20 @@ export class AlphaVault {
       .mul(escrowAccount.totalDeposit)
       .div(this.vault.totalDeposit);
     const totalClaimed = escrowAccount.claimedToken;
+
     const totalClaimable = (() => {
-      const currentSlotBN = new BN(
+      const currentPoint = new BN(
         this.vault.activationType === ActivationType.SLOT
           ? currentSlot
           : currentTimestamp
       );
-      if (currentSlotBN.lt(this.vault.startVestingPoint)) {
+      if (currentPoint.lt(this.vault.startVestingPoint)) {
         return new BN(0);
       }
 
-      const endSlot = BN.min(currentSlotBN, this.vault.endVestingPoint);
+      const endPoint = BN.min(currentPoint, this.vault.endVestingPoint);
       const totalClaimableToken = this.vault.boughtToken
-        .mul(endSlot.add(new BN(1)).sub(this.vault.startVestingPoint))
+        .mul(endPoint.add(new BN(1)).sub(this.vault.startVestingPoint))
         .div(
           this.vault.endVestingPoint
             .add(new BN(1))
@@ -570,6 +569,7 @@ export class AlphaVault {
       const drippedEscrowAmount = totalClaimableToken
         .mul(escrowAccount.totalDeposit)
         .div(this.vault.totalDeposit);
+
       return drippedEscrowAmount.sub(escrowAccount.claimedToken);
     })();
 
@@ -632,8 +632,12 @@ export class AlphaVault {
     const canDeposit = this.canDeposit(escrow, merkleProof);
     const hadDeposited = escrow ? escrow.totalDeposit.gtn(0) : false;
     const canWithdraw = this.canWithdraw(escrow);
+    const canWithdrawDepositOverflow = this.canWithdrawDepositOverflow(escrow);
+    const availableDepositOverflow =
+      this.escrowAvailableDepositOverflowAmount(escrow);
     const canWithdrawRemainingQuote = this.canWithdrawRemainingQuote(escrow);
     const hadWithdrawnRemainingQuote = this.hadWithdrawnRemainingQuote(escrow);
+
     return {
       claimInfo,
       depositInfo,
@@ -644,6 +648,8 @@ export class AlphaVault {
       canDeposit,
       hadDeposited,
       canWithdraw,
+      canWithdrawDepositOverflow,
+      availableDepositOverflow,
       canWithdrawRemainingQuote,
       hadWithdrawnRemainingQuote,
     };
@@ -716,6 +722,40 @@ export class AlphaVault {
     return false;
   }
 
+  private canWithdrawDepositOverflow(escrow: Escrow | null) {
+    if (!escrow) return false;
+
+    const currentPoint =
+      this.vault.activationType === ActivationType.SLOT
+        ? this.clock.slot.toNumber()
+        : this.clock.unixTimestamp.toNumber();
+
+    const escrowAvailableDepositOverflowAmount =
+      this.escrowAvailableDepositOverflowAmount(escrow);
+
+    return (
+      currentPoint > this.vaultPoint.lastJoinPoint &&
+      currentPoint <= this.vaultPoint.lastBuyingPoint &&
+      escrowAvailableDepositOverflowAmount.gt(new BN(0))
+    );
+  }
+
+  private escrowAvailableDepositOverflowAmount(escrow: Escrow | null) {
+    if (!escrow || this.vault.vaultMode == VaultMode.FCFS) return new BN(0);
+
+    const vaultDepositOverflow = this.vault.totalDeposit.gt(
+      this.vault.maxBuyingCap
+    )
+      ? this.vault.totalDeposit.sub(this.vault.maxBuyingCap)
+      : new BN(0);
+
+    const escrowDepositOverflow = vaultDepositOverflow
+      .mul(escrow.totalDeposit)
+      .div(this.vault.totalDeposit);
+
+    return escrowDepositOverflow.sub(escrow.withdrawnDepositOverflow);
+  }
+
   private canWithdrawRemainingQuote(escrow: Escrow | null) {
     if (!escrow) return false;
 
@@ -724,15 +764,11 @@ export class AlphaVault {
         ? this.clock.slot.toNumber()
         : this.clock.unixTimestamp.toNumber();
 
-    // make sure the user can withdraw after alpha-vault has done purchasing process
-    if (
-      this.vault.totalDeposit.gt(this.vault.swappedAmount) &&
-      currentPoint > this.vaultPoint.lastBuyingPoint
-    ) {
-      return true;
-    }
-
-    return false;
+    return (
+      currentPoint > this.vaultPoint.lastBuyingPoint &&
+      this.vault.vaultMode == VaultMode.PRORATA &&
+      escrow.refunded === 0
+    );
   }
 
   private hadWithdrawnRemainingQuote(escrow: Escrow | null) {
