@@ -1,8 +1,8 @@
 {
-  "address": "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
+  "address": "SNPmGgnywBvvrAKMLundzG6StojyHTHDLu7T4sdhP4k",
   "metadata": {
     "name": "alpha_vault",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "spec": "0.1.0",
     "description": "Created with Anchor"
   },
@@ -251,6 +251,72 @@
       "args": []
     },
     {
+      "name": "close_merkle_proof_metadata",
+      "discriminator": [
+        23,
+        52,
+        170,
+        30,
+        252,
+        47,
+        100,
+        129
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "relations": [
+            "merkle_proof_metadata"
+          ]
+        },
+        {
+          "name": "merkle_proof_metadata",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "rent_receiver",
+          "writable": true
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "close_prorata_config",
       "discriminator": [
         84,
@@ -434,6 +500,109 @@
               "name": "FcfsConfigParameters"
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "create_merkle_proof_metadata",
+      "discriminator": [
+        151,
+        46,
+        163,
+        52,
+        181,
+        178,
+        47,
+        227
+      ],
+      "accounts": [
+        {
+          "name": "vault"
+        },
+        {
+          "name": "merkle_proof_metadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  114,
+                  107,
+                  108,
+                  101,
+                  95,
+                  112,
+                  114,
+                  111,
+                  111,
+                  102,
+                  95,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "proof_url",
+          "type": "string"
         }
       ]
     },
@@ -832,39 +1001,6 @@
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "escrow0"
-        },
-        {
-          "name": "escrow1"
-        },
-        {
-          "name": "escrow2"
-        },
-        {
-          "name": "escrow3"
-        },
-        {
-          "name": "escrow4"
-        },
-        {
-          "name": "escrow5"
-        },
-        {
-          "name": "escrow6"
-        },
-        {
-          "name": "escrow7"
-        },
-        {
-          "name": "escrow8"
-        },
-        {
-          "name": "escrow9"
-        },
-        {
-          "name": "escrow10"
-        },
-        {
           "name": "event_authority",
           "pda": {
             "seeds": [
@@ -1223,7 +1359,7 @@
         },
         {
           "name": "amm_program",
-          "address": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo"
+          "address": "LbVRzDTvBDEcrthxfZ4RL6yiq3uZw8bS6MwtdY6UhFQ"
         },
         {
           "name": "pool",
@@ -2274,6 +2410,19 @@
       ]
     },
     {
+      "name": "MerkleProofMetadata",
+      "discriminator": [
+        133,
+        24,
+        30,
+        217,
+        240,
+        20,
+        222,
+        100
+      ]
+    },
+    {
       "name": "MerkleRootConfig",
       "discriminator": [
         103,
@@ -2445,6 +2594,19 @@
       ]
     },
     {
+      "name": "MerkleProofMetadataCreated",
+      "discriminator": [
+        186,
+        42,
+        131,
+        176,
+        244,
+        128,
+        196,
+        68
+      ]
+    },
+    {
       "name": "MerkleRootConfigCreated",
       "discriminator": [
         121,
@@ -2540,7 +2702,7 @@
     },
     {
       "code": 6008,
-      "name": "EscrowHasRefuned",
+      "name": "EscrowHasRefunded",
       "msg": "Escrow has refunded"
     },
     {
@@ -2595,8 +2757,8 @@
     },
     {
       "code": 6019,
-      "name": "RefundAmountIsZero",
-      "msg": "Refund amount is zero"
+      "name": "WithdrawAmountIsZero",
+      "msg": "Withdraw amount is zero"
     },
     {
       "code": 6020,
@@ -2864,23 +3026,18 @@
             "type": "u64"
           },
           {
-            "name": "padding_2",
+            "name": "withdrawn_deposit_overflow",
             "docs": [
-              "padding 2"
+              "Only has meaning in pro-rata vault"
             ],
-            "type": {
-              "array": [
-                "u8",
-                8
-              ]
-            }
+            "type": "u64"
           },
           {
             "name": "padding",
             "type": {
               "array": [
                 "u128",
-                40
+                1
               ]
             }
           }
@@ -3332,6 +3489,53 @@
           {
             "name": "whitelist_mode",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MerkleProofMetadata",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "docs": [
+              "vault pubkey that config is belong"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          },
+          {
+            "name": "proof_url",
+            "docs": [
+              "proof url"
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MerkleProofMetadataCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "proof_url",
+            "type": "string"
           }
         ]
       }
