@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `closeMerkleProofMetadata` function. Allow vault creator to close merkle proof metadata account.
 - `getMerkleProofUrl` function. Get merkle proof API endpoint from merkle proof metadata account. If not available, it default back to meteora API endpoint
 - `deriveMerkleProofMetadata` function. Derive merkle proof metadata account PDA.
+- `getMerkleProofForDeposit` function. Get merkle proof required for deposit based on merkle proof API stored in `MerkleProofMetadata`.
 
 ### Changed
 
