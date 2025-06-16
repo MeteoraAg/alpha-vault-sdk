@@ -1287,6 +1287,44 @@ export class AlphaVault {
   }
 
   /**
+   * Retrieves the Merkle proof data required for depositing into the vault.
+   * The data is fetched from the URL stored in the vault's Merkle proof metadata.
+   *
+   * @param {PublicKey} owner - The public key of the depositor's wallet.
+   * @return {Promise<DepositWithProofParams | null>} A promise that resolves to the Merkle proof data if it exists, or null otherwise.
+   */
+  public async getMerkleProofForDeposit(
+    owner: PublicKey
+  ): Promise<DepositWithProofParams | null> {
+    interface MerkleProofResponse {
+      merkle_root_config: String;
+      max_cap: number;
+      proof: number[][];
+    }
+
+    let baseUrl = await this.getMerkleProofUrl();
+    if (baseUrl.endsWith("/")) {
+      baseUrl = baseUrl.slice(0, baseUrl.length - 1);
+    }
+    const fullUrl = `${baseUrl}/${this.pubkey.toBase58()}/${owner.toBase58()}`;
+
+    try {
+      const response = await fetch(fullUrl);
+      if (response.ok) {
+        const data: MerkleProofResponse = await response.json();
+        return {
+          merkleRootConfig: new PublicKey(data.merkle_root_config),
+          maxCap: new BN(data.max_cap),
+          proof: data.proof,
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return null;
+  }
+
+  /**
    * Closes the Merkle proof metadata for the vault.
    *
    * @param {PublicKey} vaultCreator - The public key of the creator's wallet.
