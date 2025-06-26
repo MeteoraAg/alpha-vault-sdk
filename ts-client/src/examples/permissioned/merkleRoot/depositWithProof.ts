@@ -5,67 +5,35 @@ import {
   PublicKey,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { loadKeypairFromFile } from "../../utils";
-import { AlphaVault } from "../../../alpha-vault";
 import BN from "bn.js";
 import dotenv from "dotenv";
-import Decimal from "decimal.js";
-import { deriveMerkleRootConfig } from "../../../alpha-vault/helper";
-import { createMerkleTree, loadWhitelistWalletCsv } from "./utils";
-import { PROGRAM_ID } from "../../../alpha-vault/constant";
+import { AlphaVault } from "../../../alpha-vault";
+import { loadKeypairFromFile } from "../../utils";
 
 dotenv.config();
 
 async function depositToPermissionedAlphaVault(
   vault: PublicKey,
   depositAmount: BN,
-  csvPath: string,
   payer: Keypair
 ) {
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
   const alphaVault = await AlphaVault.create(connection, vault);
 
-  // 1. Load whitelisted wallet
-  const whitelistedWallets = await loadWhitelistWalletCsv(csvPath);
-
-  // 2. Create merkle tree
-  const tree = await createMerkleTree(
-    connection,
-    alphaVault,
-    whitelistedWallets
+  // 1. Load merkle proof
+  const merkleProof = await alphaVault.getMerkleProofForDeposit(
+    payer.publicKey
   );
 
-  // 3. Get wallet proof info
-  const depositorWhitelistInfo = whitelistedWallets.find((w) =>
-    w.wallet.equals(payer.publicKey)
-  );
-  const quoteMint = await connection.getTokenSupply(alphaVault.vault.quoteMint);
-  const toNativeAmountMultiplier = new Decimal(10 ** quoteMint.value.decimals);
+  console.log(merkleProof);
 
-  const nativeDepositCap = new BN(
-    depositorWhitelistInfo.depositCap.mul(toNativeAmountMultiplier).toString()
+  // 2. Deposit
+  const depositTx = await alphaVault.deposit(
+    depositAmount,
+    payer.publicKey,
+    merkleProof
   );
 
-  const depositorProof = tree
-    .getProof(payer.publicKey, nativeDepositCap)
-    .map((buffer) => {
-      return Array.from(new Uint8Array(buffer));
-    });
-
-  const [merkleRootConfig] = deriveMerkleRootConfig(
-    alphaVault.pubkey,
-    new BN(0),
-    new PublicKey(PROGRAM_ID["mainnet-beta"])
-  );
-
-  // 4. Deposit
-  const depositTx = await alphaVault.deposit(depositAmount, payer.publicKey, {
-    merkleRootConfig,
-    maxCap: nativeDepositCap,
-    proof: depositorProof,
-  });
-
-  console.log(`Depositing ${depositAmount.toString()}`);
   const txHash = await sendAndConfirmTransaction(connection, depositTx, [
     payer,
   ]);
@@ -77,21 +45,14 @@ async function depositToPermissionedAlphaVault(
 }
 
 // Alpha vault to be deposited to
-const vault = new PublicKey("ARGqVVUPPqtqH9UeBHvYsv7AtZv623YdEaEziZ1pdDUs");
+const vault = new PublicKey("BToaBpGTZd1dt2W46jn8Lm65yk7FgerZgJdwAE1wRsxS");
 const depositAmount = new BN(100_000);
 const payer = loadKeypairFromFile(process.env.KEYPAIR_PATH);
-const whitelistWalletCsvFilepath =
-  "src/examples/permissioned/whitelist_wallet.csv";
 
 /**
  * This example shows how to deposit to permissioned alpha vault. Deposit can only happen before the deposit close.
  */
-depositToPermissionedAlphaVault(
-  vault,
-  depositAmount,
-  whitelistWalletCsvFilepath,
-  payer
-)
+depositToPermissionedAlphaVault(vault, depositAmount, payer)
   .then(() => {
     console.log("Done");
   })

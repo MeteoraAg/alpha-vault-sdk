@@ -113,13 +113,19 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
   test("DEPOSITING", async () => {
     await waitForState(connection, alphaVault, VaultState.DEPOSITING);
 
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
-      await alphaVault.interactionState(escrow);
+    const {
+      canDeposit,
+      canClaim,
+      canWithdraw,
+      canWithdrawRemainingQuote,
+      canWithdrawDepositOverflow,
+    } = await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.DEPOSITING);
     expect(canDeposit).toBe(true);
     expect(canWithdraw).toBe(false);
     expect(canWithdrawRemainingQuote).toBe(false);
     expect(canClaim).toBe(false);
+    expect(canWithdrawDepositOverflow).toBe(false);
 
     const depositAmount = getAmountInLamports(MAX_VAULT_BUYING_CAP + 1, 9);
     const depositTx = await alphaVault.deposit(
@@ -144,11 +150,13 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
       canClaim: canClaimAfter,
       canWithdraw: canWithdrawAfter,
       canWithdrawRemainingQuote: canWithdrawRemainingQuoteAfter,
+      canWithdrawDepositOverflow: canWithdrawDepositOverflowAfter,
     } = await alphaVault.interactionState(escrow);
     expect(canDepositAfter).toBe(true);
     expect(canClaimAfter).toBe(false);
     expect(canWithdrawRemainingQuoteAfter).toBe(false);
     expect(canWithdrawAfter).toBe(true);
+    expect(canWithdrawDepositOverflowAfter).toBe(false);
   });
 
   test("PURCHASING", async () => {
@@ -159,24 +167,38 @@ describe("DAMM, Permissionless, PRORATA, SLOT", () => {
       keypair,
     ]);
     console.log("🚀 ~ fillTxHash:", fillTxHash);
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
-      await alphaVault.interactionState(escrow);
+    const {
+      canDeposit,
+      canClaim,
+      canWithdraw,
+      canWithdrawRemainingQuote,
+      canWithdrawDepositOverflow,
+      availableDepositOverflow,
+    } = await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.PURCHASING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
     expect(canWithdrawRemainingQuote).toBe(false);
+    expect(canWithdrawDepositOverflow).toBe(true);
+    expect(availableDepositOverflow.gt(new BN(0))).toBeTruthy();
     expect(canClaim).toBe(false);
   });
 
   test("LOCKING", async () => {
     await waitForState(connection, alphaVault, VaultState.LOCKING);
 
-    const { canDeposit, canClaim, canWithdraw, canWithdrawRemainingQuote } =
-      await alphaVault.interactionState(escrow);
+    const {
+      canDeposit,
+      canClaim,
+      canWithdraw,
+      canWithdrawRemainingQuote,
+      canWithdrawDepositOverflow,
+    } = await alphaVault.interactionState(escrow);
     expect(alphaVault.vaultState).toBe(VaultState.LOCKING);
     expect(canDeposit).toBe(false);
     expect(canWithdraw).toBe(false);
     expect(canWithdrawRemainingQuote).toBe(true);
+    expect(canWithdrawDepositOverflow).toBe(false);
     expect(canClaim).toBe(false);
   });
 

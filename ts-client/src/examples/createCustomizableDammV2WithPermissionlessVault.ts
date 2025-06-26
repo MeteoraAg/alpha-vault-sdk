@@ -17,7 +17,7 @@ import {
   SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
 import { BN } from "bn.js";
-import { AlphaVault, Permissionless, PoolType } from "../alpha-vault";
+import { AlphaVault, PoolType, WhitelistMode } from "../alpha-vault";
 import {
   Clock,
   ClockLayout,
@@ -142,7 +142,7 @@ async function createCustomizableDammV2WithPermissionlessVault(
       endVestingPoint,
       maxBuyingCap,
       escrowFee,
-      whitelistMode: Permissionless,
+      whitelistMode: WhitelistMode.Permissionless,
     },
     creator,
     {

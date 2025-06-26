@@ -19,6 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## @meteora-ag/alpha-vault [1.1.14] [PR #16](https://github.com/MeteoraAg/alpha-vault-sdk/pull/16)
+
+### Added
+
+- `createMerkleProofMetadata` function. Allow vault creator to submit merkle proof API endpoint.
+- `closeMerkleProofMetadata` function. Allow vault creator to close merkle proof metadata account.
+- `getMerkleProofUrl` function. Get merkle proof API endpoint from merkle proof metadata account. If not available, it default back to meteora API endpoint
+- `deriveMerkleProofMetadata` function. Derive merkle proof metadata account PDA.
+- `getMerkleProofForDeposit` function. Get merkle proof required for deposit based on merkle proof API stored in `MerkleProofMetadata`.
+
+### Changed
+
+- `withdrawRemainingQuote` can only be invoked after vault fill stage, which the condition is `current_point > last_buying_point`.
+- `withdraw` have 2 stages now. The first stage is to withdraw from escrow and the second stage is to withdraw excessive quote token from the vault. The second stage (new stage) is only applicable when the vault is in prorata mode. The second stage is triggered when the `current_point >= last_join_point && current_point <= last_buying_point`. The second stage is being represented as `canWithdrawDepositOverflow` in `InteractionState` object, and the amount can be withdrawn in that stage is `availableDepositOverflow` in `InteractionState` object.
+
 ## @meteora-ag/alpha-vault [1.1.11] [PR #13](https://github.com/MeteoraAg/alpha-vault-sdk/pull/13)
 
 ### Added

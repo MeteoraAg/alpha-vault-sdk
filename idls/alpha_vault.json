@@ -2,30 +2,19 @@
   "address": "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
   "metadata": {
     "name": "alpha_vault",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "spec": "0.1.0",
     "description": "Created with Anchor"
   },
   "instructions": [
     {
       "name": "claim_token",
-      "discriminator": [
-        116,
-        206,
-        27,
-        191,
-        166,
-        19,
-        0,
-        73
-      ],
+      "discriminator": [116, 206, 27, 191, 166, 19, 0, 73],
       "accounts": [
         {
           "name": "vault",
           "writable": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "escrow",
@@ -34,9 +23,7 @@
         {
           "name": "token_out_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "destination_token",
@@ -51,9 +38,7 @@
         {
           "name": "owner",
           "signer": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "event_authority",
@@ -62,23 +47,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -92,16 +62,7 @@
     },
     {
       "name": "close_crank_fee_whitelist",
-      "discriminator": [
-        189,
-        166,
-        73,
-        241,
-        81,
-        12,
-        246,
-        170
-      ],
+      "discriminator": [189, 166, 73, 241, 81, 12, 246, 170],
       "accounts": [
         {
           "name": "crank_fee_whitelist",
@@ -123,23 +84,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -153,23 +99,12 @@
     },
     {
       "name": "close_escrow",
-      "discriminator": [
-        139,
-        171,
-        94,
-        146,
-        191,
-        91,
-        144,
-        50
-      ],
+      "discriminator": [139, 171, 94, 146, 191, 91, 144, 50],
       "accounts": [
         {
           "name": "vault",
           "writable": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "escrow",
@@ -178,9 +113,7 @@
         {
           "name": "owner",
           "signer": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "rent_receiver",
@@ -193,23 +126,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -223,16 +141,7 @@
     },
     {
       "name": "close_fcfs_config",
-      "discriminator": [
-        48,
-        178,
-        212,
-        101,
-        23,
-        138,
-        233,
-        90
-      ],
+      "discriminator": [48, 178, 212, 101, 23, 138, 233, 90],
       "accounts": [
         {
           "name": "config",
@@ -251,17 +160,48 @@
       "args": []
     },
     {
-      "name": "close_prorata_config",
-      "discriminator": [
-        84,
-        140,
-        103,
-        57,
-        178,
-        155,
-        57,
-        26
+      "name": "close_merkle_proof_metadata",
+      "discriminator": [23, 52, 170, 30, 252, 47, 100, 129],
+      "accounts": [
+        {
+          "name": "vault",
+          "relations": ["merkle_proof_metadata"]
+        },
+        {
+          "name": "merkle_proof_metadata",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "rent_receiver",
+          "writable": true
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
       ],
+      "args": []
+    },
+    {
+      "name": "close_prorata_config",
+      "discriminator": [84, 140, 103, 57, 178, 155, 57, 26],
       "accounts": [
         {
           "name": "config",
@@ -281,16 +221,7 @@
     },
     {
       "name": "create_crank_fee_whitelist",
-      "discriminator": [
-        120,
-        91,
-        25,
-        162,
-        211,
-        27,
-        100,
-        199
-      ],
+      "discriminator": [120, 91, 25, 162, 211, 27, 100, 199],
       "accounts": [
         {
           "name": "crank_fee_whitelist",
@@ -300,25 +231,8 @@
               {
                 "kind": "const",
                 "value": [
-                  99,
-                  114,
-                  97,
-                  110,
-                  107,
-                  95,
-                  102,
-                  101,
-                  101,
-                  95,
-                  119,
-                  104,
-                  105,
-                  116,
-                  101,
-                  108,
-                  105,
-                  115,
-                  116
+                  99, 114, 97, 110, 107, 95, 102, 101, 101, 95, 119, 104, 105,
+                  116, 101, 108, 105, 115, 116
                 ]
               },
               {
@@ -347,23 +261,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -377,16 +276,7 @@
     },
     {
       "name": "create_fcfs_config",
-      "discriminator": [
-        7,
-        255,
-        242,
-        242,
-        1,
-        99,
-        179,
-        12
-      ],
+      "discriminator": [7, 255, 242, 242, 1, 99, 179, 12],
       "accounts": [
         {
           "name": "config",
@@ -395,19 +285,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  102,
-                  99,
-                  102,
-                  115,
-                  95,
-                  99,
-                  111,
-                  110,
-                  102,
-                  105,
-                  103
-                ]
+                "value": [102, 99, 102, 115, 95, 99, 111, 110, 102, 105, 103]
               },
               {
                 "kind": "arg",
@@ -438,17 +316,68 @@
       ]
     },
     {
-      "name": "create_merkle_root_config",
-      "discriminator": [
-        55,
-        243,
-        253,
-        240,
-        78,
-        186,
-        232,
-        166
+      "name": "create_merkle_proof_metadata",
+      "discriminator": [151, 46, 163, 52, 181, 178, 47, 227],
+      "accounts": [
+        {
+          "name": "vault"
+        },
+        {
+          "name": "merkle_proof_metadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109, 101, 114, 107, 108, 101, 95, 112, 114, 111, 111, 102, 95,
+                  109, 101, 116, 97, 100, 97, 116, 97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
       ],
+      "args": [
+        {
+          "name": "proof_url",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "create_merkle_root_config",
+      "discriminator": [55, 243, 253, 240, 78, 186, 232, 166],
       "accounts": [
         {
           "name": "vault"
@@ -460,19 +389,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  109,
-                  101,
-                  114,
-                  107,
-                  108,
-                  101,
-                  95,
-                  114,
-                  111,
-                  111,
-                  116
-                ]
+                "value": [109, 101, 114, 107, 108, 101, 95, 114, 111, 111, 116]
               },
               {
                 "kind": "account",
@@ -501,23 +418,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -540,16 +442,7 @@
     },
     {
       "name": "create_new_escrow",
-      "discriminator": [
-        60,
-        154,
-        170,
-        202,
-        252,
-        109,
-        83,
-        199
-      ],
+      "discriminator": [60, 154, 170, 202, 252, 109, 83, 199],
       "accounts": [
         {
           "name": "vault",
@@ -557,9 +450,7 @@
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "escrow",
@@ -568,14 +459,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  101,
-                  115,
-                  99,
-                  114,
-                  111,
-                  119
-                ]
+                "value": [101, 115, 99, 114, 111, 119]
               },
               {
                 "kind": "account",
@@ -613,23 +497,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -643,29 +512,16 @@
     },
     {
       "name": "create_permissioned_escrow",
-      "discriminator": [
-        60,
-        166,
-        36,
-        85,
-        96,
-        137,
-        132,
-        184
-      ],
+      "discriminator": [60, 166, 36, 85, 96, 137, 132, 184],
       "accounts": [
         {
           "name": "vault",
           "writable": true,
-          "relations": [
-            "merkle_root_config"
-          ]
+          "relations": ["merkle_root_config"]
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "escrow",
@@ -674,14 +530,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  101,
-                  115,
-                  99,
-                  114,
-                  111,
-                  119
-                ]
+                "value": [101, 115, 99, 114, 111, 119]
               },
               {
                 "kind": "account",
@@ -699,9 +548,7 @@
         },
         {
           "name": "merkle_root_config",
-          "docs": [
-            "merkle_root_config"
-          ]
+          "docs": ["merkle_root_config"]
         },
         {
           "name": "payer",
@@ -725,23 +572,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -760,10 +592,7 @@
           "name": "proof",
           "type": {
             "vec": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         }
@@ -771,16 +600,7 @@
     },
     {
       "name": "create_permissioned_escrow_with_authority",
-      "discriminator": [
-        211,
-        231,
-        194,
-        69,
-        65,
-        11,
-        123,
-        93
-      ],
+      "discriminator": [211, 231, 194, 69, 65, 11, 123, 93],
       "accounts": [
         {
           "name": "vault",
@@ -788,9 +608,7 @@
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "escrow",
@@ -799,14 +617,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  101,
-                  115,
-                  99,
-                  114,
-                  111,
-                  119
-                ]
+                "value": [101, 115, 99, 114, 111, 119]
               },
               {
                 "kind": "account",
@@ -832,62 +643,14 @@
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "escrow0"
-        },
-        {
-          "name": "escrow1"
-        },
-        {
-          "name": "escrow2"
-        },
-        {
-          "name": "escrow3"
-        },
-        {
-          "name": "escrow4"
-        },
-        {
-          "name": "escrow5"
-        },
-        {
-          "name": "escrow6"
-        },
-        {
-          "name": "escrow7"
-        },
-        {
-          "name": "escrow8"
-        },
-        {
-          "name": "escrow9"
-        },
-        {
-          "name": "escrow10"
-        },
-        {
           "name": "event_authority",
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -906,16 +669,7 @@
     },
     {
       "name": "create_prorata_config",
-      "discriminator": [
-        38,
-        203,
-        72,
-        231,
-        103,
-        29,
-        195,
-        61
-      ],
+      "discriminator": [38, 203, 72, 231, 103, 29, 195, 61],
       "accounts": [
         {
           "name": "config",
@@ -925,19 +679,7 @@
               {
                 "kind": "const",
                 "value": [
-                  112,
-                  114,
-                  111,
-                  114,
-                  97,
-                  116,
-                  97,
-                  95,
-                  99,
-                  111,
-                  110,
-                  102,
-                  105,
+                  112, 114, 111, 114, 97, 116, 97, 95, 99, 111, 110, 102, 105,
                   103
                 ]
               },
@@ -971,29 +713,16 @@
     },
     {
       "name": "deposit",
-      "discriminator": [
-        242,
-        35,
-        198,
-        137,
-        82,
-        225,
-        242,
-        182
-      ],
+      "discriminator": [242, 35, 198, 137, 82, 225, 242, 182],
       "accounts": [
         {
           "name": "vault",
           "writable": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "escrow",
@@ -1006,9 +735,7 @@
         {
           "name": "token_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "token_mint"
@@ -1019,9 +746,7 @@
         {
           "name": "owner",
           "signer": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "event_authority",
@@ -1030,23 +755,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1065,16 +775,7 @@
     },
     {
       "name": "fill_damm_v2",
-      "discriminator": [
-        221,
-        175,
-        108,
-        48,
-        19,
-        204,
-        125,
-        23
-      ],
+      "discriminator": [221, 175, 108, 48, 19, 204, 125, 23],
       "accounts": [
         {
           "name": "vault",
@@ -1083,16 +784,12 @@
         {
           "name": "token_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "token_out_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "amm_program",
@@ -1104,9 +801,7 @@
         {
           "name": "pool",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "token_a_vault",
@@ -1157,23 +852,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1192,16 +872,7 @@
     },
     {
       "name": "fill_dlmm",
-      "discriminator": [
-        1,
-        108,
-        141,
-        11,
-        4,
-        126,
-        251,
-        222
-      ],
+      "discriminator": [1, 108, 141, 11, 4, 126, 251, 222],
       "accounts": [
         {
           "name": "vault",
@@ -1210,27 +881,21 @@
         {
           "name": "token_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "token_out_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "amm_program",
-          "address": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo"
+          "address": "LbVRzDTvBDEcrthxfZ4RL6yiq3uZw8bS6MwtdY6UhFQ"
         },
         {
           "name": "pool",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "bin_array_bitmap_extension"
@@ -1291,23 +956,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1334,16 +984,7 @@
     },
     {
       "name": "fill_dynamic_amm",
-      "discriminator": [
-        224,
-        226,
-        223,
-        80,
-        36,
-        50,
-        70,
-        231
-      ],
+      "discriminator": [224, 226, 223, 80, 36, 50, 70, 231],
       "accounts": [
         {
           "name": "vault",
@@ -1352,16 +993,12 @@
         {
           "name": "token_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "token_out_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "amm_program",
@@ -1370,9 +1007,7 @@
         {
           "name": "pool",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "a_vault",
@@ -1442,23 +1077,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1477,16 +1097,7 @@
     },
     {
       "name": "initialize_fcfs_vault",
-      "discriminator": [
-        163,
-        205,
-        69,
-        145,
-        235,
-        71,
-        47,
-        21
-      ],
+      "discriminator": [163, 205, 69, 145, 235, 71, 47, 21],
       "accounts": [
         {
           "name": "vault",
@@ -1495,13 +1106,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
+                "value": [118, 97, 117, 108, 116]
               },
               {
                 "kind": "account",
@@ -1537,23 +1142,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1576,16 +1166,7 @@
     },
     {
       "name": "initialize_prorata_vault",
-      "discriminator": [
-        178,
-        180,
-        176,
-        247,
-        128,
-        186,
-        43,
-        9
-      ],
+      "discriminator": [178, 180, 176, 247, 128, 186, 43, 9],
       "accounts": [
         {
           "name": "vault",
@@ -1594,13 +1175,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
+                "value": [118, 97, 117, 108, 116]
               },
               {
                 "kind": "account",
@@ -1636,23 +1211,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1675,16 +1235,7 @@
     },
     {
       "name": "initialize_vault_with_fcfs_config",
-      "discriminator": [
-        189,
-        251,
-        92,
-        104,
-        235,
-        21,
-        81,
-        182
-      ],
+      "discriminator": [189, 251, 92, 104, 235, 21, 81, 182],
       "accounts": [
         {
           "name": "vault",
@@ -1693,13 +1244,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
+                "value": [118, 97, 117, 108, 116]
               },
               {
                 "kind": "account",
@@ -1737,23 +1282,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1776,16 +1306,7 @@
     },
     {
       "name": "initialize_vault_with_prorata_config",
-      "discriminator": [
-        155,
-        216,
-        34,
-        162,
-        103,
-        242,
-        236,
-        211
-      ],
+      "discriminator": [155, 216, 34, 162, 103, 242, 236, 211],
       "accounts": [
         {
           "name": "vault",
@@ -1794,13 +1315,7 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
+                "value": [118, 97, 117, 108, 116]
               },
               {
                 "kind": "account",
@@ -1838,23 +1353,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1877,16 +1377,7 @@
     },
     {
       "name": "transfer_vault_authority",
-      "discriminator": [
-        139,
-        35,
-        83,
-        88,
-        52,
-        186,
-        162,
-        110
-      ],
+      "discriminator": [139, 35, 83, 88, 52, 186, 162, 110],
       "accounts": [
         {
           "name": "vault",
@@ -1895,9 +1386,7 @@
         {
           "name": "vault_authority",
           "signer": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         }
       ],
       "args": [
@@ -1909,16 +1398,7 @@
     },
     {
       "name": "update_fcfs_vault_parameters",
-      "discriminator": [
-        172,
-        23,
-        13,
-        143,
-        18,
-        133,
-        104,
-        174
-      ],
+      "discriminator": [172, 23, 13, 143, 18, 133, 104, 174],
       "accounts": [
         {
           "name": "vault",
@@ -1926,9 +1406,7 @@
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "admin",
@@ -1941,23 +1419,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -1980,16 +1443,7 @@
     },
     {
       "name": "update_prorata_vault_parameters",
-      "discriminator": [
-        177,
-        39,
-        151,
-        50,
-        253,
-        249,
-        5,
-        74
-      ],
+      "discriminator": [177, 39, 151, 50, 253, 249, 5, 74],
       "accounts": [
         {
           "name": "vault",
@@ -1997,9 +1451,7 @@
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "admin",
@@ -2012,23 +1464,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -2051,29 +1488,16 @@
     },
     {
       "name": "withdraw",
-      "discriminator": [
-        183,
-        18,
-        70,
-        156,
-        148,
-        109,
-        161,
-        34
-      ],
+      "discriminator": [183, 18, 70, 156, 148, 109, 161, 34],
       "accounts": [
         {
           "name": "vault",
           "writable": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "escrow",
@@ -2086,9 +1510,7 @@
         {
           "name": "token_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "token_mint"
@@ -2099,9 +1521,7 @@
         {
           "name": "owner",
           "signer": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "event_authority",
@@ -2110,23 +1530,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -2145,29 +1550,16 @@
     },
     {
       "name": "withdraw_remaining_quote",
-      "discriminator": [
-        54,
-        253,
-        188,
-        34,
-        100,
-        145,
-        59,
-        127
-      ],
+      "discriminator": [54, 253, 188, 34, 100, 145, 59, 127],
       "accounts": [
         {
           "name": "vault",
           "writable": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "pool",
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "escrow",
@@ -2176,9 +1568,7 @@
         {
           "name": "token_vault",
           "writable": true,
-          "relations": [
-            "vault"
-          ]
+          "relations": ["vault"]
         },
         {
           "name": "destination_token",
@@ -2193,9 +1583,7 @@
         {
           "name": "owner",
           "signer": true,
-          "relations": [
-            "escrow"
-          ]
+          "relations": ["escrow"]
         },
         {
           "name": "event_authority",
@@ -2204,23 +1592,8 @@
               {
                 "kind": "const",
                 "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  95, 95, 101, 118, 101, 110, 116, 95, 97, 117, 116, 104, 111,
+                  114, 105, 116, 121
                 ]
               }
             ]
@@ -2236,265 +1609,93 @@
   "accounts": [
     {
       "name": "CrankFeeWhitelist",
-      "discriminator": [
-        39,
-        105,
-        184,
-        30,
-        248,
-        231,
-        176,
-        133
-      ]
+      "discriminator": [39, 105, 184, 30, 248, 231, 176, 133]
     },
     {
       "name": "Escrow",
-      "discriminator": [
-        31,
-        213,
-        123,
-        187,
-        186,
-        22,
-        218,
-        155
-      ]
+      "discriminator": [31, 213, 123, 187, 186, 22, 218, 155]
     },
     {
       "name": "FcfsVaultConfig",
-      "discriminator": [
-        99,
-        243,
-        252,
-        122,
-        160,
-        175,
-        130,
-        52
-      ]
+      "discriminator": [99, 243, 252, 122, 160, 175, 130, 52]
+    },
+    {
+      "name": "MerkleProofMetadata",
+      "discriminator": [133, 24, 30, 217, 240, 20, 222, 100]
     },
     {
       "name": "MerkleRootConfig",
-      "discriminator": [
-        103,
-        2,
-        222,
-        217,
-        73,
-        50,
-        187,
-        39
-      ]
+      "discriminator": [103, 2, 222, 217, 73, 50, 187, 39]
     },
     {
       "name": "ProrataVaultConfig",
-      "discriminator": [
-        93,
-        214,
-        205,
-        104,
-        119,
-        9,
-        51,
-        152
-      ]
+      "discriminator": [93, 214, 205, 104, 119, 9, 51, 152]
     },
     {
       "name": "Vault",
-      "discriminator": [
-        211,
-        8,
-        232,
-        43,
-        2,
-        152,
-        117,
-        119
-      ]
+      "discriminator": [211, 8, 232, 43, 2, 152, 117, 119]
     }
   ],
   "events": [
     {
       "name": "CrankFeeWhitelistClosed",
-      "discriminator": [
-        157,
-        171,
-        85,
-        155,
-        37,
-        20,
-        41,
-        114
-      ]
+      "discriminator": [157, 171, 85, 155, 37, 20, 41, 114]
     },
     {
       "name": "CrankFeeWhitelistCreated",
-      "discriminator": [
-        176,
-        138,
-        32,
-        77,
-        129,
-        74,
-        137,
-        244
-      ]
+      "discriminator": [176, 138, 32, 77, 129, 74, 137, 244]
     },
     {
       "name": "EscrowClaimToken",
-      "discriminator": [
-        179,
-        72,
-        71,
-        30,
-        59,
-        19,
-        170,
-        3
-      ]
+      "discriminator": [179, 72, 71, 30, 59, 19, 170, 3]
     },
     {
       "name": "EscrowClosed",
-      "discriminator": [
-        109,
-        20,
-        57,
-        51,
-        217,
-        118,
-        3,
-        173
-      ]
+      "discriminator": [109, 20, 57, 51, 217, 118, 3, 173]
     },
     {
       "name": "EscrowCreated",
-      "discriminator": [
-        70,
-        127,
-        105,
-        102,
-        92,
-        97,
-        7,
-        173
-      ]
+      "discriminator": [70, 127, 105, 102, 92, 97, 7, 173]
     },
     {
       "name": "EscrowDeposit",
-      "discriminator": [
-        43,
-        90,
-        49,
-        176,
-        134,
-        148,
-        50,
-        32
-      ]
+      "discriminator": [43, 90, 49, 176, 134, 148, 50, 32]
     },
     {
       "name": "EscrowRemainingWithdraw",
-      "discriminator": [
-        113,
-        14,
-        156,
-        89,
-        113,
-        79,
-        88,
-        178
-      ]
+      "discriminator": [113, 14, 156, 89, 113, 79, 88, 178]
     },
     {
       "name": "EscrowWithdraw",
-      "discriminator": [
-        171,
-        17,
-        164,
-        116,
-        122,
-        66,
-        183,
-        34
-      ]
+      "discriminator": [171, 17, 164, 116, 122, 66, 183, 34]
     },
     {
       "name": "FcfsVaultCreated",
-      "discriminator": [
-        73,
-        153,
-        165,
-        103,
-        151,
-        182,
-        184,
-        136
-      ]
+      "discriminator": [73, 153, 165, 103, 151, 182, 184, 136]
     },
     {
       "name": "FcfsVaultParametersUpdated",
-      "discriminator": [
-        78,
-        112,
-        112,
-        62,
-        193,
-        209,
-        231,
-        226
-      ]
+      "discriminator": [78, 112, 112, 62, 193, 209, 231, 226]
+    },
+    {
+      "name": "MerkleProofMetadataCreated",
+      "discriminator": [186, 42, 131, 176, 244, 128, 196, 68]
     },
     {
       "name": "MerkleRootConfigCreated",
-      "discriminator": [
-        121,
-        112,
-        42,
-        76,
-        144,
-        131,
-        142,
-        90
-      ]
+      "discriminator": [121, 112, 42, 76, 144, 131, 142, 90]
     },
     {
       "name": "ProrataVaultCreated",
-      "discriminator": [
-        181,
-        255,
-        162,
-        226,
-        203,
-        199,
-        193,
-        6
-      ]
+      "discriminator": [181, 255, 162, 226, 203, 199, 193, 6]
     },
     {
       "name": "ProrataVaultParametersUpdated",
-      "discriminator": [
-        24,
-        147,
-        160,
-        237,
-        132,
-        87,
-        15,
-        206
-      ]
+      "discriminator": [24, 147, 160, 237, 132, 87, 15, 206]
     },
     {
       "name": "SwapFill",
-      "discriminator": [
-        116,
-        212,
-        73,
-        222,
-        33,
-        244,
-        134,
-        148
-      ]
+      "discriminator": [116, 212, 73, 222, 33, 244, 134, 148]
     }
   ],
   "errors": [
@@ -2540,7 +1741,7 @@
     },
     {
       "code": 6008,
-      "name": "EscrowHasRefuned",
+      "name": "EscrowHasRefunded",
       "msg": "Escrow has refunded"
     },
     {
@@ -2595,8 +1796,8 @@
     },
     {
       "code": 6019,
-      "name": "RefundAmountIsZero",
-      "msg": "Refund amount is zero"
+      "name": "WithdrawAmountIsZero",
+      "msg": "Withdraw amount is zero"
     },
     {
       "code": 6020,
@@ -2733,10 +1934,7 @@
           {
             "name": "padding",
             "type": {
-              "array": [
-                "u128",
-                5
-              ]
+              "array": ["u128", 5]
             }
           }
         ]
@@ -2773,21 +1971,14 @@
         "fields": [
           {
             "name": "root",
-            "docs": [
-              "The 256-bit merkle root."
-            ],
+            "docs": ["The 256-bit merkle root."],
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "version",
-            "docs": [
-              "version"
-            ],
+            "docs": ["version"],
             "type": "u64"
           }
         ]
@@ -2804,84 +1995,55 @@
         "fields": [
           {
             "name": "vault",
-            "docs": [
-              "vault address"
-            ],
+            "docs": ["vault address"],
             "type": "pubkey"
           },
           {
             "name": "owner",
-            "docs": [
-              "owner"
-            ],
+            "docs": ["owner"],
             "type": "pubkey"
           },
           {
             "name": "total_deposit",
-            "docs": [
-              "total deposited quote token"
-            ],
+            "docs": ["total deposited quote token"],
             "type": "u64"
           },
           {
             "name": "claimed_token",
-            "docs": [
-              "Total token that escrow has claimed"
-            ],
+            "docs": ["Total token that escrow has claimed"],
             "type": "u64"
           },
           {
             "name": "last_claimed_point",
-            "docs": [
-              "Last claimed timestamp"
-            ],
+            "docs": ["Last claimed timestamp"],
             "type": "u64"
           },
           {
             "name": "refunded",
-            "docs": [
-              "Whether owner has claimed for remaining quote token"
-            ],
+            "docs": ["Whether owner has claimed for remaining quote token"],
             "type": "u8"
           },
           {
             "name": "padding_1",
-            "docs": [
-              "padding 1"
-            ],
+            "docs": ["padding 1"],
             "type": {
-              "array": [
-                "u8",
-                7
-              ]
+              "array": ["u8", 7]
             }
           },
           {
             "name": "max_cap",
-            "docs": [
-              "Only has meaning in permissioned vault"
-            ],
+            "docs": ["Only has meaning in permissioned vault"],
             "type": "u64"
           },
           {
-            "name": "padding_2",
-            "docs": [
-              "padding 2"
-            ],
-            "type": {
-              "array": [
-                "u8",
-                8
-              ]
-            }
+            "name": "withdrawn_deposit_overflow",
+            "docs": ["Only has meaning in pro-rata vault"],
+            "type": "u64"
           },
           {
             "name": "padding",
             "type": {
-              "array": [
-                "u128",
-                40
-              ]
+              "array": ["u128", 1]
             }
           }
         ]
@@ -3127,10 +2289,7 @@
           {
             "name": "_padding",
             "type": {
-              "array": [
-                "u8",
-                175
-              ]
+              "array": ["u8", 175]
             }
           }
         ]
@@ -3337,6 +2496,46 @@
       }
     },
     {
+      "name": "MerkleProofMetadata",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "docs": ["vault pubkey that config is belong"],
+            "type": "pubkey"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": ["u64", 16]
+            }
+          },
+          {
+            "name": "proof_url",
+            "docs": ["proof url"],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MerkleProofMetadataCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "proof_url",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "MerkleRootConfig",
       "serialization": "bytemuck",
       "repr": {
@@ -3347,40 +2546,26 @@
         "fields": [
           {
             "name": "root",
-            "docs": [
-              "The 256-bit merkle root."
-            ],
+            "docs": ["The 256-bit merkle root."],
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "vault",
-            "docs": [
-              "vault pubkey that config is belong"
-            ],
+            "docs": ["vault pubkey that config is belong"],
             "type": "pubkey"
           },
           {
             "name": "version",
-            "docs": [
-              "version"
-            ],
+            "docs": ["version"],
             "type": "u64"
           },
           {
             "name": "_padding",
-            "docs": [
-              "padding for further use"
-            ],
+            "docs": ["padding for further use"],
             "type": {
-              "array": [
-                "u64",
-                8
-              ]
+              "array": ["u64", 8]
             }
           }
         ]
@@ -3410,10 +2595,7 @@
           {
             "name": "root",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         ]
@@ -3479,10 +2661,7 @@
           {
             "name": "_padding",
             "type": {
-              "array": [
-                "u8",
-                191
-              ]
+              "array": ["u8", 191]
             }
           }
         ]
@@ -3681,208 +2860,146 @@
         "fields": [
           {
             "name": "pool",
-            "docs": [
-              "pool"
-            ],
+            "docs": ["pool"],
             "type": "pubkey"
           },
           {
             "name": "token_vault",
-            "docs": [
-              "reserve quote token"
-            ],
+            "docs": ["reserve quote token"],
             "type": "pubkey"
           },
           {
             "name": "token_out_vault",
-            "docs": [
-              "reserve base token"
-            ],
+            "docs": ["reserve base token"],
             "type": "pubkey"
           },
           {
             "name": "quote_mint",
-            "docs": [
-              "quote token"
-            ],
+            "docs": ["quote token"],
             "type": "pubkey"
           },
           {
             "name": "base_mint",
-            "docs": [
-              "base token"
-            ],
+            "docs": ["base token"],
             "type": "pubkey"
           },
           {
             "name": "base",
-            "docs": [
-              "base key"
-            ],
+            "docs": ["base key"],
             "type": "pubkey"
           },
           {
             "name": "owner",
-            "docs": [
-              "owner key, deprecated field, can re-use in the future"
-            ],
+            "docs": ["owner key, deprecated field, can re-use in the future"],
             "type": "pubkey"
           },
           {
             "name": "max_buying_cap",
-            "docs": [
-              "max buying cap"
-            ],
+            "docs": ["max buying cap"],
             "type": "u64"
           },
           {
             "name": "total_deposit",
-            "docs": [
-              "total deposited quote token"
-            ],
+            "docs": ["total deposited quote token"],
             "type": "u64"
           },
           {
             "name": "total_escrow",
-            "docs": [
-              "total user deposit"
-            ],
+            "docs": ["total user deposit"],
             "type": "u64"
           },
           {
             "name": "swapped_amount",
-            "docs": [
-              "swapped_amount"
-            ],
+            "docs": ["swapped_amount"],
             "type": "u64"
           },
           {
             "name": "bought_token",
-            "docs": [
-              "total bought token"
-            ],
+            "docs": ["total bought token"],
             "type": "u64"
           },
           {
             "name": "total_refund",
-            "docs": [
-              "Total quote refund"
-            ],
+            "docs": ["Total quote refund"],
             "type": "u64"
           },
           {
             "name": "total_claimed_token",
-            "docs": [
-              "Total claimed_token"
-            ],
+            "docs": ["Total claimed_token"],
             "type": "u64"
           },
           {
             "name": "start_vesting_point",
-            "docs": [
-              "Start vesting ts"
-            ],
+            "docs": ["Start vesting ts"],
             "type": "u64"
           },
           {
             "name": "end_vesting_point",
-            "docs": [
-              "End vesting ts"
-            ],
+            "docs": ["End vesting ts"],
             "type": "u64"
           },
           {
             "name": "bump",
-            "docs": [
-              "bump"
-            ],
+            "docs": ["bump"],
             "type": "u8"
           },
           {
             "name": "pool_type",
-            "docs": [
-              "pool type"
-            ],
+            "docs": ["pool type"],
             "type": "u8"
           },
           {
             "name": "vault_mode",
-            "docs": [
-              "vault mode"
-            ],
+            "docs": ["vault mode"],
             "type": "u8"
           },
           {
             "name": "padding_0",
-            "docs": [
-              "padding 0"
-            ],
+            "docs": ["padding 0"],
             "type": {
-              "array": [
-                "u8",
-                5
-              ]
+              "array": ["u8", 5]
             }
           },
           {
             "name": "max_depositing_cap",
-            "docs": [
-              "max depositing cap"
-            ],
+            "docs": ["max depositing cap"],
             "type": "u64"
           },
           {
             "name": "individual_depositing_cap",
-            "docs": [
-              "individual depositing cap"
-            ],
+            "docs": ["individual depositing cap"],
             "type": "u64"
           },
           {
             "name": "depositing_point",
-            "docs": [
-              "depositing point"
-            ],
+            "docs": ["depositing point"],
             "type": "u64"
           },
           {
             "name": "escrow_fee",
-            "docs": [
-              "flat fee when user open an escrow"
-            ],
+            "docs": ["flat fee when user open an escrow"],
             "type": "u64"
           },
           {
             "name": "total_escrow_fee",
-            "docs": [
-              "total escrow fee just for statistic"
-            ],
+            "docs": ["total escrow fee just for statistic"],
             "type": "u64"
           },
           {
             "name": "whitelist_mode",
-            "docs": [
-              "deposit whitelist mode"
-            ],
+            "docs": ["deposit whitelist mode"],
             "type": "u8"
           },
           {
             "name": "activation_type",
-            "docs": [
-              "activation type"
-            ],
+            "docs": ["activation type"],
             "type": "u8"
           },
           {
             "name": "padding_1",
-            "docs": [
-              "padding 1"
-            ],
+            "docs": ["padding 1"],
             "type": {
-              "array": [
-                "u8",
-                6
-              ]
+              "array": ["u8", 6]
             }
           },
           {
@@ -3895,10 +3012,7 @@
           {
             "name": "padding",
             "type": {
-              "array": [
-                "u128",
-                5
-              ]
+              "array": ["u128", 5]
             }
           }
         ]

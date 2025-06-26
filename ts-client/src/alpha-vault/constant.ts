@@ -11,6 +11,7 @@ export const SEED = Object.freeze({
   vault: "vault",
   merkleRoot: "merkle_root",
   crankFeeWhitelist: "crank_fee_whitelist",
+  merkleProofMetadata: "merkle_proof_metadata",
 });
 
 export const ALPHA_VAULT_TREASURY_ID = new PublicKey(

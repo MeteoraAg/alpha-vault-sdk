@@ -20,7 +20,7 @@ import {
   loadKeypairFromFile,
 } from "./utils";
 import { NATIVE_MINT } from "@solana/spl-token";
-import { AlphaVault, Permissionless, PoolType } from "../alpha-vault";
+import { AlphaVault, PoolType, WhitelistMode } from "../alpha-vault";
 
 async function createCustomizableDlmmWithPermissionlessVault(
   connection: Connection,
@@ -98,7 +98,7 @@ async function createCustomizableDlmmWithPermissionlessVault(
       endVestingPoint,
       maxBuyingCap,
       escrowFee,
-      whitelistMode: Permissionless,
+      whitelistMode: WhitelistMode.Permissionless,
     },
     creator,
     {

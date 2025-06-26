@@ -171,6 +171,31 @@ export async function createEscrowForAuthority(
   console.log("🚀 ~ createStakeEscrowTxHash:", createStakeEscrowTxHash);
 }
 
+export async function createMerkleMetadata(
+  alphaVault: AlphaVault,
+  vaultCreator: Keypair,
+  proofUrl: string
+) {
+  const transaction = await alphaVault.createMerkleProofMetadata(
+    vaultCreator.publicKey,
+    proofUrl
+  );
+
+  const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
+  const createMerkleMetadataTx = new Transaction({
+    blockhash,
+    lastValidBlockHeight,
+    feePayer: vaultCreator.publicKey,
+  }).add(transaction);
+  const createMerkleMetadataTxHash = await sendAndConfirmTransaction(
+    connection,
+    createMerkleMetadataTx,
+    [vaultCreator]
+  );
+  console.log("🚀 ~ createMerkleMetadataTxHash:", createMerkleMetadataTxHash);
+}
+
 export async function createMerkle(
   alphaVault: AlphaVault,
   payer: Keypair,
