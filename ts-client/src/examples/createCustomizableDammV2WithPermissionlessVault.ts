@@ -1,10 +1,13 @@
 import {
   CpAmm,
   FEE_DENOMINATOR,
-  FeeSchedulerMode,
+  BaseFeeMode,
   getLiquidityDeltaFromAmountA,
   PoolState,
   SCALE_OFFSET,
+  getBaseFeeParams,
+  PoolFeesParams,
+  getDynamicFeeParams,
 } from "@meteora-ag/cp-amm-sdk";
 import { ActivationType } from "@meteora-ag/dlmm";
 import { NATIVE_MINT, TOKEN_PROGRAM_ID } from "@solana/spl-token";
@@ -77,6 +80,29 @@ async function createCustomizableDammV2WithPermissionlessVault(
     .mul(new BN(FEE_DENOMINATOR))
     .divn(100);
 
+  const baseFee = getBaseFeeParams(
+    {
+      baseFeeMode: BaseFeeMode.FeeMarketCapSchedulerExponential,
+      feeMarketCapSchedulerParam: {
+        startingFeeBps: 1111,
+        endingFeeBps: 100,
+        numberOfPeriod: 3,
+        sqrtPriceStepBps: 2000,
+        schedulerExpirationDuration: 60,
+      },
+    },
+    9,
+    ActivationType.Timestamp
+  );
+
+  console.log("Base fee:", baseFee);
+
+  const poolFees: PoolFeesParams = {
+    baseFee,
+    padding: [],
+    dynamicFee: getDynamicFeeParams(500),
+  };
+
   const { tx, pool } = await cpAmm.createCustomPool({
     payer: payer.publicKey,
     creator,
@@ -95,19 +121,7 @@ async function createCustomizableDammV2WithPermissionlessVault(
     tokenAProgram: TOKEN_PROGRAM_ID,
     tokenBProgram: TOKEN_PROGRAM_ID,
     liquidityDelta,
-    poolFees: {
-      baseFee: {
-        cliffFeeNumerator,
-        numberOfPeriod: 0,
-        periodFrequency: new BN(0),
-        reductionFactor: new BN(0),
-        feeSchedulerMode: FeeSchedulerMode.Linear,
-      },
-      protocolFeePercent,
-      referralFeePercent,
-      partnerFeePercent: 0,
-      dynamicFee: null,
-    },
+    poolFees,
   });
 
   console.log("Creating pool");
