@@ -8,7 +8,6 @@ import {
 } from "@solana/web3.js";
 import {
   ALPHA_VAULT_TREASURY_ID,
-  DLMM_PROGRAM_ID,
   DYNAMIC_AMM_PROGRAM_ID,
   PROGRAM_ID,
   SEED,
@@ -22,7 +21,6 @@ import {
 } from "../type";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
-  createAssociatedTokenAccountInstruction,
   createCloseAccountInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
@@ -40,7 +38,6 @@ import DLMM, {
   RemainingAccountInfo,
   SwapQuote,
   IDL as DLMMIdl,
-  LbClmm,
 } from "@meteora-ag/dlmm";
 import BN from "bn.js";
 import IDL from "../alpha_vault.json";
