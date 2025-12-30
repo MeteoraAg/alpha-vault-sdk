@@ -1,10 +1,5 @@
-import { AnchorProvider, BN, Program } from "@coral-xyz/anchor";
-import {
-  Mint,
-  NATIVE_MINT,
-  TOKEN_PROGRAM_ID,
-  unpackMint,
-} from "@solana/spl-token";
+import { AnchorProvider, BN } from "@coral-xyz/anchor";
+import { Mint, NATIVE_MINT, unpackMint } from "@solana/spl-token";
 import {
   Cluster,
   Connection,
@@ -16,9 +11,7 @@ import {
 } from "@solana/web3.js";
 import {
   ALPHA_VAULT_TREASURY_ID,
-  DYNAMIC_AMM_PROGRAM_ID,
   MERKLE_PROOF_API,
-  PROGRAM_ID,
   VaultPoint,
   VaultState,
   WhitelistMode,
@@ -38,7 +31,6 @@ import {
   createCpAmmProgram,
   deriveMerkleProofMetadata,
 } from "./helper";
-import IDL from "./alpha_vault.json";
 import {
   ActivationType,
   AlphaVaultProgram,
@@ -57,9 +49,8 @@ import {
   VaultParam,
   WalletDepositCap,
 } from "./type";
-import { AmmIdl, PoolState } from "@meteora-ag/dynamic-amm-sdk";
-import { IDL as DlmmIdl, LBCLMM_PROGRAM_IDS, LbPair } from "@meteora-ag/dlmm";
-import { CpAmm } from "@meteora-ag/cp-amm-sdk";
+import { PoolState } from "@meteora-ag/dynamic-amm-sdk";
+import { LbPair } from "@meteora-ag/dlmm";
 
 export * from "./constant";
 export * from "./helper";

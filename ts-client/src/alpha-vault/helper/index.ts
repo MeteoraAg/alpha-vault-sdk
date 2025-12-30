@@ -8,7 +8,6 @@ import {
 } from "@solana/web3.js";
 import {
   ALPHA_VAULT_TREASURY_ID,
-  DLMM_PROGRAM_ID,
   DYNAMIC_AMM_PROGRAM_ID,
   PROGRAM_ID,
   SEED,
@@ -22,7 +21,6 @@ import {
 } from "../type";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
-  createAssociatedTokenAccountInstruction,
   createCloseAccountInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
@@ -40,7 +38,6 @@ import DLMM, {
   RemainingAccountInfo,
   SwapQuote,
   IDL as DLMMIdl,
-  LbClmm,
 } from "@meteora-ag/dlmm";
 import BN from "bn.js";
 import IDL from "../alpha_vault.json";
@@ -51,7 +48,8 @@ import {
   Program as OldProgram,
 } from "@cora-xyz/anchor-0.28.0";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
-import CpAmmIDL, {
+import {
+  CpAmmIdl,
   CpAmm,
   CpAmmTypes,
   CP_AMM_PROGRAM_ID,
@@ -106,7 +104,7 @@ export function createCpAmmProgram(connection: Connection, opt?: Opt) {
     AnchorProvider.defaultOptions()
   );
   return new Program<CpAmmTypes>(
-    { ...CpAmmIDL, address: CP_AMM_PROGRAM_ID },
+    { ...CpAmmIdl, address: CP_AMM_PROGRAM_ID },
     provider
   );
 }
