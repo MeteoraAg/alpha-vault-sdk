@@ -19,12 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## @meteora-ag/alpha-vault [1.1.16] [PR #18](https://github.com/MeteoraAg/alpha-vault-sdk/pull/18)
+
+### Fixed
+
+- Fix `fillVault` for DAMM v2.
+
 ## @meteora-ag/alpha-vault [1.1.15] [PR #17](https://github.com/MeteoraAg/alpha-vault-sdk/pull/17)
 
 ### Changed
 
 - Bumped `@meteora-ag/cp-amm-sdk` to `1.2.8` and fix `CpAmmIdl` import issue.
-
 
 ## @meteora-ag/alpha-vault [1.1.14] [PR #16](https://github.com/MeteoraAg/alpha-vault-sdk/pull/16)
 
