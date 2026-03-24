@@ -1,5 +1,6 @@
 import {
   CpAmm,
+  CollectFeeMode,
   FEE_DENOMINATOR,
   BaseFeeMode,
   getLiquidityDeltaFromAmountA,
@@ -70,7 +71,8 @@ async function createCustomizableDammV2WithPermissionlessVault(
   const liquidityDelta = getLiquidityDeltaFromAmountA(
     tokenAAmount,
     sqrtMinPrice,
-    sqrtMaxPrice
+    sqrtMaxPrice,
+    CollectFeeMode.BothToken
   );
 
   const feePct = 5;
@@ -99,7 +101,8 @@ async function createCustomizableDammV2WithPermissionlessVault(
 
   const poolFees: PoolFeesParams = {
     baseFee,
-    padding: [],
+    compoundingFeeBps: 0,
+    padding: 0,
     dynamicFee: getDynamicFeeParams(500),
   };
 

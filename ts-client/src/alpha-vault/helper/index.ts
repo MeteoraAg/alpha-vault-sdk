@@ -56,19 +56,19 @@ import {
 } from "@meteora-ag/cp-amm-sdk";
 
 const MEMO_PROGRAM_ID = new PublicKey(
-  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
 );
 
 export function createProgram(connection: Connection, opt?: Opt) {
   const provider = new AnchorProvider(
     connection,
     {} as any,
-    AnchorProvider.defaultOptions()
+    AnchorProvider.defaultOptions(),
   );
 
   return new Program<AlphaVault>(
     { ...IDL, address: PROGRAM_ID[opt?.cluster || "mainnet-beta"] },
-    provider
+    provider,
   );
 }
 
@@ -76,13 +76,13 @@ export function createDlmmProgram(connection: Connection, opt?: Opt) {
   const provider = new OldAnchorProvider(
     connection,
     {} as any,
-    AnchorProvider.defaultOptions()
+    AnchorProvider.defaultOptions(),
   );
 
   return new OldProgram(
     DLMMIdl,
     LBCLMM_PROGRAM_IDS[opt?.cluster || "mainnet-beta"],
-    provider
+    provider,
   );
 }
 
@@ -90,7 +90,7 @@ export function createDammProgram(connection: Connection, opt?: Opt) {
   const provider = new OldAnchorProvider(
     connection,
     {} as any,
-    AnchorProvider.defaultOptions()
+    AnchorProvider.defaultOptions(),
   );
 
   // @ts-ignore
@@ -101,38 +101,38 @@ export function createCpAmmProgram(connection: Connection, opt?: Opt) {
   const provider = new AnchorProvider(
     connection,
     {} as any,
-    AnchorProvider.defaultOptions()
+    AnchorProvider.defaultOptions(),
   );
   return new Program<CpAmmTypes>(
     { ...CpAmmIdl, address: CP_AMM_PROGRAM_ID },
-    provider
+    provider,
   );
 }
 
 export function deriveCrankFeeWhitelist(
   cranker: PublicKey,
-  programId: PublicKey
+  programId: PublicKey,
 ) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from(SEED.crankFeeWhitelist), cranker.toBuffer()],
-    programId
+    programId,
   );
 }
 
 export function deriveMerkleProofMetadata(
   alphaVault: PublicKey,
-  programId: PublicKey
+  programId: PublicKey,
 ) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from(SEED.merkleProofMetadata), alphaVault.toBuffer()],
-    programId
+    programId,
   );
 }
 
 export function deriveMerkleRootConfig(
   alphaVault: PublicKey,
   version: BN,
-  programId: PublicKey
+  programId: PublicKey,
 ) {
   return PublicKey.findProgramAddressSync(
     [
@@ -140,29 +140,29 @@ export function deriveMerkleRootConfig(
       alphaVault.toBuffer(),
       new Uint8Array(version.toArrayLike(Buffer, "le", 8)),
     ],
-    programId
+    programId,
   );
 }
 
 export function deriveEscrow(
   alphaVault: PublicKey,
   owner: PublicKey,
-  programId: PublicKey
+  programId: PublicKey,
 ) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from(SEED.escrow), alphaVault.toBuffer(), owner.toBuffer()],
-    programId
+    programId,
   );
 }
 
 export function deriveAlphaVault(
   base: PublicKey,
   lbPair: PublicKey,
-  programId: PublicKey
+  programId: PublicKey,
 ) {
   return PublicKey.findProgramAddressSync(
     [Buffer.from(SEED.vault), base.toBuffer(), lbPair.toBuffer()],
-    programId
+    programId,
   );
 }
 
@@ -172,13 +172,13 @@ export const getOrCreateATAInstruction = async (
   owner: PublicKey,
   payer: PublicKey = owner,
   tokenProgram: PublicKey,
-  allowOwnerOffCurve = true
+  allowOwnerOffCurve = true,
 ): Promise<GetOrCreateATAResponse> => {
   const toAccount = getAssociatedTokenAddressSync(
     tokenMint,
     owner,
     allowOwnerOffCurve,
-    tokenProgram
+    tokenProgram,
   );
 
   try {
@@ -195,7 +195,7 @@ export const getOrCreateATAInstruction = async (
         toAccount,
         owner,
         tokenMint,
-        tokenProgram
+        tokenProgram,
       );
 
       return { ataPubKey: toAccount, ix };
@@ -210,7 +210,7 @@ export const getOrCreateATAInstruction = async (
 export const wrapSOLInstruction = (
   from: PublicKey,
   to: PublicKey,
-  amount: bigint
+  amount: bigint,
 ): TransactionInstruction[] => {
   return [
     SystemProgram.transfer({
@@ -236,13 +236,13 @@ export const unwrapSOLInstruction = (owner: PublicKey) => {
   const wSolATAAccount = getAssociatedTokenAddressSync(
     NATIVE_MINT,
     owner,
-    true
+    true,
   );
   if (wSolATAAccount) {
     const closedWrappedSolInstruction = createCloseAccountInstruction(
       wSolATAAccount,
       owner,
-      owner
+      owner,
     );
     return closedWrappedSolInstruction;
   }
@@ -253,7 +253,7 @@ export const fillDammV2Transaction = async (
   program: AlphaVaultProgram,
   vaultKey: PublicKey,
   vault: Vault,
-  payer: PublicKey
+  payer: PublicKey,
 ) => {
   const connection = program.provider.connection;
   const cpAmm = new CpAmm(connection);
@@ -262,12 +262,12 @@ export const fillDammV2Transaction = async (
 
   const [poolAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("pool_authority")],
-    cpAmm._program.programId
+    cpAmm._program.programId,
   );
 
   const [dammEventAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("__event_authority")],
-    cpAmm._program.programId
+    cpAmm._program.programId,
   );
 
   const [crankFeeWhitelist] = deriveCrankFeeWhitelist(payer, program.programId);
@@ -281,12 +281,12 @@ export const fillDammV2Transaction = async (
       vault.baseMint,
       vaultKey,
       payer,
-      pool.tokenAFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID
+      pool.tokenAFlag == 0 ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 
   const fillDammInstruction = await program.methods
-    .fillDammV2(vault.maxBuyingCap)
+    .fillDammV2(vault.totalDeposit)
     .accountsPartial({
       vault: vaultKey,
       tokenVault: vault.tokenVault,
@@ -317,7 +317,7 @@ export const fillDammV2Transaction = async (
   const { lastValidBlockHeight, blockhash } =
     await connection.getLatestBlockhash("confirmed");
 
-  new Transaction({
+  return new Transaction({
     lastValidBlockHeight,
     blockhash,
   }).add(...preInstructions, fillDammInstruction);
@@ -328,7 +328,7 @@ export const fillDlmmTransaction = async (
   vaultKey: PublicKey,
   vault: Vault,
   payer: PublicKey,
-  opt?: { cluster: string }
+  opt?: { cluster: string },
 ) => {
   const connection = program.provider.connection;
   const cluster = (opt?.cluster ?? "mainnet-beta") as Cluster;
@@ -352,7 +352,7 @@ export const fillDlmmTransaction = async (
       vault.baseMint,
       vaultKey,
       payer,
-      pair.tokenX.owner
+      pair.tokenX.owner,
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 
@@ -378,7 +378,7 @@ export const fillDlmmTransaction = async (
       swapForY,
       new BN(0),
       binArrays,
-      true
+      true,
     );
   } catch (error) {
     if (error instanceof DlmmSdkError) {
@@ -396,7 +396,7 @@ export const fillDlmmTransaction = async (
   const dlmmProgramId = new PublicKey(LBCLMM_PROGRAM_IDS[cluster]);
   const [dlmmEventAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("__event_authority")],
-    dlmmProgramId
+    dlmmProgramId,
   );
 
   const tokenXProgram = pair.tokenX.owner;
@@ -489,7 +489,7 @@ export const fillDammTransaction = async (
   vaultKey: PublicKey,
   vault: Vault,
   payer: PublicKey,
-  opt?: { cluster: string }
+  opt?: { cluster: string },
 ) => {
   if (vault.vaultMode === VaultMode.PRORATA) {
     if (vault.swappedAmount.eq(BN.min(vault.totalDeposit, vault.maxBuyingCap)))
@@ -514,7 +514,7 @@ export const fillDammTransaction = async (
       vault.baseMint,
       vaultKey,
       payer,
-      TOKEN_PROGRAM_ID
+      TOKEN_PROGRAM_ID,
     );
   createTokenOutVaultIx && preInstructions.push(createTokenOutVaultIx);
 
@@ -566,10 +566,10 @@ export const fillDammTransaction = async (
 export const estimateSlotDate = (
   enableSlot: number,
   slotAverageTime: number,
-  currentSlot: number
+  currentSlot: number,
 ) => {
   const estimateDate = new Date(
-    Date.now() + (enableSlot - currentSlot) * slotAverageTime
+    Date.now() + (enableSlot - currentSlot) * slotAverageTime,
   );
 
   return estimateDate;

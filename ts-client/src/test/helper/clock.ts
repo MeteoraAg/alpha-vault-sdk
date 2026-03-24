@@ -32,10 +32,23 @@ export const DAMM_SLOT_DELAY = Object.freeze({
   END: 30,
 });
 
+export const DAMMV2_SLOT_DELAY = Object.freeze({
+  ACTIVATION: 15,
+  DEPOSITING: 5,
+  VESTING: 20,
+  END: 30,
+});
+
+function getSlotDelay(poolType: PoolType) {
+  if (poolType === PoolType.DLMM) return DLMM_SLOT_DELAY;
+  if (poolType === PoolType.DAMMV2) return DAMMV2_SLOT_DELAY;
+  return DAMM_SLOT_DELAY;
+}
+
 export async function createDummyPoint(
   connection: Connection,
   activationType: ActivationType,
-  poolType: PoolType
+  poolType: PoolType,
 ): Promise<VaultPoint> {
   const currentSlot = await connection.getSlot();
 
@@ -43,8 +56,7 @@ export async function createDummyPoint(
     activationType === ActivationType.SLOT
       ? currentSlot
       : await connection.getBlockTime(currentSlot);
-  const slotDelay =
-    poolType === PoolType.DLMM ? DLMM_SLOT_DELAY : DAMM_SLOT_DELAY;
+  const slotDelay = getSlotDelay(poolType);
   const bufferTime = activationType === ActivationType.SLOT ? 1000 : 1;
 
   return {
@@ -58,7 +70,7 @@ export async function createDummyPoint(
 export async function waitForState(
   connection: Connection,
   alphaVault: AlphaVault,
-  vaultState: VaultState
+  vaultState: VaultState,
 ) {
   const {
     vaultPoint,

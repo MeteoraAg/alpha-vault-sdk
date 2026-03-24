@@ -23,6 +23,7 @@ import {
   deriveMerkleRootConfig,
   fillDlmmTransaction,
   fillDammTransaction,
+  fillDammV2Transaction,
   getOrCreateATAInstruction,
   unwrapSOLInstruction,
   wrapSOLInstruction,
@@ -1175,6 +1176,7 @@ export class AlphaVault {
     if (poolType === PoolType.DAMM) {
       return fillDammTransaction(this.program, this.pubkey, this.vault, payer);
     } else if (poolType === PoolType.DAMMV2) {
+      return fillDammV2Transaction(this.program, this.pubkey, this.vault, payer);
     } else {
       return fillDlmmTransaction(
         this.program,
