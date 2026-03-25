@@ -255,6 +255,10 @@ export const fillDammV2Transaction = async (
   vault: Vault,
   payer: PublicKey,
 ) => {
+  if (shouldStopFilling(vault)) {
+    return;
+  }
+
   const connection = program.provider.connection;
   const cpAmm = new CpAmm(connection);
 
@@ -330,6 +334,10 @@ export const fillDlmmTransaction = async (
   payer: PublicKey,
   opt?: { cluster: string },
 ) => {
+  if (shouldStopFilling(vault)) {
+    return;
+  }
+
   const connection = program.provider.connection;
   const cluster = (opt?.cluster ?? "mainnet-beta") as Cluster;
   const pair = await DLMM.create(connection, vault.pool, {
@@ -491,11 +499,8 @@ export const fillDammTransaction = async (
   payer: PublicKey,
   opt?: { cluster: string },
 ) => {
-  if (vault.vaultMode === VaultMode.PRORATA) {
-    if (vault.swappedAmount.eq(BN.min(vault.totalDeposit, vault.maxBuyingCap)))
-      return;
-  } else {
-    if (vault.swappedAmount.eq(vault.totalDeposit)) return;
+  if (shouldStopFilling(vault)) {
+    return;
   }
 
   const connection = program.provider.connection;
@@ -574,3 +579,13 @@ export const estimateSlotDate = (
 
   return estimateDate;
 };
+
+function shouldStopFilling(vault: Vault) {
+  switch (vault.vaultMode) {
+    case VaultMode.PRORATA:
+      const maxSwappableAmount = BN.min(vault.totalDeposit, vault.maxBuyingCap);
+      return vault.swappedAmount.gte(maxSwappableAmount);
+    case VaultMode.FCFS:
+      return vault.swappedAmount.gte(vault.totalDeposit);
+  }
+}
