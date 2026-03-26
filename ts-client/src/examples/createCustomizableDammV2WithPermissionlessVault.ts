@@ -1,5 +1,6 @@
 import {
   CpAmm,
+  CollectFeeMode,
   FEE_DENOMINATOR,
   BaseFeeMode,
   getLiquidityDeltaFromAmountA,
@@ -30,10 +31,10 @@ import {
 
 async function createCustomizableDammV2WithPermissionlessVault(
   connection: Connection,
-  payer: Keypair
+  payer: Keypair,
 ) {
   const tokenAMint = await createDummyMint(connection, payer).then(
-    (info) => info.mint
+    (info) => info.mint,
   );
   const tokenBMint = NATIVE_MINT;
 
@@ -45,10 +46,10 @@ async function createCustomizableDammV2WithPermissionlessVault(
   const toLamportMultipler = 3;
 
   const sqrtMinPrice = new BN(
-    Math.sqrt(minPrice * 10 ** toLamportMultipler)
+    Math.sqrt(minPrice * 10 ** toLamportMultipler),
   ).shln(SCALE_OFFSET);
   const sqrtMaxPrice = new BN(
-    Math.sqrt(maxPrice * 10 ** toLamportMultipler)
+    Math.sqrt(maxPrice * 10 ** toLamportMultipler),
   ).shln(SCALE_OFFSET);
 
   const hasAlphaVault = true;
@@ -70,15 +71,11 @@ async function createCustomizableDammV2WithPermissionlessVault(
   const liquidityDelta = getLiquidityDeltaFromAmountA(
     tokenAAmount,
     sqrtMinPrice,
-    sqrtMaxPrice
+    sqrtMaxPrice,
+    CollectFeeMode.BothToken,
   );
 
   const feePct = 5;
-  const protocolFeePercent = 20;
-  const referralFeePercent = 20;
-  const cliffFeeNumerator = new BN(feePct)
-    .mul(new BN(FEE_DENOMINATOR))
-    .divn(100);
 
   const baseFee = getBaseFeeParams(
     {
@@ -87,19 +84,21 @@ async function createCustomizableDammV2WithPermissionlessVault(
         startingFeeBps: 1111,
         endingFeeBps: 100,
         numberOfPeriod: 3,
-        sqrtPriceStepBps: 2000,
+        startingMarketCap: 100_000,
+        endingMarketCap: 1_000_000,
         schedulerExpirationDuration: 60,
       },
     },
     9,
-    ActivationType.Timestamp
+    ActivationType.Timestamp,
   );
 
   console.log("Base fee:", baseFee);
 
   const poolFees: PoolFeesParams = {
     baseFee,
-    padding: [],
+    compoundingFeeBps: 0,
+    padding: 0,
     dynamicFee: getDynamicFeeParams(500),
   };
 
@@ -134,7 +133,7 @@ async function createCustomizableDammV2WithPermissionlessVault(
   const poolAccount = await connection.getAccountInfo(pool);
   const dammV2Pool: PoolState = await cpAmm._program.coder.accounts.decode(
     "pool",
-    poolAccount.data
+    poolAccount.data,
   );
 
   // 2. Create permissionless alpha vault
@@ -161,14 +160,14 @@ async function createCustomizableDammV2WithPermissionlessVault(
     creator,
     {
       cluster: "devnet",
-    }
+    },
   );
 
   console.log("Creating alpha vault");
   const alphaVaultTxHash = await sendAndConfirmTransaction(
     connection,
     createAlphaVaultTx,
-    [payer]
+    [payer],
   );
   console.log(alphaVaultTxHash);
 }
