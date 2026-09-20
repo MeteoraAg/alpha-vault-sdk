@@ -51,5 +51,10 @@
   },
   "keywords": [],
   "author": "McSam",
-  "license": "ISC"
+  "license": "ISC",
+  "pnpm": {
+    "overrides": {
+      "sharp": "^0.35.4"
+    }
+  }
 }
