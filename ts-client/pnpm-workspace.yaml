@@ -14,8 +14,9 @@ auditConfig:
     - GHSA-528h-pc64-c93x
     - GHSA-hqr4-qq8f-hg3x
     - GHSA-mjw6-4jj6-33hc
-    # toml 3 (fixed in 5): @coral-xyz/anchor only parses Anchor.toml in `workspace`, which the SDK
-    # doesn't use. pnpm 10 doesn't report it here, newer pnpm does
+    # toml 3 (fixed in 5): @coral-xyz/anchor 0.28, 0.29 and 0.31 and @project-serum/anchor 0.24
+    # only parse Anchor.toml in `workspace`, which the SDK doesn't use. pnpm 10 doesn't report it
+    # here, pnpm 11 and later do
     - GHSA-4qx8-w7c3-pj3p
     - GHSA-82x6-q7mm-w9cf
     - GHSA-9j65-hcg3-gc64

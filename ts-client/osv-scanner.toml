@@ -19,27 +19,27 @@ reason = "stream-json 1 (fixed in 3): @solana/web3.js > jayson only uses it in i
 
 [[IgnoredVulns]]
 id = "GHSA-4qx8-w7c3-pj3p"
-reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (aliased as `@cora-xyz/anchor-0.28.0`) only parses Anchor.toml in `workspace`, which the SDK doesn't use"
+reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (also aliased as `@cora-xyz/anchor-0.28.0`), 0.29 and 0.31 and @project-serum/anchor 0.24 only parse Anchor.toml in `workspace`, which the SDK doesn't use"
 
 [[IgnoredVulns]]
 id = "GHSA-82x6-q7mm-w9cf"
-reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (aliased as `@cora-xyz/anchor-0.28.0`) only parses Anchor.toml in `workspace`, which the SDK doesn't use"
+reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (also aliased as `@cora-xyz/anchor-0.28.0`), 0.29 and 0.31 and @project-serum/anchor 0.24 only parse Anchor.toml in `workspace`, which the SDK doesn't use"
 
 [[IgnoredVulns]]
 id = "GHSA-9j65-hcg3-gc64"
-reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (aliased as `@cora-xyz/anchor-0.28.0`) only parses Anchor.toml in `workspace`, which the SDK doesn't use"
+reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (also aliased as `@cora-xyz/anchor-0.28.0`), 0.29 and 0.31 and @project-serum/anchor 0.24 only parse Anchor.toml in `workspace`, which the SDK doesn't use"
 
 [[IgnoredVulns]]
 id = "GHSA-9qmh-m7c6-f92p"
-reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (aliased as `@cora-xyz/anchor-0.28.0`) only parses Anchor.toml in `workspace`, which the SDK doesn't use"
+reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (also aliased as `@cora-xyz/anchor-0.28.0`), 0.29 and 0.31 and @project-serum/anchor 0.24 only parse Anchor.toml in `workspace`, which the SDK doesn't use"
 
 [[IgnoredVulns]]
 id = "GHSA-h895-cgqg-jf52"
-reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (aliased as `@cora-xyz/anchor-0.28.0`) only parses Anchor.toml in `workspace`, which the SDK doesn't use"
+reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (also aliased as `@cora-xyz/anchor-0.28.0`), 0.29 and 0.31 and @project-serum/anchor 0.24 only parse Anchor.toml in `workspace`, which the SDK doesn't use"
 
 [[IgnoredVulns]]
 id = "GHSA-v5mp-jgw5-2x6j"
-reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (aliased as `@cora-xyz/anchor-0.28.0`) only parses Anchor.toml in `workspace`, which the SDK doesn't use"
+reason = "toml 3 (fixed in 5): @coral-xyz/anchor 0.28 (also aliased as `@cora-xyz/anchor-0.28.0`), 0.29 and 0.31 and @project-serum/anchor 0.24 only parse Anchor.toml in `workspace`, which the SDK doesn't use"
 
 [[IgnoredVulns]]
 id = "GHSA-w5hq-g745-h8pq"
