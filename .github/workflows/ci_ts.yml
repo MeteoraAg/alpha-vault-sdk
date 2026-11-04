@@ -18,18 +18,22 @@ env:
 jobs:
   sdk_changed_files:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
-      sdk: ${{steps.changed-files-specific.outputs.any_changed}}
+      sdk: ${{steps.changed-files-specific.outputs.sdk}}
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: Get specific changed files
         id: changed-files-specific
-        uses: tj-actions/changed-files@v18.6
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
-          files: |
-            ts-client
+          filters: |
+            sdk:
+              - "ts-client/**"
 
   sdk_test:
     runs-on: ubuntu-latest
@@ -40,7 +44,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
-          version: 10
+          package_json_file: ts-client/package.json
           run_install: false
       - uses: ./.github/actions/setup-solana
       - uses: ./.github/actions/setup-dep
